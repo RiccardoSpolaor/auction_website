@@ -1,8 +1,9 @@
 import mongoose = require('mongoose');
 import user = require('./User');
-import message = require('./Message');
+import public_message = require('./PublicMessage');
 
-export interface Insertion {
+export interface Insertion extends mongoose.Document {
+    readonly _id: mongoose.Schema.Types.ObjectId,
     title: string,
     authors: [string],
     edition: string,
@@ -15,7 +16,7 @@ export interface Insertion {
     expire_date: Date,
     current_winner: user.User,
 
-    messages: [message.Message]
+    //messages: [public_message.PublicMessage]
 }
 
 // User defined type guard
@@ -80,12 +81,7 @@ var insertionSchema = new mongoose.Schema( {
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User',
         required: false
-    },
-    messages: [{
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Message',
-        required: false
-    },]
+    }
 })
 
 export function getSchema() { return insertionSchema; }

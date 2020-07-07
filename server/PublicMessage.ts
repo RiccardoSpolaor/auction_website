@@ -2,7 +2,8 @@ import mongoose = require('mongoose');
 import user = require('./User');
 import insertion = require('./Insertion');
 
-export interface PublicMessage {
+export interface PublicMessage extends mongoose.Document {
+    readonly _id: mongoose.Schema.Types.ObjectId,
     content: string,
     author: user.User,
     timestamp: Date,

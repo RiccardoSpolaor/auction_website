@@ -6,6 +6,7 @@ export interface User extends mongoose.Document {
     readonly _id: mongoose.Schema.Types.ObjectId,
     username: string,
     mail: string,
+    location: string,
     roles: string[],
     salt: string,
     digest: string,
@@ -24,6 +25,10 @@ var userSchema = new mongoose.Schema( {
         type: mongoose.SchemaTypes.String,
         required: true,
         unique: true
+    },
+    location: {
+        type: mongoose.SchemaTypes.String,
+        required: true,
     },
     roles:  {
         type: [mongoose.SchemaTypes.String],
