@@ -1,7 +1,7 @@
 {
     "name": "auction_website",
     "main": "auction_website",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "author": "Spolaor Riccardo & Zilio Silvia",
     "dependencies": {
         "body-parser": "^1.19.0",

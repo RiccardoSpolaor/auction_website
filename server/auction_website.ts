@@ -242,8 +242,8 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
       });
 
     },
-    function onrejected() {
-        console.log("Unable to connect to MongoDB");
+    function onrejected(err) {
+        console.log("Unable to connect to MongoDB" + err);
         process.exit(-2);
     }
 )
