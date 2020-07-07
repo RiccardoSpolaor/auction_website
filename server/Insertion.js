@@ -1,24 +1,7 @@
-import mongoose = require('mongoose');
-import {User} from './User';
-import {PublicMessage} from './PublicMessage';
-
-export interface Insertion extends mongoose.Document {
-    readonly _id: mongoose.Schema.Types.ObjectId,
-    title: string,
-    authors: [string],
-    edition: string,
-    faculty: string,
-
-    insertion_timestamp: Date,
-    insertionist_id: User,
-    reserve_price: number,
-    price: number,
-    expire_date: Date,
-    current_winner: User,
-
-    //messages: [public_message.PublicMessage]
-}
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getModel = exports.getSchema = void 0;
+const mongoose = require("mongoose");
 // User defined type guard
 // Type checking cannot be performed during the execution (we don't have the Message interface anyway)
 // but we can create a function to check if the supplied parameter is compatible with a given type
@@ -28,8 +11,6 @@ export interface Insertion extends mongoose.Document {
 //export function isMessage(arg: any): arg is Message {
 //    return arg && arg.content && typeof(arg.content) == 'string' && arg.tags && Array.isArray(arg.tags) && arg.timestamp && arg.timestamp instanceof Date && arg.authormail && typeof(arg.authormail) == 'string' ;
 //}
-
-
 // We use Mongoose to perform the ODM between our application and
 // mongodb. To do that we need to create a Schema and an associated
 // data model that will be mapped into a mongodb collection
@@ -38,15 +19,14 @@ export interface Insertion extends mongoose.Document {
 // of correctly matching the Message interface with the messageSchema 
 //
 // Mongoose Schema
-
-var insertionSchema = new mongoose.Schema( {
+var insertionSchema = new mongoose.Schema({
     title: {
         type: [mongoose.SchemaTypes.String],
         required: true
     },
     authors: {
         type: [mongoose.SchemaTypes.String],
-        required: true 
+        required: true
     },
     edition: {
         type: [mongoose.SchemaTypes.String],
@@ -61,7 +41,7 @@ var insertionSchema = new mongoose.Schema( {
         required: true
     },
     insertionist_id: {
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
@@ -78,19 +58,20 @@ var insertionSchema = new mongoose.Schema( {
         required: true
     },
     current_winner: {
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: false
     }
-})
-
-export function getSchema() { return insertionSchema; }
-
+});
+function getSchema() { return insertionSchema; }
+exports.getSchema = getSchema;
 // Mongoose Model
-var insertionModel;  // This is not exposed outside the model
-export function getModel() : mongoose.Model< Insertion > { // Return Model as singleton
-    if( !insertionModel ) {
-        insertionModel = mongoose.model('Insertion', getSchema() )
+var insertionModel; // This is not exposed outside the model
+function getModel() {
+    if (!insertionModel) {
+        insertionModel = mongoose.model('Insertion', getSchema());
     }
     return insertionModel;
 }
+exports.getModel = getModel;
+//# sourceMappingURL=Insertion.js.map

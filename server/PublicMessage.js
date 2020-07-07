@@ -1,15 +1,7 @@
-import mongoose = require('mongoose');
-import {User} from './User';
-import {Insertion} from './Insertion';
-
-export interface PublicMessage extends mongoose.Document {
-    readonly _id: mongoose.Schema.Types.ObjectId,
-    content: string,
-    author: User,
-    timestamp: Date,
-    insertion: Insertion
-}
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getModel = exports.getSchema = void 0;
+const mongoose = require("mongoose");
 // User defined type guard
 // Type checking cannot be performed during the execution (we don't have the Message interface anyway)
 // but we can create a function to check if the supplied parameter is compatible with a given type
@@ -19,8 +11,6 @@ export interface PublicMessage extends mongoose.Document {
 //export function isMessage(arg: any): arg is Message {
 //    return arg && arg.content && typeof(arg.content) == 'string' && arg.tags && Array.isArray(arg.tags) && arg.timestamp && arg.timestamp instanceof Date && arg.authormail && typeof(arg.authormail) == 'string' ;
 //}
-
-
 // We use Mongoose to perform the ODM between our application and
 // mongodb. To do that we need to create a Schema and an associated
 // data model that will be mapped into a mongodb collection
@@ -29,14 +19,13 @@ export interface PublicMessage extends mongoose.Document {
 // of correctly matching the Message interface with the messageSchema 
 //
 // Mongoose Schema
-
-var publicMessageSchema = new mongoose.Schema( {
+var publicMessageSchema = new mongoose.Schema({
     content: {
         type: [mongoose.SchemaTypes.String],
         required: true
     },
     author: {
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
@@ -45,19 +34,20 @@ var publicMessageSchema = new mongoose.Schema( {
         required: true
     },
     insertion_id: {
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Insertion',
         required: true
     },
-})
-
-export function getSchema() { return publicMessageSchema; }
-
+});
+function getSchema() { return publicMessageSchema; }
+exports.getSchema = getSchema;
 // Mongoose Model
-var publicMessageModel;  // This is not exposed outside the model
-export function getModel() : mongoose.Model< PublicMessage > { // Return Model as singleton
-    if( !publicMessageModel ) {
-        publicMessageModel = mongoose.model('PublicMessage', getSchema() )
+var publicMessageModel; // This is not exposed outside the model
+function getModel() {
+    if (!publicMessageModel) {
+        publicMessageModel = mongoose.model('PublicMessage', getSchema());
     }
     return publicMessageModel;
 }
+exports.getModel = getModel;
+//# sourceMappingURL=PublicMessage.js.map

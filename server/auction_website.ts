@@ -83,6 +83,7 @@ if (result.error) {
   console.log("Unable to load \".env\" file. Please provide one to store the JWT secret key");
   process.exit(-1);
 }
+
 if( !process.env.JWT_SECRET ) {
   console.log("\".env\" file loaded but JWT_SECRET=<secret> key-value pair was not found");
   process.exit(-1);
@@ -97,8 +98,152 @@ colors.enabled = true;
 
 import mongoose = require('mongoose');
 import {Insertion} from './Insertion';
-//import * as message from './Message';
+import * as insertion from './Insertion';
 
-//import { User } from './User';
-//import * as user from './User';
+import {PublicMessage} from './PublicMessage';
+import * as public_message from './PublicMessage';
 
+import { User } from './User';
+import * as user from './User';
+
+import express = require('express');
+import bodyparser = require('body-parser');      // body-parser middleware is used to parse the request body and
+                                                 // directly provide a JavaScript object if the "Content-type" is
+                                                 // application/json
+
+import passport = require('passport');           // authentication middleware for Express
+import passportHTTP = require('passport-http');  // implements Basic and Digest authentication for HTTP (used for /login endpoint)
+
+import jsonwebtoken = require('jsonwebtoken');  // JWT generation
+import jwt = require('express-jwt');            // JWT parsing middleware for express
+
+import cors = require('cors');                  // Enable CORS middleware
+import io = require('socket.io');               // Socket.io websocket library
+
+
+
+declare global {
+  namespace Express {
+      interface User {
+        mail:string,
+        username: string,
+        roles: string[],
+        id: string
+      }
+    }
+}
+
+
+var ios = undefined;
+var app = express();
+
+// We create the JWT authentication middleware
+// provided by the express-jwt library.  
+// 
+// How it works (from the official documentation):
+// If the token is valid, req.user will be set with the JSON object 
+// decoded to be used by later middleware for authorization and access control.
+//
+var auth = jwt( {secret: process.env.JWT_SECRET} );
+
+
+app.use( cors() );
+
+// Install the top-level middleware "bodyparser"
+// body-parser extracts the entire body portion of an incoming request stream 
+// and exposes it on req.body
+app.use( bodyparser.json() );
+
+
+// Add API routes to express application
+//
+
+app.get("/", (req,res) => {
+
+    res.status(200).json( { api_version: "1.0", endpoints: [ "/books", "/books/:id/messages"] } ); // json method sends a JSON response (setting the correct Content-Type) to the client
+
+});
+
+mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then( 
+    function onconnected() {
+
+        console.log("Connected to MongoDB");
+
+        var u = user.newUser( {
+          username: "admin",
+          mail: "admin@postmessages.it"
+        } );
+        u.setAdmin();
+        u.setPassword("admin");
+        u.save().then( ()=> {
+          console.log("Admin user created");
+/*
+          message.getModel().countDocuments({}).then(
+              ( count ) => {
+                  if( count == 0 ) {
+                      console.log("Adding some test data into the database");
+                      var m1 = message
+                        .getModel()
+                        .create({
+                          tags: ["Tag1", "Tag2", "Tag3"],
+                          content: "Post 1",
+                          timestamp: new Date(),
+                          authormail: u.mail
+                        });
+                      var m2 = message
+                        .getModel()
+                        .create({
+                          tags: ["Tag1", "Tag5"],
+                          content: "Post 2",
+                          timestamp: new Date(),
+                          authormail: u.mail
+                        });
+                      var m3 = message
+                        .getModel()
+                        .create({
+                          tags: ["Tag6", "Tag10"],
+                          content: "Post 3",
+                          timestamp: new Date(),
+                          authormail: u.mail
+                        });
+
+                      Promise.all([m1, m2, m3])
+                        .then(function() {
+                          console.log("Messages saved");
+                        })
+                        .catch(function(reason) {
+                          console.log("Unable to save: " + reason);
+                        });
+
+                  }
+              })*/
+        }).catch( (err)=> {
+          console.log("Unable to create admin user: " + err );
+        }).finally( ()=> {
+
+          let server = http.createServer(app);
+
+          ios = io(server);
+          ios.on('connection', function(client) {
+            console.log( "Socket.io client connected".green );
+          });
+          server.listen( 8080, () => console.log("HTTP Server started on port 8080") );
+
+          // To start an HTTPS server we create an https.Server instance 
+          // passing the express application middleware. Then, we start listening
+          // on port 8443
+          //
+          /*
+          https.createServer({
+            key: fs.readFileSync('keys/key.pem'),
+            cert: fs.readFileSync('keys/cert.pem')
+          }, app).listen(8443);
+          */
+      });
+
+    },
+    function onrejected() {
+        console.log("Unable to connect to MongoDB");
+        process.exit(-2);
+    }
+)
