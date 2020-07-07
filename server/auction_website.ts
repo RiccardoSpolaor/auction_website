@@ -8,27 +8,37 @@
  *  The application also provide user authentication through JWT. The provided
  *  APIs are fully stateless.
  * 
- * 
+ *  CI MANCANO LE CHAT PRIVATE
  * 
  *  Endpoints                    Attributes          Method        Description
  * 
- *     /                            -                  GET         Returns the version and a list of available endpoints
+ *     /                              -                GET         Returns the version and a list of available endpoints
  * 
  *     /books                     ?title=              GET         Returns all the books auctions, eventually filtered by, title;
- *                                ?faculty=                        faculty; university; location of the vendor; current price of the auction.
+ *                                ?faculty=                        faculty; university; location of the insertionist; current price of the auction.
  *                                ?university=
  *                                ?location=
  *                                ?price=
- *     /books                       -                  POST        Posts a new book auction
- *     /books/:id                   -                  DELETE      Deletes a book auction by id
- *     
- *     /books/:id/messages          -                  GET         Returns all book auction public messages and the current user's private ones.
- *     /books/:id/messages        ?private=            POST        Posts a book auction message, eventually private.
+ *     /books                         -                POST        Posts a new book auction
+ *
+ *     /books/:id                     -                GET         Gets a book auction by id  
+ *     /books/:id                     -                DELETE      Deletes a book auction by id, can just be done by an admin
+ *     /books/:id                     -                PUT         Edits an auction content, can be done by the user who made it or the admin
+ *                                                                 Every user can post a new price offer.
  * 
- *     /users                       -                  GET         List all users
- *     /users/:mail                 -                  GET         Get user info by mail
- *     /users                       -                  POST        Add a new user
- *     /login                       -                  POST        login an existing user, returning a JWT
+ *     /books/:id/public_messages     -                GET         Returns all book auction public messages.
+ *     /books/:id/public_messages     -                POST        Posts a book auction public message.
+ * 
+ *  ?  /books/:id/private_messages/:mail-              GET         Returns the book auction private messages between the user (:mail) and the insertionist.
+ *  ?  /books/:id/private_messages/:mail-              POST        (:id) posts a book auction private message to the insertionist.
+ *
+ *  ?  users/:id/bookchat/:id         -                GET         Returns a chat id of a certain user 
+ *     /users/:mail                   -                GET         Get user info by mail
+ *     /users                         -                POST        Add a new user 
+ *     /users                         -                GET         List all users
+ *     /users/:mail                   -                GET         Get user info by mail
+ *     /users                         -                POST        Add a new user
+ *     /login                         -                POST        login an existing user, returning a JWT
  * 
  * 
  * ------------------------------------------------------------------------------------ 
