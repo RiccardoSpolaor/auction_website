@@ -8,36 +8,35 @@
  *  The application also provide user authentication through JWT. The provided
  *  APIs are fully stateless.
  * 
- *  CI MANCANO LE CHAT PRIVATE
  * 
- *  Endpoints                    Attributes          Method        Description
+ *  Endpoints                       Attributes          Method        Description
  * 
- *     /                              -                GET         Returns the version and a list of available endpoints
+ *     /                                  -                GET         Returns the version and a list of available endpoints
  * 
- *     /books                     ?title=              GET         Returns all the books auctions, eventually filtered by, title;
- *                                ?faculty=                        faculty; university; location of the insertionist; current price of the auction.
- *                                ?university=
- *                                ?location=
- *                                ?price=
- *     /books                         -                POST        Posts a new book auction
+ *     /insertions                    ?title=              GET         Returns all the books auctions, eventually filtered by, title;
+ *                                    ?faculty=                        faculty; university; location of the insertionist; current price of the auction.
+ *                                    ?university=
+ *                                    ?location=
+ *                                    ?price=
+ *     /insertions                        -                POST        Posts a new book auction
  *
- *     /books/:id                     -                GET         Gets a book auction by id  
- *     /books/:id                     -                DELETE      Deletes a book auction by id, can just be done by an admin
- *     /books/:id                     -                PUT         Edits an auction content, can be done by the user who made it or the admin
- *                                                                 Every user can post a new price offer.
+ *     /insertions/:id                    -                GET         Gets a book auction by id  
+ *     /insertions/:id                    -                DELETE      Deletes a book auction by id, can just be done by an admin
+ *     /insertions/:id                    -                PUT         Edits an auction content, can be done by the user who made it or the admin
+ *                                                                     Every user can post a new price offer.
  * 
- *     /books/:id/public_messages     -                GET         Returns all book auction public messages.
- *     /books/:id/public_messages     -                POST        Posts a book auction public message.
+ *     /public_messages                   -                GET         Returns all current visualized book auction public messages.
+ *     /public_messages                   -                POST        Posts a public message on the current insertion.
  * 
- *  ?  /books/:id/private_messages/:mail-              GET         Returns the book auction private messages between the user (:mail) and the insertionist.
- *  ?  /books/:id/private_messages/:mail-              POST        (:id) posts a book auction private message to the insertionist.
- *
- *  ?  users/:id/bookchat/:id         -                GET         Returns a chat id of a certain user 
+ *     /private_chat                       -             GET           Returns all the private chats of the current user where he is either the sender or the receiver 
+ *     /private_chat                       -             POST         Create a new private chat where the sender is the current user and the receiver (è quello dell'nserzione visualizzata al momento e lo stesso vale per l'id )
+ * 
+ *     /private_chat/:id                  -             GET         Returns all the messsages of a specific chat
+ *     /private_chat/:id                  -            POST         Post a message in a specific chat
+ * 
  *     /users/:mail                   -                GET         Get user info by mail
  *     /users                         -                POST        Add a new user 
  *     /users                         -                GET         List all users
- *     /users/:mail                   -                GET         Get user info by mail
- *     /users                         -                POST        Add a new user
  *     /login                         -                POST        login an existing user, returning a JWT
  * 
  * 
@@ -119,6 +118,7 @@ import jwt = require('express-jwt');            // JWT parsing middleware for ex
 
 import cors = require('cors');                  // Enable CORS middleware
 import io = require('socket.io');               // Socket.io websocket library
+import { report } from 'process';
 
 
 
@@ -163,6 +163,152 @@ app.get("/", (req,res) => {
     res.status(200).json( { api_version: "1.0", endpoints: [ "/books", "/books/:id/messages"] } ); // json method sends a JSON response (setting the correct Content-Type) to the client
 
 });
+
+app.get("/insertions", (req,res,next) => {
+
+  var filter = {};
+  var expressions = [{}];
+
+  /*for (var i in ['title', 'faculty', 'university', 'location','price']){
+      if( req.query[i] ) {
+        expressions.push ({ i: { $regex: req.query[i], $options: "i" }  });
+      }
+  }*/
+
+  /*var ex = ['title', 'faculty', 'university', 'location','price'];
+  for (var i=0; i< ex.length; i++) {
+    var d = ex[i];
+    if( req.query.d ) {
+      expressions.push ({ d: { $regex: req.query.d, $options: "i" }  });
+    }
+}*/
+
+  if( req.query.title ) {
+    expressions.push ({ title: { $regex: req.query.title, $options: "i" }  });
+  } 
+  if( req.query.faculty ) {
+    expressions.push ({ faculty: { $regex: req.query.faculty, $options: "i" }  });
+  }
+  if( req.query.university ) {
+    expressions.push ({ university: { $regex: req.query.university, $options: "i" }  });
+  }
+  if( req.query.location ) {
+    expressions.push ({ location: { $regex: req.query.location, $options: "i" }  });
+  }
+  if( req.query.price ) {
+    expressions.push ({ price: { $eq: Number(req.query.price) }  });
+  }
+
+  filter = {$and: expressions};
+
+  console.log("Using filter: " + JSON.stringify(filter) );
+  console.log(" Using query: " + JSON.stringify(req.query) );
+
+  insertion.getModel().find( filter ).sort({insertion_timestamp:-1}).then( (documents) => {
+    return res.status(200).json( documents );
+  }).catch( (reason) => {
+    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+  })
+
+});
+
+/*app.post( "/insertions", auth, (req,res,next) => {
+
+  console.log("Received: " + JSON.stringify(req.body) );
+
+  var recvmessage = req.body;
+  recvmessage.timestamp = new Date();
+  recvmessage.authormail = req.user.mail;
+
+  if( message.isMessage( recvmessage ) ) {
+
+    message.getModel().create( recvmessage ).then( ( data ) => {
+      // Notify all socket.io clients
+      ios.emit('broadcast', data );
+
+      return res.status(200).json({ error: false, errormessage: "", id: data._id });
+    }).catch((reason) => {
+      return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+    } )
+
+  } else {
+    return next({ statusCode:404, error: true, errormessage: "Data is not a valid Message" });
+  }
+
+});*/
+
+// Configure HTTP basic authentication strategy 
+// trough passport middleware.
+// NOTE: Always use HTTPS with Basic Authentication
+
+passport.use( new passportHTTP.BasicStrategy(
+  function(username, password, done) {
+
+    // Delegate function we provide to passport middleware
+    // to verify user credentials 
+
+    console.log("New login attempt from ".green + username );
+    user.getModel().findOne( {mail: username} , (err, user)=>{
+      if( err ) {
+        return done( {statusCode: 500, error: true, errormessage:err} );
+      }
+
+      if( !user ) {
+        return done(null,false,{statusCode: 500, error: true, errormessage:"Invalid user"});
+      }
+
+      if( user.validatePassword( password ) ) {
+        return done(null, user);
+      }
+
+      return done(null,false,{statusCode: 500, error: true, errormessage:"Invalid password"});
+    })
+  }
+));
+
+// Login endpoint uses passport middleware to check
+// user credentials before generating a new JWT
+app.get("/login", passport.authenticate('basic', { session: false }), (req,res,next) => {
+
+  // If we reach this point, the user is successfully authenticated and
+  // has been injected into req.user
+
+  // We now generate a JWT with the useful user data
+  // and return it as response
+
+  var tokendata = {
+    username: req.user.username,
+    roles: req.user.roles,
+    mail: req.user.mail,
+    id: req.user.id
+    //location: req.user.location
+  };
+
+  console.log("Login granted. Generating token" );
+  var token_signed = jsonwebtoken.sign(tokendata, process.env.JWT_SECRET, { expiresIn: '1h' } );
+
+  // Note: You can manually check the JWT content at https://jwt.io
+
+  return res.status(200).json({ error: false, errormessage: "", token: token_signed });
+
+});
+
+// Add error handling middleware
+app.use( function(err,req,res,next) {
+
+  console.log("Request error: ".red + JSON.stringify(err) );
+  res.status( err.statusCode || 500 ).json( err );
+
+});
+
+
+// The very last middleware will report an error 404 
+// (will be eventually reached if no error occurred and if
+//  the requested endpoint is not matched by any route)
+//
+app.use( (req,res,next) => {
+  res.status(404).json({statusCode:404, error:true, errormessage: "Invalid endpoint"} );
+})
 
 mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then( 
     function onconnected() {
