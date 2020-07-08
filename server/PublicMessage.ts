@@ -36,7 +36,7 @@ var publicMessageSchema = new mongoose.Schema( {
         required: true
     },
     author: {
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.SchemaTypes.ObjectId, 
         ref: 'User',
         required: true
     },
@@ -45,7 +45,7 @@ var publicMessageSchema = new mongoose.Schema( {
         required: true
     },
     insertion_id: {
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.SchemaTypes.ObjectId, 
         ref: 'Insertion',
         required: true
     },

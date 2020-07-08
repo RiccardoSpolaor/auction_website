@@ -164,10 +164,21 @@ app.get("/", (req,res) => {
 
 });
 
+app.get('/users/:mail', auth, (req,res,next) => {
+
+  // req.params.mail contains the :mail URL component
+  user.getModel().findOne( {mail: req.params.mail }, {digest: 0, salt:0 }).then( (user)=> {
+    return res.status(200).json( user );
+  }).catch( (reason) => {
+    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+  })
+
+});
+
 app.get("/insertions", (req,res,next) => {
 
   var filter = {};
-  var expressions = [{}];
+  var expressions = [];
 
   /*for (var i in ['title', 'faculty', 'university', 'location','price']){
       if( req.query[i] ) {
@@ -199,7 +210,7 @@ app.get("/insertions", (req,res,next) => {
     expressions.push ({ price: { $eq: Number(req.query.price) }  });
   }
 
-  filter = {$and: expressions};
+  filter = expressions.length?{$and: expressions}:{};
 
   console.log("Using filter: " + JSON.stringify(filter) );
   console.log(" Using query: " + JSON.stringify(req.query) );
@@ -212,19 +223,20 @@ app.get("/insertions", (req,res,next) => {
 
 });
 
-/*app.post( "/insertions", auth, (req,res,next) => {
+app.post( "/insertions", auth, (req,res,next) => {
 
   console.log("Received: " + JSON.stringify(req.body) );
 
-  var recvmessage = req.body;
-  recvmessage.timestamp = new Date();
-  recvmessage.authormail = req.user.mail;
+  var recinsertion = req.body;
+  recinsertion.expire_date = new Date(recinsertion.expire_date);
+  recinsertion.insertion_timestamp = new Date();
+  recinsertion.insertionist = req.user.id;
+  //recinsertion.current_winner = null;
 
-  if( message.isMessage( recvmessage ) ) {
-
-    message.getModel().create( recvmessage ).then( ( data ) => {
+  if( insertion.isInsertion( recinsertion )) {
+    insertion.getModel().create( recinsertion ).then( ( data ) => {
       // Notify all socket.io clients
-      ios.emit('broadcast', data );
+      /*ios.emit('broadcast', data );*/
 
       return res.status(200).json({ error: false, errormessage: "", id: data._id });
     }).catch((reason) => {
@@ -232,10 +244,10 @@ app.get("/insertions", (req,res,next) => {
     } )
 
   } else {
-    return next({ statusCode:404, error: true, errormessage: "Data is not a valid Message" });
+    return next({ statusCode:404, error: true, errormessage: "Data is not a valid Insertion" });
   }
 
-});*/
+});
 
 // Configure HTTP basic authentication strategy 
 // trough passport middleware.
@@ -316,28 +328,35 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
         console.log("Connected to MongoDB");
 
         var u = user.newUser( {
-          username: "admin",
-          mail: "admin@postmessages.it",
+          username: "admin1",
+          mail: "admin1@postmessages.it",
           location: "Italy"
         } );
         u.setAdmin();
-        u.setPassword("admin");
+        u.setPassword("admin1");
         u.save().then( ()=> {
           console.log("Admin user created");
-/*
-          message.getModel().countDocuments({}).then(
+          
+          insertion.getModel().countDocuments({}).then(
               ( count ) => {
                   if( count == 0 ) {
                       console.log("Adding some test data into the database");
-                      var m1 = message
+                      var ins1 = insertion
                         .getModel()
                         .create({
-                          tags: ["Tag1", "Tag2", "Tag3"],
-                          content: "Post 1",
-                          timestamp: new Date(),
-                          authormail: u.mail
+                          title: "Asd",
+                          authors: ["Raffaeta", "Pelillo"],
+                          edition: 3,
+                          faculty: "informatica",
+                          university: "Ca Foscari",
+                          insertion_timestamp: new Date(),
+                          insertionist: u.id,
+                          reserve_price: 10,
+                          price: 0,
+                          expire_date: new Date(),
+                          current_winner: null,
                         });
-                      var m2 = message
+                      /*var m2 = message
                         .getModel()
                         .create({
                           tags: ["Tag1", "Tag5"],
@@ -352,9 +371,9 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
                           content: "Post 3",
                           timestamp: new Date(),
                           authormail: u.mail
-                        });
+                        });*/
 
-                      Promise.all([m1, m2, m3])
+                      Promise.all([ins1])
                         .then(function() {
                           console.log("Messages saved");
                         })
@@ -363,7 +382,7 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
                         });
 
                   }
-              })*/
+              })
         }).catch( (err)=> {
           console.log("Unable to create admin user: " + err );
         }).finally( ()=> {

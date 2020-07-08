@@ -1,20 +1,21 @@
 import mongoose = require('mongoose');
-import {User} from './User';
+import {User, newUser} from './User';
 import {PublicMessage} from './PublicMessage';
 
 export interface Insertion extends mongoose.Document {
-    readonly _id: mongoose.Schema.Types.ObjectId,
+    //readonly _id: mongoose.Schema.Types.ObjectId,
     title: string,
     authors: [string],
-    edition: string,
+    edition: number,
     faculty: string,
+    university: string,
 
     insertion_timestamp: Date,
-    insertionist_id: User,
+    insertionist: string,
     reserve_price: number,
     price: number,
     expire_date: Date,
-    current_winner: User,
+    current_winner: number,
 
     //messages: [public_message.PublicMessage]
 }
@@ -25,9 +26,18 @@ export interface Insertion extends mongoose.Document {
 //
 // A better approach is to use JSON schema
 //
-//export function isMessage(arg: any): arg is Message {
-//    return arg && arg.content && typeof(arg.content) == 'string' && arg.tags && Array.isArray(arg.tags) && arg.timestamp && arg.timestamp instanceof Date && arg.authormail && typeof(arg.authormail) == 'string' ;
-//}
+export function isInsertion(arg: any): arg is Insertion {
+    return arg && arg.title && typeof(arg.title) == 'string' 
+               && arg.authors && Array.isArray(arg.authors) && arg.authors.length
+               && typeof(arg.edition) == 'number' && arg.edition >= 0
+               && arg.faculty && typeof(arg.faculty) == 'string' 
+               && arg.university && typeof(arg.university) == 'string' 
+               && arg.insertion_timestamp && arg.insertion_timestamp instanceof Date 
+               && arg.insertionist && typeof(arg.insertionist) == 'string' 
+               && typeof(arg.price) == 'number' && arg.price >= 0
+               && typeof(arg.reserve_price) == 'number' && arg.reserve_price > arg.price
+               && arg.expire_date && arg.expire_date instanceof Date && arg.expire_date > arg.insertion_timestamp
+}
 
 
 // We use Mongoose to perform the ODM between our application and
@@ -41,7 +51,7 @@ export interface Insertion extends mongoose.Document {
 
 var insertionSchema = new mongoose.Schema( {
     title: {
-        type: [mongoose.SchemaTypes.String],
+        type: mongoose.SchemaTypes.String,
         required: true
     },
     authors: {
@@ -49,28 +59,32 @@ var insertionSchema = new mongoose.Schema( {
         required: true 
     },
     edition: {
-        type: [mongoose.SchemaTypes.String],
+        type: mongoose.SchemaTypes.Number,
         required: true
     },
     faculty: {
-        type: [mongoose.SchemaTypes.String],
+        type: mongoose.SchemaTypes.String,
+        required: true
+    },
+    university: {
+        type: mongoose.SchemaTypes.String,
         required: true
     },
     insertion_timestamp: {
         type: mongoose.SchemaTypes.Date,
         required: true
     },
-    insertionist_id: {
-        type: mongoose.Schema.Types.ObjectId, 
+    insertionist: {
+        type: mongoose.SchemaTypes.ObjectId, 
         ref: 'User',
         required: true
     },
     reserve_price: {
-        type: mongoose.Schema.Types.Number,
+        type: mongoose.SchemaTypes.Number,
         required: true
     },
     price: {
-        type: mongoose.Schema.Types.Number,
+        type: mongoose.SchemaTypes.Number,
         required: true
     },
     expire_date: {
@@ -78,7 +92,7 @@ var insertionSchema = new mongoose.Schema( {
         required: true
     },
     current_winner: {
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.SchemaTypes.ObjectId, 
         ref: 'User',
         required: false
     }

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getModel = exports.getSchema = void 0;
+exports.getModel = exports.getSchema = exports.isInsertion = void 0;
 const mongoose = require("mongoose");
 // User defined type guard
 // Type checking cannot be performed during the execution (we don't have the Message interface anyway)
@@ -8,9 +8,19 @@ const mongoose = require("mongoose");
 //
 // A better approach is to use JSON schema
 //
-//export function isMessage(arg: any): arg is Message {
-//    return arg && arg.content && typeof(arg.content) == 'string' && arg.tags && Array.isArray(arg.tags) && arg.timestamp && arg.timestamp instanceof Date && arg.authormail && typeof(arg.authormail) == 'string' ;
-//}
+function isInsertion(arg) {
+    return arg && arg.title && typeof (arg.title) == 'string'
+        && arg.authors && Array.isArray(arg.authors) && arg.authors.length
+        && typeof (arg.edition) == 'number' && arg.edition >= 0
+        && arg.faculty && typeof (arg.faculty) == 'string'
+        && arg.university && typeof (arg.university) == 'string'
+        && arg.insertion_timestamp && arg.insertion_timestamp instanceof Date
+        && arg.insertionist && typeof (arg.insertionist) == 'string'
+        && typeof (arg.price) == 'number' && arg.price >= 0
+        && typeof (arg.reserve_price) == 'number' && arg.reserve_price > arg.price
+        && arg.expire_date && arg.expire_date instanceof Date && arg.expire_date > arg.insertion_timestamp;
+}
+exports.isInsertion = isInsertion;
 // We use Mongoose to perform the ODM between our application and
 // mongodb. To do that we need to create a Schema and an associated
 // data model that will be mapped into a mongodb collection
@@ -21,7 +31,7 @@ const mongoose = require("mongoose");
 // Mongoose Schema
 var insertionSchema = new mongoose.Schema({
     title: {
-        type: [mongoose.SchemaTypes.String],
+        type: mongoose.SchemaTypes.String,
         required: true
     },
     authors: {
@@ -29,28 +39,32 @@ var insertionSchema = new mongoose.Schema({
         required: true
     },
     edition: {
-        type: [mongoose.SchemaTypes.String],
+        type: mongoose.SchemaTypes.Number,
         required: true
     },
     faculty: {
-        type: [mongoose.SchemaTypes.String],
+        type: mongoose.SchemaTypes.String,
+        required: true
+    },
+    university: {
+        type: mongoose.SchemaTypes.String,
         required: true
     },
     insertion_timestamp: {
         type: mongoose.SchemaTypes.Date,
         required: true
     },
-    insertionist_id: {
-        type: mongoose.Schema.Types.ObjectId,
+    insertionist: {
+        type: mongoose.SchemaTypes.ObjectId,
         ref: 'User',
         required: true
     },
     reserve_price: {
-        type: mongoose.Schema.Types.Number,
+        type: mongoose.SchemaTypes.Number,
         required: true
     },
     price: {
-        type: mongoose.Schema.Types.Number,
+        type: mongoose.SchemaTypes.Number,
         required: true
     },
     expire_date: {
@@ -58,7 +72,7 @@ var insertionSchema = new mongoose.Schema({
         required: true
     },
     current_winner: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.SchemaTypes.ObjectId,
         ref: 'User',
         required: false
     }
