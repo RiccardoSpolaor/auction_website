@@ -15,11 +15,11 @@ var userSchema = new mongoose.Schema({
     },
     location: {
         type: mongoose.SchemaTypes.String,
-        required: true,
+        required: false,
     },
     roles: {
         type: [mongoose.SchemaTypes.String],
-        required: true
+        required: false
     },
     salt: {
         type: mongoose.SchemaTypes.String,

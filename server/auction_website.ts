@@ -171,7 +171,8 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
 
         var u = user.newUser( {
           username: "admin",
-          mail: "admin@postmessages.it"
+          mail: "admin@postmessages.it",
+          location: "Italy"
         } );
         u.setAdmin();
         u.setPassword("admin");
