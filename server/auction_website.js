@@ -23,11 +23,9 @@
  *
  *     /insertions/:id                    -                GET         Gets a book auction by id
  *     /insertions/:id                    -                DELETE      Deletes a book auction by id, can just be done by an admin
- *     /insertions/:id                    -                PUT         Edits an auction content, can be done by the user who made it or the admin
- *                                                                     Every user can post a new price offer.
- *
- *     /public_messages                   -                GET         Returns all current visualized book auction public messages.
- *     /public_messages                   -                POST        Posts a public message on the current insertion.
+ *     /insertions/:id/content            -                PUT         Edits an auction content, can be done by the user who made it or the admin
+ *     /insertions/:id/messages           -                PUT         Every user can write a new public_message.
+ *     /insertions/:id/price              -                PUT         Every user can post a new price offer.
  *
  *     /private_chat                       -             GET           Returns all the private chats of the current user where he is either the sender or the receiver
  *     /private_chat                       -             POST         Create a new private chat where the sender is the current user and the receiver (è quello dell'nserzione visualizzata al momento e lo stesso vale per l'id )
@@ -37,7 +35,7 @@
  *
  *     /users/:mail                   -                GET         Get user info by mail
  *     /users                         -                POST        Add a new user
- *     /users                         -                GET         List all users
+ *     /users                         -                GET         List all users       DA FARE
  *
  *     /login                         -                POST        login an existing user, returning a JWT
  *
@@ -92,6 +90,7 @@ const colors = require("colors");
 colors.enabled = true;
 const mongoose = require("mongoose");
 const insertion = require("./Insertion");
+const public_message = require("./PublicMessage");
 const user = require("./User");
 const express = require("express");
 const bodyparser = require("body-parser"); // body-parser middleware is used to parse the request body and
@@ -122,14 +121,6 @@ app.use(bodyparser.json());
 //
 app.get("/", (req, res) => {
     res.status(200).json({ api_version: "1.0", endpoints: ["/books", "/books/:id/messages"] }); // json method sends a JSON response (setting the correct Content-Type) to the client
-});
-app.get('/users/:mail', auth, (req, res, next) => {
-    // req.params.mail contains the :mail URL component
-    user.getModel().findOne({ mail: req.params.mail }, { digest: 0, salt: 0 }).then((user) => {
-        return res.status(200).json(user);
-    }).catch((reason) => {
-        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
-    });
 });
 app.get("/insertions", (req, res, next) => {
     var filter = {};
@@ -195,16 +186,33 @@ app.post("/insertions", auth, (req, res, next) => {
     }
 });
 app.get("/insertions/:id", (req, res, next) => {
+    auth;
     insertion.getModel().findById(req.params.id).then((insertion) => {
+        /*console.log("req.user.id" + req.user.id);
+        console.log("insertion.insertionist" + insertion.insertionist);*/
+        if (!req.user.admin && (req.user.id != insertion.insertionist))
+            insertion.reserve_price = undefined;
         return res.status(200).json(insertion);
     }).catch((reason) => {
         return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
     });
 });
+/*app.get("/insertions/:id", (req,res,next) => {
+  
+  insertion.getModel().findById( req.params.id ).then( (insertion)=> {
+  console.log("req.user.id" + req.user.id);
+  console.log("insertion.insertionist" + insertion.insertionist);
+
+  insertion.reserve_price = undefined;
+  return res.status(200).json( insertion );
+}).catch( (reason) => {
+  return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+})
+});*/
 app.delete('/insertions/:id', auth, (req, res, next) => {
     // Check admin role
     if (!user.newUser(req.user).hasAdminRole()) {
-        return next({ statusCode: 404, error: true, errormessage: "Unauthorized: user is not a moderator" });
+        return next({ statusCode: 404, error: true, errormessage: "Unauthorized: user is not an admin" });
     }
     // req.params.id contains the :id URL component
     insertion.getModel().findByIdAndDelete(req.params.id).then(() => {
@@ -213,18 +221,18 @@ app.delete('/insertions/:id', auth, (req, res, next) => {
         return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
     });
 });
-app.put('/insertions/:id', auth, (req, res, next) => {
+app.put('/insertions/:id/content', auth, (req, res, next) => {
     var body = req.body;
     insertion.getModel().findById(req.params.id).then((insertion) => {
         return insertion;
     }).then((data) => {
         if (!user.newUser(req.user).hasAdminRole() && req.user.id != data.insertionist) {
-            return next({ statusCode: 404, error: true, errormessage: "Unauthorized: user is not a moderator" });
+            return next({ statusCode: 404, error: true, errormessage: "Unauthorized: user is not an admin" });
         }
         if (body.expire_date)
             body.expire_date = new Date(body.expire_date);
         if (insertion.isValidUpdate(body, data)) {
-            insertion.getModel().findByIdAndUpdate(req.params.id, body, function (err) {
+            insertion.getModel().findByIdAndUpdate(data.id, body, function (err) {
                 if (err)
                     return next({ statusCode: 404, error: true, errormessage: "DB error: " + err });
                 else {
@@ -235,6 +243,50 @@ app.put('/insertions/:id', auth, (req, res, next) => {
         }
         else
             return next({ statusCode: 404, error: true, errormessage: "Data is not a valid Insertion" });
+    }).catch((reason) => {
+        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
+    });
+});
+app.put('/insertions/:id/messages', auth, (req, res, next) => {
+    var body = req.body;
+    insertion.getModel().findById(req.params.id).then((insertion) => {
+        return insertion;
+    }).then((data) => {
+        body.timestamp = new Date();
+        body.author = req.user.id;
+        if (public_message.isPublicMessage(body)) {
+            var m = public_message.newMessage(body);
+            data.messages.push(m);
+            data.save().then((data) => {
+                return res.status(200).json({ error: false, errormessage: "", id: data._id });
+            }).catch((reason) => {
+                return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason.errmsg });
+            });
+        }
+        else
+            return next({ statusCode: 404, error: true, errormessage: "Data is not a valid Message" });
+    }).catch((reason) => {
+        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
+    });
+});
+app.put('/insertions/:id/price', auth, (req, res, next) => {
+    var body = req.body;
+    insertion.getModel().findById(req.params.id).then((insertion) => {
+        return insertion;
+    }).then((data) => {
+        if (body.current_price != undefined && typeof body.current_price == 'number' &&
+            (body.current_price > data.start_price) &&
+            (data.current_price == undefined || data.current_price < body.current_price)) {
+            data.current_price = body.current_price;
+            data.current_winner = req.user.id;
+            data.save().then((data) => {
+                return res.status(200).json({ error: false, errormessage: "", id: data._id });
+            }).catch((reason) => {
+                return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason.errmsg });
+            });
+        }
+        else
+            return next({ statusCode: 404, error: true, errormessage: "Invalid Data" });
     }).catch((reason) => {
         return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
     });
@@ -272,7 +324,7 @@ app.get("/login", passport.authenticate('basic', { session: false }), (req, res,
     // and return it as response
     var tokendata = {
         username: req.user.username,
-        roles: req.user.roles,
+        admin: req.user.admin,
         mail: req.user.mail,
         id: req.user.id
         //location: req.user.location
@@ -336,6 +388,7 @@ mongoose.connect('mongodb://localhost:27017/auction_website').then(function onco
                     edition: 3,
                     faculty: "informatica",
                     university: "Ca Foscari",
+                    messages: null,
                     insertion_timestamp: new Date(),
                     insertionist: u.id,
                     reserve_price: 10,

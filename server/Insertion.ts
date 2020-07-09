@@ -1,6 +1,7 @@
 import mongoose = require('mongoose');
 import {User, newUser} from './User';
 import {PublicMessage} from './PublicMessage';
+import * as publicMessage from './PublicMessage';
 
 export interface Insertion extends mongoose.Document {
     //readonly _id: mongoose.Schema.Types.ObjectId,
@@ -9,6 +10,7 @@ export interface Insertion extends mongoose.Document {
     edition: number,
     faculty: string,
     university: string,
+    messages: [PublicMessage],
 
     insertion_timestamp: Date,
     insertionist: string,
@@ -103,6 +105,10 @@ var insertionSchema = new mongoose.Schema( {
     university: {
         type: mongoose.SchemaTypes.String,
         required: true
+    },
+    messages: {
+        type: [publicMessage.getSchema()], 
+        required: false
     },
     insertion_timestamp: {
         type: mongoose.SchemaTypes.Date,

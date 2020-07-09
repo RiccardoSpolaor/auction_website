@@ -17,9 +17,10 @@ var userSchema = new mongoose.Schema({
         type: mongoose.SchemaTypes.String,
         required: false,
     },
-    roles: {
-        type: [mongoose.SchemaTypes.String],
-        required: false
+    admin: {
+        type: mongoose.SchemaTypes.Boolean,
+        required: false,
+        default: false
     },
     salt: {
         type: mongoose.SchemaTypes.String,
@@ -57,15 +58,11 @@ userSchema.methods.validatePassword = function (pwd) {
     return (this.digest === digest);
 };
 userSchema.methods.hasAdminRole = function () {
-    for (var roleidx in this.roles) {
-        if (this.roles[roleidx] === 'ADMIN')
-            return true;
-    }
-    return false;
+    return this.admin;
 };
 userSchema.methods.setAdmin = function () {
     if (!this.hasAdminRole())
-        this.roles.push("ADMIN");
+        this.admin = true;
 };
 function getSchema() { return userSchema; }
 exports.getSchema = getSchema;

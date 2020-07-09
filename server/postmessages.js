@@ -233,7 +233,7 @@ app.post('/users', (req,res,next) => {
     u.setPassword( req.body.password );
 
     u.save().then( (data) => {
-      return res.status(200).json({ error: false, errormessage: "", id: data._id });
+      return res.status(200).json({ error: false, errormessage: "", id: dat[mongoose.SchemaTypes.String]a._id });
     }).catch( (reason) => {
       if( reason.code === 11000 )
         return next({statusCode:404, error:true, errormessage: "User already exists"} );

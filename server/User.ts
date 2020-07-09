@@ -7,7 +7,7 @@ export interface User extends mongoose.Document {
     username: string,
     mail: string,
     location: string,
-    roles: string[],
+    admin: boolean,
     salt: string,
     digest: string,
     setPassword: (pwd:string)=>void,
@@ -30,9 +30,10 @@ var userSchema = new mongoose.Schema( {
         type: mongoose.SchemaTypes.String,
         required: false,
     },
-    roles:  {
-        type: [mongoose.SchemaTypes.String],
-        required: false 
+    admin:  {
+        type: mongoose.SchemaTypes.Boolean,
+        required: false,
+        default: false
     },
     salt:  {
         type: mongoose.SchemaTypes.String,
@@ -77,16 +78,12 @@ userSchema.methods.validatePassword = function( pwd:string ):boolean {
 }
 
 userSchema.methods.hasAdminRole = function(): boolean {
-    for( var roleidx in this.roles ) {
-        if( this.roles[roleidx] === 'ADMIN' )
-            return true;
-    }
-    return false;
+    return this.admin;
 }
 
 userSchema.methods.setAdmin = function() {
     if( !this.hasAdminRole() )
-        this.roles.push( "ADMIN" );
+        this.admin = true;
 }
 
 export function getSchema() { return userSchema; }
@@ -111,7 +108,6 @@ export function isUser(arg: any): boolean {
                && arg.mail && typeof(arg.mail) == 'string' && validateEmail(arg.mail)
                && arg.location && typeof(arg.location) == 'string' 
 }
-
 
 export function newUser( data ): User {
     var usermodel = getModel();
