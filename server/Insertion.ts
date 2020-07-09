@@ -13,9 +13,10 @@ export interface Insertion extends mongoose.Document {
     insertion_timestamp: Date,
     insertionist: string,
     reserve_price: number,
-    price: number,
+    start_price: number,
+    current_price: number,
     expire_date: Date,
-    current_winner: number,
+    current_winner: string,
 
     //messages: [public_message.PublicMessage]
 }
@@ -29,14 +30,47 @@ export interface Insertion extends mongoose.Document {
 export function isInsertion(arg: any): arg is Insertion {
     return arg && arg.title && typeof(arg.title) == 'string' 
                && arg.authors && Array.isArray(arg.authors) && arg.authors.length
-               && typeof(arg.edition) == 'number' && arg.edition >= 0
+               && arg.edition!=undefined && typeof(arg.edition) == 'number' && arg.edition >= 0
                && arg.faculty && typeof(arg.faculty) == 'string' 
                && arg.university && typeof(arg.university) == 'string' 
                && arg.insertion_timestamp && arg.insertion_timestamp instanceof Date 
                && arg.insertionist && typeof(arg.insertionist) == 'string' 
-               && typeof(arg.price) == 'number' && arg.price >= 0
-               && typeof(arg.reserve_price) == 'number' && arg.reserve_price > arg.price
+               && arg.start_price!=undefined && typeof(arg.start_price) == 'number' && arg.start_price >= 0
+               && arg.reserve_price!=undefined && typeof(arg.reserve_price) == 'number' && arg.reserve_price > arg.start_price
                && arg.expire_date && arg.expire_date instanceof Date && arg.expire_date > arg.insertion_timestamp
+}
+
+function areReserveAndStartPriceCompatible( body_start : any, body_reserve : any, db_start : number, db_reserve : number) {
+    if (body_start!=undefined && body_reserve!=undefined){
+        if(typeof(body_start) == 'number' && typeof(body_reserve) == 'number')
+            return body_start < body_reserve;
+        else
+            return false;
+    }
+    if (body_start != undefined) {
+        if(typeof(body_start) == 'number')
+            return body_start < db_reserve;
+        else
+            return false;
+    }
+    if (body_reserve != undefined) {
+        if(typeof(body_reserve) == 'number')
+            return body_reserve > db_start;
+        else
+            return false;
+    }
+    return true;
+}
+
+export function isValidUpdate(arg: any, db: Insertion): boolean {
+    console.log(JSON.stringify(db));
+    return !(!arg || (arg.title && typeof(arg.title) != 'string')
+               || (arg.authors && (!Array.isArray(arg.authors) || !arg.authors.length))
+               || (arg.edition!=undefined && (typeof(arg.edition) != 'number' || arg.edition < 0))
+               || (arg.faculty && typeof(arg.faculty) != 'string')
+               || !areReserveAndStartPriceCompatible(arg.start_price, arg.reserve_price, db.start_price, db.reserve_price)
+               || (arg.university && typeof(arg.university) != 'string') 
+               || (arg.expire_date && (arg.expire_date !instanceof Date && arg.expire_date <= db.insertion_timestamp)))
 }
 
 
@@ -83,9 +117,13 @@ var insertionSchema = new mongoose.Schema( {
         type: mongoose.SchemaTypes.Number,
         required: true
     },
-    price: {
+    start_price: {
         type: mongoose.SchemaTypes.Number,
         required: true
+    },
+    current_price: {
+        type: mongoose.SchemaTypes.Number,
+        required: false
     },
     expire_date: {
         type: mongoose.SchemaTypes.Date,

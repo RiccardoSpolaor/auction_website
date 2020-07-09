@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.newUser = exports.getModel = exports.getSchema = void 0;
+exports.newUser = exports.isUser = exports.getModel = exports.getSchema = void 0;
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 var userSchema = new mongoose.Schema({
@@ -78,6 +78,16 @@ function getModel() {
     return userModel;
 }
 exports.getModel = getModel;
+function validateEmail(email) {
+    const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    return re.test(String(email).toLowerCase());
+}
+function isUser(arg) {
+    return arg && arg.username && typeof (arg.username) == 'string'
+        && arg.mail && typeof (arg.mail) == 'string' && validateEmail(arg.mail)
+        && arg.location && typeof (arg.location) == 'string';
+}
+exports.isUser = isUser;
 function newUser(data) {
     var usermodel = getModel();
     var user = new usermodel(data);

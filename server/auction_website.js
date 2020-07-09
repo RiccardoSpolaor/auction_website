@@ -38,6 +38,7 @@
  *     /users/:mail                   -                GET         Get user info by mail
  *     /users                         -                POST        Add a new user
  *     /users                         -                GET         List all users
+ *
  *     /login                         -                POST        login an existing user, returning a JWT
  *
  *
@@ -171,6 +172,10 @@ app.get("/insertions", (req, res, next) => {
 });
 app.post("/insertions", auth, (req, res, next) => {
     console.log("Received: " + JSON.stringify(req.body));
+    // Check admin role
+    if (user.newUser(req.user).hasAdminRole()) {
+        return next({ statusCode: 404, error: true, errormessage: "Unauthorized: Admins can't create new Insertions" });
+    }
     var recinsertion = req.body;
     recinsertion.expire_date = new Date(recinsertion.expire_date);
     recinsertion.insertion_timestamp = new Date();
@@ -188,6 +193,94 @@ app.post("/insertions", auth, (req, res, next) => {
     else {
         return next({ statusCode: 404, error: true, errormessage: "Data is not a valid Insertion" });
     }
+});
+app.get("/insertions/:id", (req, res, next) => {
+    insertion.getModel().findById(req.params.id).then((insertion) => {
+        return res.status(200).json(insertion);
+    }).catch((reason) => {
+        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
+    });
+});
+app.delete('/insertions/:id', auth, (req, res, next) => {
+    // Check admin role
+    if (!user.newUser(req.user).hasAdminRole()) {
+        return next({ statusCode: 404, error: true, errormessage: "Unauthorized: user is not a moderator" });
+    }
+    // req.params.id contains the :id URL component
+    insertion.getModel().findByIdAndDelete(req.params.id).then(() => {
+        return res.status(200).json({ error: false, errormessage: "" });
+    }).catch((reason) => {
+        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
+    });
+});
+app.put('/insertions/:id', auth, (req, res, next) => {
+    var body = req.body;
+    insertion.getModel().findById(req.params.id).then((insertion) => {
+        return insertion;
+    }).then((data) => {
+        if (!user.newUser(req.user).hasAdminRole() && req.user.id != data.insertionist) {
+            return next({ statusCode: 404, error: true, errormessage: "Unauthorized: user is not a moderator" });
+        }
+        if (body.expire_date)
+            body.expire_date = new Date(body.expire_date);
+        if (insertion.isValidUpdate(body, data)) {
+            insertion.getModel().findByIdAndUpdate(req.params.id, body, function (err) {
+                if (err)
+                    return next({ statusCode: 404, error: true, errormessage: "DB error: " + err });
+                else {
+                    console.log("Database Update");
+                    return res.status(200).json({ error: false, errormessage: "" });
+                }
+            });
+        }
+        else
+            return next({ statusCode: 404, error: true, errormessage: "Data is not a valid Insertion" });
+    }).catch((reason) => {
+        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
+    });
+});
+app.post('/users', (req, res, next) => {
+    if (!user.isUser(req.body))
+        return next({ statusCode: 404, error: true, errormessage: "Invalid Data" });
+    var u = user.newUser(req.body);
+    if (!req.body.password) {
+        return next({ statusCode: 404, error: true, errormessage: "Password field missing" });
+    }
+    u.setPassword(req.body.password);
+    u.save().then((data) => {
+        return res.status(200).json({ error: false, errormessage: "", id: data._id });
+    }).catch((reason) => {
+        if (reason.code === 11000)
+            return next({ statusCode: 404, error: true, errormessage: "User already exists" });
+        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason.errmsg });
+    });
+});
+app.get('/users/:mail', auth, (req, res, next) => {
+    // req.params.mail contains the :mail URL component
+    user.getModel().findOne({ mail: req.params.mail }, { digest: 0, salt: 0 }).then((user) => {
+        return res.status(200).json(user);
+    }).catch((reason) => {
+        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
+    });
+});
+// Login endpoint uses passport middleware to check
+// user credentials before generating a new JWT
+app.get("/login", passport.authenticate('basic', { session: false }), (req, res, next) => {
+    // If we reach this point, the user is successfully authenticated and
+    // has been injected into req.user
+    // We now generate a JWT with the useful user data
+    // and return it as response
+    var tokendata = {
+        username: req.user.username,
+        roles: req.user.roles,
+        mail: req.user.mail,
+        id: req.user.id
+        //location: req.user.location
+    };
+    console.log("Login granted. Generating token");
+    var token_signed = jsonwebtoken.sign(tokendata, process.env.JWT_SECRET, { expiresIn: '1h' });
+    // Note: You can manually check the JWT content at https://jwt.io
+    return res.status(200).json({ error: false, errormessage: "", token: token_signed });
 });
 // Configure HTTP basic authentication strategy 
 // trough passport middleware.
@@ -209,25 +302,6 @@ passport.use(new passportHTTP.BasicStrategy(function (username, password, done) 
         return done(null, false, { statusCode: 500, error: true, errormessage: "Invalid password" });
     });
 }));
-// Login endpoint uses passport middleware to check
-// user credentials before generating a new JWT
-app.get("/login", passport.authenticate('basic', { session: false }), (req, res, next) => {
-    // If we reach this point, the user is successfully authenticated and
-    // has been injected into req.user
-    // We now generate a JWT with the useful user data
-    // and return it as response
-    var tokendata = {
-        username: req.user.username,
-        roles: req.user.roles,
-        mail: req.user.mail,
-        id: req.user.id
-        //location: req.user.location
-    };
-    console.log("Login granted. Generating token");
-    var token_signed = jsonwebtoken.sign(tokendata, process.env.JWT_SECRET, { expiresIn: '1h' });
-    // Note: You can manually check the JWT content at https://jwt.io
-    return res.status(200).json({ error: false, errormessage: "", token: token_signed });
-});
 // Add error handling middleware
 app.use(function (err, req, res, next) {
     console.log("Request error: ".red + JSON.stringify(err));
@@ -243,12 +317,12 @@ app.use((req, res, next) => {
 mongoose.connect('mongodb://localhost:27017/auction_website').then(function onconnected() {
     console.log("Connected to MongoDB");
     var u = user.newUser({
-        username: "admin1",
-        mail: "admin1@postmessages.it",
+        username: "admin",
+        mail: "admin@postmessages.it",
         location: "Italy"
     });
     u.setAdmin();
-    u.setPassword("admin1");
+    u.setPassword("admin");
     u.save().then(() => {
         console.log("Admin user created");
         insertion.getModel().countDocuments({}).then((count) => {
@@ -265,7 +339,8 @@ mongoose.connect('mongodb://localhost:27017/auction_website').then(function onco
                     insertion_timestamp: new Date(),
                     insertionist: u.id,
                     reserve_price: 10,
-                    price: 0,
+                    start_price: 0,
+                    current_price: null,
                     expire_date: new Date(),
                     current_winner: null,
                 });

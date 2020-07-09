@@ -100,6 +100,19 @@ export function getModel() : mongoose.Model< User >  { // Return Model as single
     return userModel;
 }
 
+function validateEmail(email) {
+    const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    return re.test(String(email).toLowerCase());
+}
+
+
+export function isUser(arg: any): boolean {
+    return arg && arg.username && typeof(arg.username) == 'string' 
+               && arg.mail && typeof(arg.mail) == 'string' && validateEmail(arg.mail)
+               && arg.location && typeof(arg.location) == 'string' 
+}
+
+
 export function newUser( data ): User {
     var usermodel = getModel();
     var user = new usermodel( data );
