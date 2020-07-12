@@ -29,8 +29,8 @@
  *     /private_chat                       -             GET           Returns all the private chats of the current user where he is either the sender or the receiver 
  *     /private_chat                       -             POST         Create a new private chat where the sender is the current user and the receiver (è quello dell'nserzione visualizzata al momento e lo stesso vale per l'id )
  * 
- *     /private_chat/:id                  -             GET         Returns all the messsages of a specific chat
- *     /private_chat/:id                  -            POST         Post a message in a specific chat
+ *     /private_chat/:id                  -            GET          Returns all the messsages of a specific chat
+ *     /private_chat/:id                  -            PUT         Post a message in a specific chat
  * 
  *     /users/:mail                   -                GET         Get user info by mail
  *     /users                         -                POST        Add a new user 
@@ -101,6 +101,9 @@ import * as insertion from './Insertion';
 import {PublicMessage} from './PublicMessage';
 import * as public_message from './PublicMessage';
 
+import {PrivateChat} from './PrivateChat';
+import * as private_chat from './PrivateChat';
+
 import { User } from './User';
 import * as user from './User';
 
@@ -120,6 +123,24 @@ import io = require('socket.io');               // Socket.io websocket library
 import { report } from 'process';
 
 
+function addTokenUserInfoIfExists(req, res, next) {
+  // Gather the jwt access token from the request header
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(' ')[1]
+  console.log("fuori");
+  if (token == null){
+    console.log("dentro");
+    next();
+    //return res.sendStatus(401) // if there isn't any token
+  }else{
+    jsonwebtoken.verify(token, process.env.JWT_SECRET as string, (err: any, user: any) => {
+      console.log(err)
+      if (err) return res.sendStatus(403)
+      req.user = user
+      next() // pass the execution off to whatever request the client intended
+    })
+  }
+}
 
 declare global {
   namespace Express {
@@ -195,7 +216,7 @@ app.get("/insertions", (req,res,next) => {
     expressions.push ({ location: { $regex: req.query.location, $options: "i" }  });
   }
   if( req.query.price ) {
-    expressions.push ({ price: { $eq: Number(req.query.price) }  });
+    expressions.push ({ current_price: { $eq: Number(req.query.price) }  });
   }
 
   filter = expressions.length?{$and: expressions}:{};
@@ -203,7 +224,7 @@ app.get("/insertions", (req,res,next) => {
   console.log("Using filter: " + JSON.stringify(filter) );
   console.log(" Using query: " + JSON.stringify(req.query) );
 
-  insertion.getModel().find( filter ).sort({insertion_timestamp:-1}).then( (documents) => {
+  insertion.getModel().find( filter , {messages : 0, reserve_price : 0} ).sort({insertion_timestamp:-1}).then( (documents) => {
     return res.status(200).json( documents );
   }).catch( (reason) => {
     return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
@@ -242,12 +263,11 @@ app.post( "/insertions", auth, (req,res,next) => {
 
 });
 
-app.get("/insertions/:id", auth ,(req,res,next) => { 
-    insertion.getModel().findById( req.params.id ).then( (insertion)=> {
-    /*console.log("req.user.id" + req.user.id);
-    console.log("insertion.insertionist" + insertion.insertionist);*/
+app.get("/insertions/:id", addTokenUserInfoIfExists, (req,res,next)=> { 
 
-    if(!req.user.admin && (req.user.id != insertion.insertionist))
+   insertion.getModel().findById( req.params.id ).then( (insertion)=> {
+
+    if(!req.user || (!req.user.admin && (req.user.id != insertion.insertionist)))
       insertion.reserve_price = undefined;
 
     return res.status(200).json( insertion );
@@ -256,18 +276,6 @@ app.get("/insertions/:id", auth ,(req,res,next) => {
   })
 });
 
-/*app.get("/insertions/:id", (req,res,next) => {
-  
-  insertion.getModel().findById( req.params.id ).then( (insertion)=> {
-  console.log("req.user.id" + req.user.id);
-  console.log("insertion.insertionist" + insertion.insertionist);
-
-  insertion.reserve_price = undefined;
-  return res.status(200).json( insertion );
-}).catch( (reason) => {
-  return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-})
-});*/
 
 app.delete( '/insertions/:id', auth, (req,res,next) => {
 
@@ -348,6 +356,8 @@ app.put( '/insertions/:id/price', auth, (req,res,next) =>{
   insertion.getModel().findById( req.params.id ).then( (insertion)=> {
       return insertion;
   }).then((data)=>{
+    if(new Date() >= new Date(data.expire_date))
+        return next({ statusCode:500, error: true, errormessage: "Insertion is already closed"} );
 
       if(body.current_price!=undefined && typeof body.current_price == 'number' && 
         (body.current_price > data.start_price) &&
@@ -367,6 +377,43 @@ app.put( '/insertions/:id/price', auth, (req,res,next) =>{
     return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
   })
 });
+
+/* nel body passiamo solo insertion_id e messaggio */
+app.post( "/private_chat", auth, (req,res,next) => {
+  var body = req.body;
+  insertion.getModel().findById(body.insertion_id).then((insertion)=> {
+    return insertion;
+  }).then((insertion)=>{
+      var chat;
+      if(public_message.isPublicMessage(body.message)){
+        var m = public_message.newMessage(body.message);
+        var messages = [m];
+        chat.messages = messages;
+        chat.insertion_id = insertion._id;
+        chat.insertionist = insertion.insertionist;
+        chat.sender = req.user.id;
+
+        if(private_chat.isPrivateChat(chat)){
+          private_chat.getModel().create( chat ).then( ( data ) => {
+            // Notify all socket.io clients
+            /*ios.emit('broadcast', data );*/
+      
+            return res.status(200).json({ error: false, errormessage: "", id: data._id });
+          }).catch((reason) => {
+            return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+          } )
+        }else 
+          return next({ statusCode:404, error: true, errormessage: "Data is not a valid Private Chat" });
+    }else
+      return next({ statusCode:404, error: true, errormessage: "Data is not a valid Message" });
+  }).catch( (reason) => {
+    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+  })
+});
+
+
+
+
 
 app.post('/users', (req,res,next) => {
 

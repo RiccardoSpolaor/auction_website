@@ -89,12 +89,14 @@ var insertionSchema = new mongoose.Schema({
     },
     insertion_timestamp: {
         type: mongoose.SchemaTypes.Date,
-        required: true
+        required: true,
+        immutable: true
     },
     insertionist: {
         type: mongoose.SchemaTypes.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
+        immutable: true
     },
     reserve_price: {
         type: mongoose.SchemaTypes.Number,

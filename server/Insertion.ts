@@ -64,6 +64,8 @@ function areReserveAndStartPriceCompatible( body_start : any, body_reserve : any
     return true;
 }
 
+/* CONTROLLARE che non metta inserzionista diverso da quello che l'ha creato, current_price, insertion_timestamp, current_winner, ecc. */
+
 export function isValidUpdate(arg: any, db: Insertion): boolean {
     console.log(JSON.stringify(db));
     return !(!arg || (arg.title && typeof(arg.title) != 'string')
@@ -112,12 +114,14 @@ var insertionSchema = new mongoose.Schema( {
     },
     insertion_timestamp: {
         type: mongoose.SchemaTypes.Date,
-        required: true
+        required: true,
+        immutable: true
     },
     insertionist: {
         type: mongoose.SchemaTypes.ObjectId, 
         ref: 'User',
-        required: true
+        required: true,
+        immutable: true
     },
     reserve_price: {
         type: mongoose.SchemaTypes.Number,

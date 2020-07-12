@@ -102,6 +102,26 @@ const jsonwebtoken = require("jsonwebtoken"); // JWT generation
 const jwt = require("express-jwt"); // JWT parsing middleware for express
 const cors = require("cors"); // Enable CORS middleware
 const io = require("socket.io"); // Socket.io websocket library
+function addTokenUserInfoIfExists(req, res, next) {
+    // Gather the jwt access token from the request header
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    console.log("fuori");
+    if (token == null) {
+        console.log("dentro");
+        next();
+        //return res.sendStatus(401) // if there isn't any token
+    }
+    else {
+        jsonwebtoken.verify(token, process.env.JWT_SECRET, (err, user) => {
+            console.log(err);
+            if (err)
+                return res.sendStatus(403);
+            req.user = user;
+            next(); // pass the execution off to whatever request the client intended
+        });
+    }
+}
 var ios = undefined;
 var app = express();
 // We create the JWT authentication middleware
@@ -150,12 +170,12 @@ app.get("/insertions", (req, res, next) => {
         expressions.push({ location: { $regex: req.query.location, $options: "i" } });
     }
     if (req.query.price) {
-        expressions.push({ price: { $eq: Number(req.query.price) } });
+        expressions.push({ current_price: { $eq: Number(req.query.price) } });
     }
     filter = expressions.length ? { $and: expressions } : {};
     console.log("Using filter: " + JSON.stringify(filter));
     console.log(" Using query: " + JSON.stringify(req.query));
-    insertion.getModel().find(filter).sort({ insertion_timestamp: -1 }).then((documents) => {
+    insertion.getModel().find(filter, { messages: 0, reserve_price: 0 }).sort({ insertion_timestamp: -1 }).then((documents) => {
         return res.status(200).json(documents);
     }).catch((reason) => {
         return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
@@ -185,30 +205,15 @@ app.post("/insertions", auth, (req, res, next) => {
         return next({ statusCode: 404, error: true, errormessage: "Data is not a valid Insertion" });
     }
 });
-app.get("/insertions/:id", (req, res, next) => {
-    auth;
+app.get("/insertions/:id", addTokenUserInfoIfExists, (req, res, next) => {
     insertion.getModel().findById(req.params.id).then((insertion) => {
-        /*console.log("req.user.id" + req.user.id);
-        console.log("insertion.insertionist" + insertion.insertionist);*/
-        if (!req.user.admin && (req.user.id != insertion.insertionist))
+        if (!req.user || (!req.user.admin && (req.user.id != insertion.insertionist)))
             insertion.reserve_price = undefined;
         return res.status(200).json(insertion);
     }).catch((reason) => {
         return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
     });
 });
-/*app.get("/insertions/:id", (req,res,next) => {
-  
-  insertion.getModel().findById( req.params.id ).then( (insertion)=> {
-  console.log("req.user.id" + req.user.id);
-  console.log("insertion.insertionist" + insertion.insertionist);
-
-  insertion.reserve_price = undefined;
-  return res.status(200).json( insertion );
-}).catch( (reason) => {
-  return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-})
-});*/
 app.delete('/insertions/:id', auth, (req, res, next) => {
     // Check admin role
     if (!user.newUser(req.user).hasAdminRole()) {
@@ -274,6 +279,8 @@ app.put('/insertions/:id/price', auth, (req, res, next) => {
     insertion.getModel().findById(req.params.id).then((insertion) => {
         return insertion;
     }).then((data) => {
+        if (new Date() >= new Date(data.expire_date))
+            return next({ statusCode: 500, error: true, errormessage: "Insertion is already closed" });
         if (body.current_price != undefined && typeof body.current_price == 'number' &&
             (body.current_price > data.start_price) &&
             (data.current_price == undefined || data.current_price < body.current_price)) {
