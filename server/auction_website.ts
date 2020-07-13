@@ -381,39 +381,92 @@ app.put( '/insertions/:id/price', auth, (req,res,next) =>{
 /* nel body passiamo solo insertion_id e messaggio */
 app.post( "/private_chat", auth, (req,res,next) => {
   var body = req.body;
-  insertion.getModel().findById(body.insertion_id).then((insertion)=> {
-    return insertion;
-  }).then((insertion)=>{
-      var chat;
-      if(public_message.isPublicMessage(body.message)){
-        var m = public_message.newMessage(body.message);
-        var messages = [m];
-        chat.messages = messages;
-        chat.insertion_id = insertion._id;
-        chat.insertionist = insertion.insertionist;
-        chat.sender = req.user.id;
-
-        if(private_chat.isPrivateChat(chat)){
-          private_chat.getModel().create( chat ).then( ( data ) => {
-            // Notify all socket.io clients
-            /*ios.emit('broadcast', data );*/
+  console.log(req.user.id)
+  private_chat.getModel().find({$and: [{insertion_id: body.insertion_id}, {sender: req.user.id}]}).then((data) =>{
+    console.log(data)
+      if(data.length) // UTILIZZARE app.put("/private_chat/:id")
+        return next({ statusCode:404, error: true, errormessage: "c'è"});
+      else{
+        insertion.getModel().findById(body.insertion_id).then((insertion)=> {
+          return insertion;
+        }).then((data)=>{
+            var m = {content: body.message, author: req.user.id, timestamp: new Date()}
+            if(public_message.isPublicMessage(m)){
+                var messages = [m];
+                var chat = {insertion_id: data.id, insertionist: data.insertionist.toString(), sender: req.user.id, messages: messages}
       
-            return res.status(200).json({ error: false, errormessage: "", id: data._id });
-          }).catch((reason) => {
-            return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-          } )
-        }else 
-          return next({ statusCode:404, error: true, errormessage: "Data is not a valid Private Chat" });
-    }else
-      return next({ statusCode:404, error: true, errormessage: "Data is not a valid Message" });
+                if(private_chat.isPrivateChat(chat)){
+                  private_chat.getModel().create( chat ).then( ( data ) => {
+                    // Notify all socket.io clients
+                    /*ios.emit('broadcast', data );*/
+              
+                    return res.status(200).json({ error: false, errormessage: "", id: data._id });
+                  }).catch((reason) => {
+                    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+                  })
+                }else 
+                  return next({ statusCode:404, error: true, errormessage: "Data is not a valid Private Chat" });
+          }else
+            return next({ statusCode:404, error: true, errormessage: "Data is not a valid Message" });
+        }).catch( (reason) => {
+          return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+        })
+      }
+  }).catch( (reason) => {
+  return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+  })
+});
+
+app.get("/private_chat", auth, (req,res,next)=> { 
+
+  private_chat.getModel().find( {$or: [{sender: req.user.id}, {insertionist: req.user.id}]})
+                                .sort({"messages.timestamp" : -1}).then( (documents) => {
+    return res.status(200).json( documents );
   }).catch( (reason) => {
     return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
   })
 });
 
+app.put("/private_chat/:id", auth, (req,res,next)=>{
+  var body = req.body;
+  private_chat.getModel().findById( req.params.id ).then( (chat)=> {
+      return chat;
+  }).then((data)=>{
 
+    if(data.sender == req.user.id || data.insertionist == req.user.id){
+      body.timestamp = new Date()
+      body.author = req.user.id
 
+      if(public_message.isPublicMessage(body)){
+        var m = public_message.newMessage(body);
+        data.messages.push(m);
 
+        data.save().then( (data) =>  {
+          return res.status(200).json({ error: false, errormessage: "", id: data._id });
+        }).catch( (reason) => {
+          return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
+        })
+      }else
+        return next({ statusCode:404, error: true, errormessage: "Data is not a valid Message" });
+    }else
+      return next({ statusCode:404, error: true, errormessage: "You can't post in this chat" });
+
+  }).catch( (reason) => {
+    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+  })
+})
+
+app.get("/private_chat/:id", auth, (req,res,next)=> { 
+
+  private_chat.getModel().findById( req.params.id ).then( (document) => { 
+    if(document.sender == req.user.id || document.insertionist == req.user.id)
+      return res.status(200).json( document);
+    else 
+      return next({ statusCode:404, error: true, errormessage: "You can't acces this chat" });
+  }).catch( (reason) => {
+    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+  })
+});
 
 app.post('/users', (req,res,next) => {
 

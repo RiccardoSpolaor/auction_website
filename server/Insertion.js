@@ -43,6 +43,7 @@ function areReserveAndStartPriceCompatible(body_start, body_reserve, db_start, d
     }
     return true;
 }
+/* CONTROLLARE che non metta inserzionista diverso da quello che l'ha creato, current_price, insertion_timestamp, current_winner, ecc. */
 function isValidUpdate(arg, db) {
     console.log(JSON.stringify(db));
     return !(!arg || (arg.title && typeof (arg.title) != 'string')
