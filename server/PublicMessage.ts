@@ -1,5 +1,4 @@
 import mongoose = require('mongoose');
-import {User} from './User';
 
 export interface PublicMessage extends mongoose.Document {
     content: string,

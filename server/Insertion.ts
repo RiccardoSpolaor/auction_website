@@ -1,5 +1,4 @@
 import mongoose = require('mongoose');
-import {User, newUser} from './User';
 import {PublicMessage} from './PublicMessage';
 import * as publicMessage from './PublicMessage';
 

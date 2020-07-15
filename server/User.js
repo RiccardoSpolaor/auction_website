@@ -1,26 +1,40 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.newUser = exports.isUser = exports.getModel = exports.getSchema = void 0;
+exports.newUser = exports.isMod = exports.isCorrectUpdate = exports.isUser = exports.getModel = exports.getSchema = void 0;
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 var userSchema = new mongoose.Schema({
+    mod: {
+        type: mongoose.SchemaTypes.Boolean,
+        required: false,
+        default: false
+    },
+    validated: {
+        type: mongoose.SchemaTypes.Boolean,
+        required: false,
+        default: false
+    },
     username: {
         type: mongoose.SchemaTypes.String,
-        required: true
+        required: true,
+        unique: true
+    },
+    name: {
+        type: mongoose.SchemaTypes.String,
+        required: function () { return !this.mod; }
+    },
+    surname: {
+        type: mongoose.SchemaTypes.String,
+        required: function () { return !this.mod; }
     },
     mail: {
         type: mongoose.SchemaTypes.String,
-        required: true,
+        required: function () { return !this.mod; },
         unique: true
     },
     location: {
         type: mongoose.SchemaTypes.String,
         required: false,
-    },
-    admin: {
-        type: mongoose.SchemaTypes.Boolean,
-        required: false,
-        default: false
     },
     salt: {
         type: mongoose.SchemaTypes.String,
@@ -57,12 +71,19 @@ userSchema.methods.validatePassword = function (pwd) {
     var digest = hmac.digest('hex');
     return (this.digest === digest);
 };
-userSchema.methods.hasAdminRole = function () {
-    return this.admin;
+userSchema.methods.hasModRole = function () {
+    return this.mod;
 };
-userSchema.methods.setAdmin = function () {
-    if (!this.hasAdminRole())
-        this.admin = true;
+userSchema.methods.setMod = function () {
+    if (!this.hasModRole())
+        this.mod = true;
+};
+userSchema.methods.isValidated = function () {
+    return this.validated;
+};
+userSchema.methods.validateUser = function () {
+    if (!this.isValidated())
+        this.validated = true;
 };
 function getSchema() { return userSchema; }
 exports.getSchema = getSchema;
@@ -81,10 +102,28 @@ function validateEmail(email) {
 }
 function isUser(arg) {
     return arg && arg.username && typeof (arg.username) == 'string'
+        && arg.name && typeof (arg.name) == 'string'
+        && arg.surname && typeof (arg.surname) == 'string'
         && arg.mail && typeof (arg.mail) == 'string' && validateEmail(arg.mail)
-        && arg.location && typeof (arg.location) == 'string';
+        && arg.location && typeof (arg.location) == 'string'
+        && arg.mod == undefined && arg.validated == undefined && arg.salt == undefined && arg.digest == undefined;
 }
 exports.isUser = isUser;
+function isCorrectUpdate(arg) {
+    return arg && (!arg.username || typeof (arg.username) == 'string')
+        && (!arg.name || typeof (arg.name) == 'string')
+        && (!arg.surname || typeof (arg.surname) == 'string')
+        && (!arg.mail || (typeof (arg.mail) == 'string' && validateEmail(arg.mail)))
+        && (!arg.location || typeof (arg.location) == 'string')
+        && arg.mod == undefined && arg.validated == undefined && arg.salt == undefined && arg.digest == undefined;
+}
+exports.isCorrectUpdate = isCorrectUpdate;
+function isMod(arg) {
+    return arg && arg.username && typeof (arg.username) == 'string'
+        && arg.mail == undefined && arg.name == undefined && arg.surname == undefined && arg.location == undefined
+        && arg.mod == undefined && arg.validated == undefined && arg.salt == undefined && arg.digest == undefined;
+}
+exports.isMod = isMod;
 function newUser(data) {
     var usermodel = getModel();
     var user = new usermodel(data);

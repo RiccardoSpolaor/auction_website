@@ -18,25 +18,29 @@
  *                                    ?university=
  *                                    ?location=
  *                                    ?price=
+ *                                    ?user=
  *     /insertions                        -                POST        Posts a new book auction
  *
  *     /insertions/:id                    -                GET         Gets a book auction by id  
- *     /insertions/:id                    -                DELETE      Deletes a book auction by id, can just be done by an admin
- *     /insertions/:id/content            -                PUT         Edits an auction content, can be done by the user who made it or the admin
+ *     /insertions/:id                    -                DELETE      Deletes a book auction by id, can just be done by a mod
+ *     /insertions/:id/content            -                PUT         Edits an auction content, can be done by the user who made it or the mod
  *     /insertions/:id/messages           -                PUT         Every user can write a new public_message.
  *     /insertions/:id/price              -                PUT         Every user can post a new price offer.
  * 
- *     /private_chat                       -             GET           Returns all the private chats of the current user where he is either the sender or the receiver 
- *     /private_chat                       -             POST         Create a new private chat where the sender is the current user and the receiver (è quello dell'nserzione visualizzata al momento e lo stesso vale per l'id )
+ *     /private_chat                      -                GET         Returns all the private chats of the current user where he is either the sender or the receiver 
+ *     /private_chat                      -                POST        Create a new private chat where the sender is the current user and the receiver (è quello dell'nserzione visualizzata al momento e lo stesso vale per l'id )
  * 
- *     /private_chat/:id                  -            GET          Returns all the messsages of a specific chat
- *     /private_chat/:id                  -            PUT         Post a message in a specific chat
+ *     /private_chat/:id                  -                GET         Returns all the messsages of a specific chat
+ *     /private_chat/:id                  -                PUT         Post a message in a specific chat
  * 
- *     /users/:mail                   -                GET         Get user info by mail
- *     /users                         -                POST        Add a new user 
- *     /users                         -                GET         List all users       DA FARE
+ *     /users/:mail                       -                GET         Get user info by mail
+ *     /users/:id                          -               DELETE      Deletes an user by id, only mod can do it
+ *     /users                             -                POST        Add a new user 
  * 
- *     /login                         -                POST        login an existing user, returning a JWT
+ *     /mod                             -                 POST        Create a new mod
+ *     /mod/:id                         -                 PUT         Edit the mod info
+ * 
+ *     /login                             -                POST        Login an existing user, returning a JWT
  * 
  * 
  * ------------------------------------------------------------------------------------ 
@@ -147,8 +151,9 @@ declare global {
       interface User {
         mail:string,
         username: string,
-        admin: boolean,
-        id: string
+        mod: boolean,
+        id: string,
+        validated: boolean
       }
     }
 }
@@ -184,24 +189,10 @@ app.get("/", (req,res) => {
 
 });
 
-app.get("/insertions", (req,res,next) => {
 
+function findFilteredInsertions(req,res,next, data){
   var filter = {};
   var expressions = [];
-
-  /*for (var i in ['title', 'faculty', 'university', 'location','price']){
-      if( req.query[i] ) {
-        expressions.push ({ i: { $regex: req.query[i], $options: "i" }  });
-      }
-  }*/
-
-  /*var ex = ['title', 'faculty', 'university', 'location','price'];
-  for (var i=0; i< ex.length; i++) {
-    var d = ex[i];
-    if( req.query.d ) {
-      expressions.push ({ d: { $regex: req.query.d, $options: "i" }  });
-    }
-}*/
 
   if( req.query.title ) {
     expressions.push ({ title: { $regex: req.query.title, $options: "i" }  });
@@ -212,11 +203,11 @@ app.get("/insertions", (req,res,next) => {
   if( req.query.university ) {
     expressions.push ({ university: { $regex: req.query.university, $options: "i" }  });
   }
-  if( req.query.location ) {
-    expressions.push ({ location: { $regex: req.query.location, $options: "i" }  });
-  }
   if( req.query.price ) {
     expressions.push ({ current_price: { $eq: Number(req.query.price) }  });
+  }
+  if(data){
+    expressions.push ({ insertionist: {$in: data }});
   }
 
   filter = expressions.length?{$and: expressions}:{};
@@ -229,16 +220,44 @@ app.get("/insertions", (req,res,next) => {
   }).catch( (reason) => {
     return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
   })
+}
 
+app.get("/insertions", (req,res,next) => {
+
+  var userfilter = {};
+  var userexpressions = [];
+
+  if( req.query.location ) {
+    userexpressions.push ({ location: { $regex: req.query.location, $options: "i" }  });
+  }
+  console.log(req.query.user);
+  console.log(typeof(req.query.user));
+  if( req.query.user ) {
+    userexpressions.push ({ $or: [{ username: {$regex: req.query.user, $options: "i"} }, { mail: {$regex: req.query.user, $options: "i"} }]});
+  }
+
+  userfilter = userexpressions.length?{$and: userexpressions}:null;
+
+  if(userfilter){
+     user.getModel().find( userfilter ).select("_id").then( (documents) => {
+      return documents;
+    }).then( (data) => {
+      findFilteredInsertions(req,res,next,data);
+    }).catch( (reason) => {
+      return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+    })
+  }else{
+    findFilteredInsertions(req,res,next,null);
+  }
 });
 
 app.post( "/insertions", auth, (req,res,next) => {
 
   console.log("Received: " + JSON.stringify(req.body) );
 
-  // Check admin role
-  if( user.newUser(req.user).hasAdminRole() ) {
-    return next({ statusCode:404, error: true, errormessage: "Unauthorized: Admins can't create new Insertions"} );
+  // Check mod role
+  if( user.newUser(req.user).hasModRole() ) {
+    return next({ statusCode:404, error: true, errormessage: "Unauthorized: MOds can't create new Insertions"} );
   }
 
   var recinsertion = req.body;
@@ -267,7 +286,7 @@ app.get("/insertions/:id", addTokenUserInfoIfExists, (req,res,next)=> {
 
    insertion.getModel().findById( req.params.id ).then( (insertion)=> {
 
-    if(!req.user || (!req.user.admin && (req.user.id != insertion.insertionist)))
+    if(!req.user || (!req.user.mod && (req.user.id != insertion.insertionist)))
       insertion.reserve_price = undefined;
 
     return res.status(200).json( insertion );
@@ -279,9 +298,9 @@ app.get("/insertions/:id", addTokenUserInfoIfExists, (req,res,next)=> {
 
 app.delete( '/insertions/:id', auth, (req,res,next) => {
 
-  // Check admin role
-  if( !user.newUser(req.user).hasAdminRole() ) {
-    return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not an admin"} );
+  // Check mod role
+  if( !user.newUser(req.user).hasModRole() ) {
+    return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not a moderator"} );
   }
   
   // req.params.id contains the :id URL component
@@ -300,8 +319,8 @@ app.put( '/insertions/:id/content', auth, (req,res,next) =>{
   insertion.getModel().findById( req.params.id ).then( (insertion)=> {
       return insertion;
   }).then((data)=>{
-    if( !user.newUser(req.user).hasAdminRole() && req.user.id != data.insertionist) {
-      return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not an admin"} );
+    if( !user.newUser(req.user).hasModRole() && req.user.id != data.insertionist) {
+      return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not a moderator"} );
     }
     if(body.expire_date)
       body.expire_date = new Date(body.expire_date);
@@ -429,7 +448,7 @@ app.get("/private_chat", auth, (req,res,next)=> {
 
 app.put("/private_chat/:id", auth, (req,res,next)=>{
   var body = req.body;
-  private_chat.getModel().findById( req.params.id ).then( (chat)=> {
+  private_chat.getModel().findById(req.params.id).then( (chat)=> {
       return chat;
   }).then((data)=>{
 
@@ -468,29 +487,53 @@ app.get("/private_chat/:id", auth, (req,res,next)=> {
   })
 });
 
-app.post('/users', (req,res,next) => {
+app.post('/users', addTokenUserInfoIfExists, (req,res,next) => {
 
-  if(!user.isUser(req.body))
-      return next({ statusCode:404, error: true, errormessage: "Invalid Data"} );
+  if(req.user && req.user.mod){
+    if(!user.isMod(req.body))
+      return next({ statusCode:404, error: true, errormessage: "Invalid No Moderator Data"} );
 
-  var u = user.newUser(req.body);
+      var u = user.newUser(req.body);
 
-  if( !req.body.password ) {
-    return next({ statusCode:404, error: true, errormessage: "Password field missing"} );
+      if( !req.body.password ) {
+        return next({ statusCode:404, error: true, errormessage: "Password field missing"} );
+      }
+      u.setPassword( req.body.password );
+
+      u.setMod();
+
+      u.save().then( (data) => {
+        return res.status(200).json({ error: false, errormessage: "", id: data._id });
+      }).catch( (reason) => {
+        if( reason.code === 11000 )
+          return next({statusCode:404, error:true, errormessage: "Mod already exists"} );
+        return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
+      })
+  }else{
+    if(!user.isUser(req.body))
+        return next({ statusCode:404, error: true, errormessage: "Invalid Data"} );
+
+    var u = user.newUser(req.body);
+
+    if( !req.body.password ) {
+      return next({ statusCode:404, error: true, errormessage: "Password field missing"} );
+    }
+    u.setPassword( req.body.password );
+
+    u.validateUser();
+
+    u.save().then( (data) => {
+      return res.status(200).json({ error: false, errormessage: "", id: data._id });
+    }).catch( (reason) => {
+      if( reason.code === 11000 )
+        return next({statusCode:404, error:true, errormessage: "User already exists"} );
+      return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
+    })
   }
-  u.setPassword( req.body.password );
-
-  u.save().then( (data) => {
-    return res.status(200).json({ error: false, errormessage: "", id: data._id });
-  }).catch( (reason) => {
-    if( reason.code === 11000 )
-      return next({statusCode:404, error:true, errormessage: "User already exists"} );
-    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
-  })
 
 });
 
-app.get('/users/:mail', auth, (req,res,next) => {
+/*app.get('/users/:mail', auth, (req,res,next) => {
 
   // req.params.mail contains the :mail URL component
   user.getModel().findOne( {mail: req.params.mail }, {digest: 0, salt:0 }).then( (user)=> {
@@ -499,6 +542,92 @@ app.get('/users/:mail', auth, (req,res,next) => {
     return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
   })
 
+});*/
+
+app.get('/users', (req,res,next) => {
+
+  // req.params.mail contains the :mail URL component
+  user.getModel().find({},{digest: 0, salt:0 }).then( (user)=> {
+    return res.status(200).json( user );
+  }).catch( (reason) => {
+    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+  })
+
+});
+
+app.put('/users/:id', auth, (req,res,next)=>{
+  var body = req.body;
+  user.getModel().findById( req.params.id ).then( (user)=> {
+    return user;
+  }).then((data)=>{
+    if(req.user.mod && !req.user.validated){
+      console.log("mod-non -valid")
+
+      if( !user.isUser(body))
+      return next({ statusCode:404, error: true, errormessage: "Invalid Data"} );
+
+      if( !body.password )
+      return next({ statusCode:404, error: true, errormessage: "Password field missing"} );
+
+      data.setPassword( body.password );
+
+      data.username = body.username;
+      data.name = body.name;
+      data.surname = body.surname;
+      data.location = body.location;
+      data.mail = body.mail;
+      data.validateUser();
+
+    }else{
+      if( !user.isCorrectUpdate(body))
+        return next({ statusCode:404, error: true, errormessage: "Invalid Data"} );
+
+      if(req.body.password)
+        data.setPassword( req.body.password );
+    }
+
+    /*user.getModel().findByIdAndUpdate(req.user.id, data, function(err){
+      if(err)
+        return next({ statusCode:404, error: true, errormessage: "DB error: "+err });
+      else{
+        console.log("Database Update");
+        return res.status(200).json( {error:false, errormessage:""} );
+      }
+    }).catch( (reason) => {
+    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+  });*/
+  
+    data.save().then( (data) => {
+      return res.status(200).json({ error: false, errormessage: "", id: data._id });
+    }).catch( (reason) => {
+      if( reason.code === 11000 )
+        return next({statusCode:404, error:true, errormessage: "User already exists"} );
+      return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
+    })
+  })
+});
+
+app.delete( '/users/:id', auth, (req,res,next) => {
+
+  // Check mod role
+  if( !user.newUser(req.user).hasModRole() ) {
+    return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not an moderator"} );
+  }
+  
+  // req.params.id contains the :id URL component
+
+  user.getModel().findById(req.params.id).then( (data)=> {
+    if(!data.hasModRole()){
+      data.remove().then(()=>{
+        return res.status(200).json( {error:false, errormessage:""} );
+      }).catch( (reason)=> {
+        return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+      });
+    }else
+      return next({ statusCode:404, error: true, errormessage: "Unauthorized: moderator can't be deleted"} )
+  }).catch( (reason)=> {
+      return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+  })
 });
 
 // Login endpoint uses passport middleware to check
@@ -513,9 +642,10 @@ app.get("/login", passport.authenticate('basic', { session: false }), (req,res,n
 
   var tokendata = {
     username: req.user.username,
-    admin: req.user.admin,
+    mod: req.user.mod,
     mail: req.user.mail,
-    id: req.user.id
+    id: req.user.id,
+    validated: req.user.validated
     //location: req.user.location
   };
 
@@ -539,7 +669,7 @@ passport.use( new passportHTTP.BasicStrategy(
     // to verify user credentials 
 
     console.log("New login attempt from ".green + username );
-    user.getModel().findOne( {mail: username} , (err, user)=>{
+    user.getModel().findOne( { $or: [ {username: username},{mail: username} ] }, (err, user)=>{
       if( err ) {
         return done( {statusCode: 500, error: true, errormessage:err} );
       }
@@ -580,14 +710,14 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
         console.log("Connected to MongoDB");
 
         var u = user.newUser( {
-          username: "admin",
-          mail: "admin@postmessages.it",
+          username: "mod",
+          mail: "mod@postmessages.it",
           location: "Italy"
         } );
-        u.setAdmin();
-        u.setPassword("admin");
+        u.setMod();
+        u.setPassword("mod");
         u.save().then( ()=> {
-          console.log("Admin user created");
+          console.log("Moderator user created");
         
           insertion.getModel().countDocuments({}).then(
               ( count ) => {
@@ -638,7 +768,7 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
                   }
               })
         }).catch( (err)=> {
-          console.log("Unable to create admin user: " + err );
+          console.log("Unable to create moderator user: " + err );
         }).finally( ()=> {
 
           let server = http.createServer(app);

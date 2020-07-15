@@ -5,35 +5,54 @@ import crypto = require('crypto');
 export interface User extends mongoose.Document {
     readonly _id: mongoose.Schema.Types.ObjectId,
     username: string,
+    name: string,
+    surname: string,
     mail: string,
     location: string,
-    admin: boolean,
+    mod: boolean,
+    validated: boolean,
     salt: string,
     digest: string,
     setPassword: (pwd:string)=>void,
     validatePassword: (pwd:string)=>boolean,
-    hasAdminRole: ()=>boolean,
-    setAdmin: ()=>void,
+    hasModRole: ()=>boolean,
+    setMod: ()=>void,
+    validateUser: ()=>void,
+    isValidated: ()=>boolean
 }
 
 var userSchema = new mongoose.Schema( {
+    mod:  {
+        type: mongoose.SchemaTypes.Boolean,
+        required: false,
+        default: false
+    },
+    validated:  {
+        type: mongoose.SchemaTypes.Boolean,
+        required: false,
+        default: false
+    },
     username: {
         type: mongoose.SchemaTypes.String,
-        required: true
+        required: true,
+        unique: true
+    },
+    name: {
+        type: mongoose.SchemaTypes.String,
+        required: function(){return !this.mod}
+    },
+    surname: {
+        type: mongoose.SchemaTypes.String,
+        required: function(){return !this.mod}
     },
     mail: {
         type: mongoose.SchemaTypes.String,
-        required: true,
+        required: function(){return !this.mod},
         unique: true
     },
     location: {
         type: mongoose.SchemaTypes.String,
         required: false,
-    },
-    admin:  {
-        type: mongoose.SchemaTypes.Boolean,
-        required: false,
-        default: false
     },
     salt:  {
         type: mongoose.SchemaTypes.String,
@@ -77,13 +96,22 @@ userSchema.methods.validatePassword = function( pwd:string ):boolean {
     return (this.digest === digest);
 }
 
-userSchema.methods.hasAdminRole = function(): boolean {
-    return this.admin;
+userSchema.methods.hasModRole = function(): boolean {
+    return this.mod;
 }
 
-userSchema.methods.setAdmin = function() {
-    if( !this.hasAdminRole() )
-        this.admin = true;
+userSchema.methods.setMod = function() {
+    if( !this.hasModRole() )
+        this.mod = true;
+}
+
+userSchema.methods.isValidated = function(): boolean {
+    return this.validated;
+}
+
+userSchema.methods.validateUser = function() {
+    if( !this.isValidated() )
+        this.validated = true;
 }
 
 export function getSchema() { return userSchema; }
@@ -102,11 +130,28 @@ function validateEmail(email) {
     return re.test(String(email).toLowerCase());
 }
 
-
 export function isUser(arg: any): boolean {
-    return arg && arg.username && typeof(arg.username) == 'string' 
+    return arg && arg.username && typeof(arg.username) == 'string'
+               && arg.name && typeof(arg.name) == 'string'
+               && arg.surname && typeof(arg.surname) == 'string'
                && arg.mail && typeof(arg.mail) == 'string' && validateEmail(arg.mail)
                && arg.location && typeof(arg.location) == 'string' 
+               && arg.mod==undefined && arg.validated==undefined && arg.salt==undefined && arg.digest==undefined 
+}
+
+export function isCorrectUpdate(arg: any): boolean {
+    return arg && (!arg.username ||  typeof(arg.username) == 'string' )
+               && (!arg.name || typeof(arg.name) == 'string')
+               && (!arg.surname || typeof(arg.surname) == 'string')
+               && (!arg.mail || (typeof(arg.mail) == 'string' && validateEmail(arg.mail)))
+               && (!arg.location || typeof(arg.location) == 'string') 
+               && arg.mod==undefined && arg.validated==undefined && arg.salt==undefined && arg.digest==undefined 
+}
+
+export function isMod(arg: any): boolean {
+    return arg && arg.username && typeof(arg.username) == 'string'
+               && arg.mail==undefined && arg.name==undefined && arg.surname==undefined && arg.location==undefined
+               && arg.mod==undefined && arg.validated==undefined && arg.salt==undefined && arg.digest==undefined 
 }
 
 export function newUser( data ): User {
