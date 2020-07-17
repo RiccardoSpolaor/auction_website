@@ -33,12 +33,15 @@
  *     /private_chat/:id                  -                GET         Returns all the messsages of a specific chat
  *     /private_chat/:id                  -                PUT         Post a message in a specific chat
  * 
- *     /users/:mail                       -                GET         Get user info by mail
- *     /users/:id                          -               DELETE      Deletes an user by id, only mod can do it
- *     /users                             -                POST        Add a new user 
+ *     /users                ?           ?mod               GET         Returns the list of users
+ *                                  
+ *     /users/:mail           ?           -                GET         Get user info by mail
+ *     /users/:id                         -                DELETE      Deletes an user by id, only mod can do it
+ *     /users                             -                PUT         Edits the user info or validates him
  * 
- *     /mod                             -                 POST        Create a new mod
- *     /mod/:id                         -                 PUT         Edit the mod info
+ *     /users/mods                        -                POST        Add a new mod user
+ *     /users/students                    -                POST        Add a new student user 
+ * 
  * 
  *     /login                             -                POST        Login an existing user, returning a JWT
  * 
@@ -125,6 +128,7 @@ import jwt = require('express-jwt');            // JWT parsing middleware for ex
 import cors = require('cors');                  // Enable CORS middleware
 import io = require('socket.io');               // Socket.io websocket library
 import { report } from 'process';
+import { AuctionEnded, IosObject } from './IosObject';
 
 
 function addTokenUserInfoIfExists(req, res, next) {
@@ -487,11 +491,11 @@ app.get("/private_chat/:id", auth, (req,res,next)=> {
   })
 });
 
-app.post('/users', addTokenUserInfoIfExists, (req,res,next) => {
+app.post('/users/mods', auth, (req,res,next) => {
 
-  if(req.user && req.user.mod){
+  if(req.user.mod){
     if(!user.isMod(req.body))
-      return next({ statusCode:404, error: true, errormessage: "Invalid No Moderator Data"} );
+      return next({ statusCode:404, error: true, errormessage: "Invalid Moderator Data"} );
 
       var u = user.newUser(req.body);
 
@@ -509,8 +513,13 @@ app.post('/users', addTokenUserInfoIfExists, (req,res,next) => {
           return next({statusCode:404, error:true, errormessage: "Mod already exists"} );
         return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
       })
-  }
-  else{
+  }else
+    return next({ statusCode:404, error: true, errormessage: "Just a moderator can add a new moderator" });
+});
+
+app.post('/users/students', addTokenUserInfoIfExists, (req,res,next) => {
+
+  if(!req.user){
     if(!user.isUser(req.body))
         return next({ statusCode:404, error: true, errormessage: "Invalid Data"} );
 
@@ -530,7 +539,8 @@ app.post('/users', addTokenUserInfoIfExists, (req,res,next) => {
         return next({statusCode:404, error:true, errormessage: "User already exists"} );
       return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
     })
-  }
+  }else
+    return next({ statusCode:404, error: true, errormessage: "You can't sign up a new user while you are logged in"});
 
 });
 
@@ -710,6 +720,7 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
                           current_price: null,
                           expire_date: new Date(),
                           current_winner: null,
+                          closed: false
                         });
                       /*var m2 = message
                         .getModel()
@@ -749,6 +760,20 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
             console.log( "Socket.io client connected".green );
           });
           server.listen( 8080, () => console.log("HTTP Server started on port 8080") );
+
+          setInterval(function(){
+            insertion.getModel().find({$and: [{expire_date: {$lte: new Date()}},{closed: {$ne: true}}]},{messages : 0, reserve_price : 0} 
+            ).sort({insertion_timestamp:-1}).then( (documents) => {
+             /*var response = []
+              for(var i in documents){
+                response.push(new AuctionEnded(i));
+              }
+                              // Notify all socket.io clients
+                ios.emit('broadcast', new IosObject("auctionEnded",response));*/
+            }).catch( (ignore) => {
+              console.log(ignore)
+            })
+          }, 2000);
 
           // To start an HTTPS server we create an https.Server instance 
           // passing the express application middleware. Then, we start listening

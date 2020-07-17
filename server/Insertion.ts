@@ -18,6 +18,7 @@ export interface Insertion extends mongoose.Document {
     current_price: number,
     expire_date: Date,
     current_winner: string,
+    closed: boolean
 
     //messages: [public_message.PublicMessage]
 }
@@ -142,8 +143,14 @@ var insertionSchema = new mongoose.Schema( {
         type: mongoose.SchemaTypes.ObjectId, 
         ref: 'User',
         required: false
-    }
+    }, 
+    closed: {
+        type: mongoose.SchemaTypes.Boolean,
+        required: false,
+        default: false
+    },
 })
+
 
 export function getSchema() { return insertionSchema; }
 

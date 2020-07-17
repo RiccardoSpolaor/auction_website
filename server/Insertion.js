@@ -119,8 +119,20 @@ var insertionSchema = new mongoose.Schema({
         type: mongoose.SchemaTypes.ObjectId,
         ref: 'User',
         required: false
-    }
+    },
+    closed: {
+        type: mongoose.SchemaTypes.Boolean,
+        required: false,
+        default: false
+    },
 });
+/*function isClosed(expire_date: Date){
+    function fun(){
+        if(expire_date <= new Date())
+            clearInterval(myVar);
+    }
+    var myVar = setInterval(fun, 3000);
+}*/
 function getSchema() { return insertionSchema; }
 exports.getSchema = getSchema;
 // Mongoose Model
