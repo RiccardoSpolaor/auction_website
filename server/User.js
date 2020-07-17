@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.newUser = exports.isMod = exports.isCorrectUpdate = exports.isUser = exports.getModel = exports.getSchema = void 0;
+exports.newUser = exports.isMod = exports.isCorrectUpdate = exports.isUser = exports.updateUser = exports.validateMod = exports.getModel = exports.getSchema = void 0;
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 var userSchema = new mongoose.Schema({
@@ -100,6 +100,66 @@ function validateEmail(email) {
     const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     return re.test(String(email).toLowerCase());
 }
+function validateMod(req, res, next, body, data) {
+    var errors = [];
+    if (!body)
+        return next({ statusCode: 404, error: true, errormessage: "Missing Data" });
+    if (!body.username || !(typeof (body.username) == 'string'))
+        errors.push('Missing or invalid Username');
+    if (!body.mail || typeof (body.mail) != 'string' || !validateEmail(body.mail))
+        errors.push('Missing or invalid Mail');
+    if (!body.password || !(typeof (body.password) == 'string'))
+        errors.push('Missing or invalid Password');
+    if (!body.name || !(typeof (body.name) == 'string'))
+        errors.push('Missing or invalid Name');
+    if (!body.surname || !(typeof (body.surname) == 'string'))
+        errors.push('Missing or invalid Surname');
+    if (!body.location || !(typeof (body.location) == 'string'))
+        errors.push('Missing or invalid Location');
+    if (errors.length)
+        return next({ statusCode: 404, error: true, errormessage: "Errors: " + errors });
+    data.setPassword(body.password);
+    data.username = body.username;
+    data.name = body.name;
+    data.surname = body.surname;
+    data.location = body.location;
+    data.mail = body.mail;
+    data.validateUser();
+}
+exports.validateMod = validateMod;
+function updateUser(req, res, next, body, data) {
+    var errors = [];
+    if (!body)
+        return next({ statusCode: 404, error: true, errormessage: "Missing Data" });
+    if (body.username)
+        if (!(typeof (body.username) == 'string'))
+            errors.push('Invalid Username');
+        else
+            data.username = body.username;
+    if (body.mail)
+        if (typeof (body.mail) != 'string' || !validateEmail(body.mail))
+            errors.push('Invalid Mail');
+        else
+            data.mail = body.mail;
+    if (body.name)
+        if (!(typeof (body.name) == 'string'))
+            errors.push('Invalid Name');
+        else
+            data.name = body.name;
+    if (body.surname)
+        if (!(typeof (body.surname) == 'string'))
+            errors.push('Invalid Surname');
+        else
+            data.surname = body.surname;
+    if (body.location)
+        if (!(typeof (body.location) == 'string'))
+            errors.push('Invalid Location');
+        else
+            data.location = body.location;
+    if (errors.length)
+        return next({ statusCode: 404, error: true, errormessage: "Errors: " + errors });
+}
+exports.updateUser = updateUser;
 function isUser(arg) {
     return arg && arg.username && typeof (arg.username) == 'string'
         && arg.name && typeof (arg.name) == 'string'

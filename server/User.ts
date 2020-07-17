@@ -125,9 +125,87 @@ export function getModel() : mongoose.Model< User >  { // Return Model as single
     return userModel;
 }
 
+
+
 function validateEmail(email) {
     const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     return re.test(String(email).toLowerCase());
+}
+
+export function validateMod (req: any, res : any, next : any, body : any, data : User) {
+    var errors : Array<string> = [];
+
+    if (!body)
+        return next({ statusCode:404, error: true, errormessage: "Missing Data"});
+
+    if (!body.username || !(typeof(body.username) == 'string'))
+        errors.push('Missing or invalid Username');
+    
+    if (!body.mail || typeof(body.mail) != 'string' || !validateEmail(body.mail))
+        errors.push('Missing or invalid Mail');
+    
+    if (!body.password || !(typeof(body.password) == 'string'))
+        errors.push('Missing or invalid Password');
+    
+    if (!body.name || !(typeof(body.name) == 'string'))
+        errors.push('Missing or invalid Name');
+    
+    if (!body.surname || !(typeof(body.surname) == 'string'))
+        errors.push('Missing or invalid Surname');
+    
+    if (!body.location || !(typeof(body.location) == 'string'))
+        errors.push('Missing or invalid Location');
+
+    if (errors.length)
+        return next({ statusCode:404, error: true, errormessage: "Errors: " + errors});
+    
+    data.setPassword( body.password );
+    data.username = body.username;
+    data.name = body.name;
+    data.surname = body.surname;
+    data.location = body.location;
+    data.mail = body.mail;
+    data.validateUser();  
+}
+
+export function updateUser (req: any, res : any, next : any, body : any, data : User) {
+    var errors : Array<string> = [];
+
+    if (!body)
+        return next({ statusCode:404, error: true, errormessage: "Missing Data"});
+
+    if (body.username)
+        if(!(typeof(body.username) == 'string'))
+            errors.push('Invalid Username');
+        else
+            data.username = body.username;
+    
+    if (body.mail)
+        if(typeof(body.mail) != 'string' || !validateEmail(body.mail))
+            errors.push('Invalid Mail');
+        else
+            data.mail = body.mail;
+    
+    if (body.name)
+        if(!(typeof(body.name) == 'string'))
+            errors.push('Invalid Name');
+        else
+            data.name = body.name;
+
+    if (body.surname)
+        if(!(typeof(body.surname) == 'string'))
+            errors.push('Invalid Surname');
+        else
+            data.surname = body.surname;
+        
+    if (body.location)
+        if(!(typeof(body.location) == 'string'))
+            errors.push('Invalid Location');
+        else
+            data.location = body.location;
+    
+    if (errors.length)
+        return next({ statusCode:404, error: true, errormessage: "Errors: " + errors});  
 }
 
 export function isUser(arg: any): boolean {

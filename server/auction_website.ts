@@ -509,7 +509,8 @@ app.post('/users', addTokenUserInfoIfExists, (req,res,next) => {
           return next({statusCode:404, error:true, errormessage: "Mod already exists"} );
         return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
       })
-  }else{
+  }
+  else{
     if(!user.isUser(req.body))
         return next({ statusCode:404, error: true, errormessage: "Invalid Data"} );
 
@@ -555,48 +556,18 @@ app.get('/users', (req,res,next) => {
 
 });
 
-app.put('/users/:id', auth, (req,res,next)=>{
+app.put('/users', auth, (req,res,next)=>{
   var body = req.body;
-  user.getModel().findById( req.params.id ).then( (user)=> {
+  user.getModel().findById( req.user.id ).then( (user)=> {
     return user;
   }).then((data)=>{
-    if(req.user.mod && !req.user.validated){
-      console.log("mod-non -valid")
+    
+    if(req.user.mod && !req.user.validated)
+      user.validateMod (req, res, next, body, data);
 
-      if( !user.isUser(body))
-      return next({ statusCode:404, error: true, errormessage: "Invalid Data"} );
-
-      if( !body.password )
-      return next({ statusCode:404, error: true, errormessage: "Password field missing"} );
-
-      data.setPassword( body.password );
-
-      data.username = body.username;
-      data.name = body.name;
-      data.surname = body.surname;
-      data.location = body.location;
-      data.mail = body.mail;
-      data.validateUser();
-
-    }else{
-      if( !user.isCorrectUpdate(body))
-        return next({ statusCode:404, error: true, errormessage: "Invalid Data"} );
-
-      if(req.body.password)
-        data.setPassword( req.body.password );
-    }
-
-    /*user.getModel().findByIdAndUpdate(req.user.id, data, function(err){
-      if(err)
-        return next({ statusCode:404, error: true, errormessage: "DB error: "+err });
-      else{
-        console.log("Database Update");
-        return res.status(200).json( {error:false, errormessage:""} );
-      }
-    }).catch( (reason) => {
-    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-  });*/
-  
+    else
+      user.updateUser(req, res, next, body, data)
+      
     data.save().then( (data) => {
       return res.status(200).json({ error: false, errormessage: "", id: data._id });
     }).catch( (reason) => {
