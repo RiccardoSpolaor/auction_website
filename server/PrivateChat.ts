@@ -1,13 +1,13 @@
 import mongoose = require('mongoose');
-import {PublicMessage} from './PublicMessage';
-import * as publicMessage from './PublicMessage';
+import {Message} from './Message';
+import * as message from './Message';
 
 export interface PrivateChat extends mongoose.Document {
     //readonly _id: mongoose.Schema.Types.ObjectId,
     insertion_id: string,
     insertionist: string,
     sender: string,
-    messages: [PublicMessage]
+    messages: [Message]
 }
 
 // User defined type guard
@@ -68,7 +68,7 @@ var privateChatSchema = new mongoose.Schema( {
         immutable: true
     },
     messages: {
-        type: [publicMessage.getSchema()], 
+        type: [message.getSchema()], 
         required: true
     }
 })

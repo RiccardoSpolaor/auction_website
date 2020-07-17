@@ -25,8 +25,10 @@
  *     /insertions/:id                    -                GET         Gets a book auction by id
  *     /insertions/:id                    -                DELETE      Deletes a book auction by id, can just be done by a mod
  *     /insertions/:id/content            -                PUT         Edits an auction content, can be done by the user who made it or the mod
- *     /insertions/:id/messages           -                PUT         Every user can write a new public_message.
+ *     /insertions/:id/public_messages    -                PUT         Every user can write a new public_message.
  *     /insertions/:id/price              -                PUT         Every user can post a new price offer.
+ *
+ *     /insertions/:id/public_messages/:m_id     -         PUT         Posts an answer to a message
  *
  *     /private_chat                      -                GET         Returns all the private chats of the current user where he is either the sender or the receiver
  *     /private_chat                      -                POST        Create a new private chat where the sender is the current user and the receiver (è quello dell'nserzione visualizzata al momento e lo stesso vale per l'id )
@@ -42,6 +44,8 @@
  *
  *     /users/mods                        -                POST        Add a new mod user
  *     /users/students                    -                POST        Add a new student user
+ *
+ *     /users/stats                       -                GET         Returns the current user stats
  *
  *
  *     /login                             -                POST        Login an existing user, returning a JWT
@@ -97,7 +101,7 @@ const colors = require("colors");
 colors.enabled = true;
 const mongoose = require("mongoose");
 const insertion = require("./Insertion");
-const public_message = require("./PublicMessage");
+const message = require("./Message");
 const private_chat = require("./PrivateChat");
 const user = require("./User");
 const express = require("express");
@@ -114,9 +118,7 @@ function addTokenUserInfoIfExists(req, res, next) {
     // Gather the jwt access token from the request header
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    console.log("fuori");
     if (token == null) {
-        console.log("dentro");
         next();
         //return res.sendStatus(401) // if there isn't any token
     }
@@ -273,16 +275,39 @@ app.put('/insertions/:id/content', auth, (req, res, next) => {
         return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
     });
 });
-app.put('/insertions/:id/messages', auth, (req, res, next) => {
+app.put('/insertions/:id/public_messages', auth, (req, res, next) => {
     var body = req.body;
     insertion.getModel().findById(req.params.id).then((insertion) => {
         return insertion;
     }).then((data) => {
         body.timestamp = new Date();
         body.author = req.user.id;
-        if (public_message.isPublicMessage(body)) {
-            var m = public_message.newMessage(body);
+        if (message.isMessage(body)) {
+            var m = message.newMessage(body);
             data.messages.push(m);
+            data.save().then((data) => {
+                return res.status(200).json({ error: false, errormessage: "", id: data._id });
+            }).catch((reason) => {
+                return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason.errmsg });
+            });
+        }
+        else
+            return next({ statusCode: 404, error: true, errormessage: "Data is not a valid Message" });
+    }).catch((reason) => {
+        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
+    });
+});
+app.put('/insertions/:id/public_messages/:m_id', auth, (req, res, next) => {
+    var body = req.body;
+    insertion.getModel().findById(req.params.id).then((data) => {
+        body.timestamp = new Date();
+        body.author = req.user.id;
+        if (message.isMessage(body)) {
+            var m = message.newMessage(body);
+            data.messages.find((info) => {
+                info._id == req.params.m_id;
+                return info;
+            }).responses.push(m);
             data.save().then((data) => {
                 return res.status(200).json({ error: false, errormessage: "", id: data._id });
             }).catch((reason) => {
@@ -332,7 +357,7 @@ app.post("/private_chat", auth, (req, res, next) => {
                 return insertion;
             }).then((data) => {
                 var m = { content: body.message, author: req.user.id, timestamp: new Date() };
-                if (public_message.isPublicMessage(m)) {
+                if (message.isMessage(m)) {
                     var messages = [m];
                     var chat = { insertion_id: data.id, insertionist: data.insertionist.toString(), sender: req.user.id, messages: messages };
                     if (private_chat.isPrivateChat(chat)) {
@@ -373,8 +398,8 @@ app.put("/private_chat/:id", auth, (req, res, next) => {
         if (data.sender == req.user.id || data.insertionist == req.user.id) {
             body.timestamp = new Date();
             body.author = req.user.id;
-            if (public_message.isPublicMessage(body)) {
-                var m = public_message.newMessage(body);
+            if (message.isMessage(body)) {
+                var m = message.newMessage(body);
                 data.messages.push(m);
                 data.save().then((data) => {
                     return res.status(200).json({ error: false, errormessage: "", id: data._id });
@@ -499,6 +524,30 @@ app.delete('/users/:id', auth, (req, res, next) => {
         return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
     });
 });
+/*****************************************DA PROVARE***************************************/
+app.get('/users/stats', auth, (req, res, next) => {
+    if (req.user.mod) {
+        var active_insertion_list = insertion.getModel().countDocuments({ closed: { $ne: true } });
+        var completed_insertion_list = insertion.getModel().countDocuments({ closed: { $eq: true } }).where('current_price').gte('reserve_price');
+        var active_insertion_list = insertion.getModel().countDocuments({ closed: { $eq: true } }).where('current_price').lt('reserve_price');
+    }
+    else {
+        var user_insertion_list = insertion.getModel().find({ insertionist: { $eq: req.user.id } });
+        /*var user_participation_list = insertion.getModel().find({current_winner: { $eq: req.user.id }});*/
+        var user_winner_list = insertion.getModel().find({ $and: [{ insertionist: { $eq: req.user.id } }, { closed: { $eq: true } }] });
+        Promise.all([user_insertion_list, /*var user_participation_list,*/ user_winner_list]).then(function (result) {
+            var obj = {
+                insertion_list: result[0],
+                /*participation_list: result[1],*/
+                winner_list: result[1]
+            };
+            return res.status(200).json(obj);
+        })
+            .catch(function (reason) {
+            return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
+        });
+    }
+});
 // Login endpoint uses passport middleware to check
 // user credentials before generating a new JWT
 app.get("/login", passport.authenticate('basic', { session: false }), (req, res, next) => {
@@ -573,7 +622,7 @@ mongoose.connect('mongodb://localhost:27017/auction_website').then(function onco
                     edition: 3,
                     faculty: "informatica",
                     university: "Ca Foscari",
-                    messages: null,
+                    messages: [],
                     insertion_timestamp: new Date(),
                     insertionist: u.id,
                     reserve_price: 10,
@@ -619,8 +668,12 @@ mongoose.connect('mongodb://localhost:27017/auction_website').then(function onco
         server.listen(8080, () => console.log("HTTP Server started on port 8080"));
         setInterval(function () {
             insertion.getModel().find({ $and: [{ expire_date: { $lte: new Date() } }, { closed: { $ne: true } }] }, { messages: 0, reserve_price: 0 }).sort({ insertion_timestamp: -1 }).then((documents) => {
-                // Notify all socket.io clients
-                ios.emit('broadcast', "ciao");
+                /*var response = []
+                 for(var i in documents){
+                   response.push(new AuctionEnded(i));
+                 }
+                                 // Notify all socket.io clients*/
+                ios.emit('broadcast', { data: 'hey', ciao: 'ciao' });
             }).catch((ignore) => {
                 console.log(ignore);
             });

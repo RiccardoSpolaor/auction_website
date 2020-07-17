@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getModel = exports.getSchema = exports.isPrivateChat = void 0;
 const mongoose = require("mongoose");
-const publicMessage = require("./PublicMessage");
+const message = require("./Message");
 // User defined type guard
 // Type checking cannot be performed during the execution (we don't have the Message interface anyway)
 // but we can create a function to check if the supplied parameter is compatible with a given type
@@ -57,7 +57,7 @@ var privateChatSchema = new mongoose.Schema({
         immutable: true
     },
     messages: {
-        type: [publicMessage.getSchema()],
+        type: [message.getSchema()],
         required: true
     }
 });

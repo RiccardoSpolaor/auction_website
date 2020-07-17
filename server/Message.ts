@@ -1,9 +1,15 @@
 import mongoose = require('mongoose');
 
-export interface PublicMessage extends mongoose.Document {
+export interface Message extends mongoose.Document {
     content: string,
     author: string,
     timestamp: Date,
+    responses: [{
+        content: string,
+        author: string,
+        timestamp: Date
+    }],
+    private: false
 }
 
 // User defined type guard
@@ -20,7 +26,7 @@ export interface PublicMessage extends mongoose.Document {
 //
 // Mongoose Schema
 
-var publicMessageSchema = new mongoose.Schema( {
+var messageSchema = new mongoose.Schema( {
     content: {
         type: [mongoose.SchemaTypes.String],
         required: true
@@ -33,13 +39,33 @@ var publicMessageSchema = new mongoose.Schema( {
     timestamp: {
         type: mongoose.SchemaTypes.Date,
         required: true
-    }
+    },
+    responses: [{
+        content: {
+            type: [mongoose.SchemaTypes.String],
+            required: true
+        },
+        author: {
+            type: mongoose.SchemaTypes.ObjectId, 
+            ref: 'User',
+            required: true
+        },
+        timestamp: {
+            type: mongoose.SchemaTypes.Date,
+            required: true
+        }
+    }],
+    private: {
+        type: mongoose.SchemaTypes.Boolean,
+        required: true,
+        default: false
+    },
 })
 
-export function getSchema() { return publicMessageSchema; }
+export function getSchema() { return messageSchema; }
 
 
-export function isPublicMessage(arg: any): arg is PublicMessage {
+export function isMessage(arg: any): arg is Message {
     return arg && arg.content && typeof(arg.content) == 'string' 
                && arg.author && typeof(arg.author) == 'string' 
                && arg.timestamp && arg.timestamp instanceof Date 
@@ -50,15 +76,15 @@ export function isPublicMessage(arg: any): arg is PublicMessage {
 
 
 // Mongoose Model
-var publicMessageModel;  // This is not exposed outside the model
-export function getModel() : mongoose.Model< PublicMessage > { // Return Model as singleton
-    if( !publicMessageModel ) {
-        publicMessageModel = mongoose.model('PublicMessage', getSchema() )
+var messageModel;  // This is not exposed outside the model
+export function getModel() : mongoose.Model< Message > { // Return Model as singleton
+    if( !messageModel ) {
+        messageModel = mongoose.model('Message', getSchema() )
     }
-    return publicMessageModel;
+    return messageModel;
 }
 
-export function newMessage( data ): PublicMessage {
+export function newMessage( data ): Message {
     var messagemodel = getModel();
     var message = new messagemodel( data );
 

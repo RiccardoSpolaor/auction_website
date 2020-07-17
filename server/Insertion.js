@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getModel = exports.getSchema = exports.isValidUpdate = exports.isInsertion = void 0;
 const mongoose = require("mongoose");
-const publicMessage = require("./PublicMessage");
+const message = require("./Message");
 // User defined type guard
 // Type checking cannot be performed during the execution (we don't have the Message interface anyway)
 // but we can create a function to check if the supplied parameter is compatible with a given type
@@ -85,7 +85,7 @@ var insertionSchema = new mongoose.Schema({
         required: true
     },
     messages: {
-        type: [publicMessage.getSchema()],
+        type: [message.getSchema()],
         required: false
     },
     insertion_timestamp: {
@@ -126,13 +126,6 @@ var insertionSchema = new mongoose.Schema({
         default: false
     },
 });
-/*function isClosed(expire_date: Date){
-    function fun(){
-        if(expire_date <= new Date())
-            clearInterval(myVar);
-    }
-    var myVar = setInterval(fun, 3000);
-}*/
 function getSchema() { return insertionSchema; }
 exports.getSchema = getSchema;
 // Mongoose Model

@@ -1,6 +1,6 @@
 import mongoose = require('mongoose');
-import {PublicMessage} from './PublicMessage';
-import * as publicMessage from './PublicMessage';
+import {Message} from './Message';
+import * as message from './Message';
 
 export interface Insertion extends mongoose.Document {
     //readonly _id: mongoose.Schema.Types.ObjectId,
@@ -9,7 +9,7 @@ export interface Insertion extends mongoose.Document {
     edition: number,
     faculty: string,
     university: string,
-    messages: [PublicMessage],
+    messages: [Message],
 
     insertion_timestamp: Date,
     insertionist: string,
@@ -20,7 +20,7 @@ export interface Insertion extends mongoose.Document {
     current_winner: string,
     closed: boolean
 
-    //messages: [public_message.PublicMessage]
+    //messages: [message.Message]
 }
 
 // User defined type guard
@@ -109,7 +109,7 @@ var insertionSchema = new mongoose.Schema( {
         required: true
     },
     messages: {
-        type: [publicMessage.getSchema()], 
+        type: [message.getSchema()],
         required: false
     },
     insertion_timestamp: {

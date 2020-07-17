@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.newMessage = exports.getModel = exports.isPublicMessage = exports.getSchema = void 0;
+exports.newMessage = exports.getModel = exports.isMessage = exports.getSchema = void 0;
 const mongoose = require("mongoose");
 // User defined type guard
 // Type checking cannot be performed during the execution (we don't have the Message interface anyway)
@@ -14,7 +14,7 @@ const mongoose = require("mongoose");
 // of correctly matching the Message interface with the messageSchema 
 //
 // Mongoose Schema
-var publicMessageSchema = new mongoose.Schema({
+var messageSchema = new mongoose.Schema({
     content: {
         type: [mongoose.SchemaTypes.String],
         required: true
@@ -27,23 +27,43 @@ var publicMessageSchema = new mongoose.Schema({
     timestamp: {
         type: mongoose.SchemaTypes.Date,
         required: true
-    }
+    },
+    responses: [{
+            content: {
+                type: [mongoose.SchemaTypes.String],
+                required: true
+            },
+            author: {
+                type: mongoose.SchemaTypes.ObjectId,
+                ref: 'User',
+                required: true
+            },
+            timestamp: {
+                type: mongoose.SchemaTypes.Date,
+                required: true
+            }
+        }],
+    private: {
+        type: mongoose.SchemaTypes.Boolean,
+        required: true,
+        default: false
+    },
 });
-function getSchema() { return publicMessageSchema; }
+function getSchema() { return messageSchema; }
 exports.getSchema = getSchema;
-function isPublicMessage(arg) {
+function isMessage(arg) {
     return arg && arg.content && typeof (arg.content) == 'string'
         && arg.author && typeof (arg.author) == 'string'
         && arg.timestamp && arg.timestamp instanceof Date;
 }
-exports.isPublicMessage = isPublicMessage;
+exports.isMessage = isMessage;
 // Mongoose Model
-var publicMessageModel; // This is not exposed outside the model
+var messageModel; // This is not exposed outside the model
 function getModel() {
-    if (!publicMessageModel) {
-        publicMessageModel = mongoose.model('PublicMessage', getSchema());
+    if (!messageModel) {
+        messageModel = mongoose.model('Message', getSchema());
     }
-    return publicMessageModel;
+    return messageModel;
 }
 exports.getModel = getModel;
 function newMessage(data) {
@@ -52,4 +72,4 @@ function newMessage(data) {
     return message;
 }
 exports.newMessage = newMessage;
-//# sourceMappingURL=PublicMessage.js.map
+//# sourceMappingURL=Message.js.map
