@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getModel = exports.getSchema = exports.isValidUpdate = exports.isInsertion = void 0;
+exports.getModel = exports.getSchema = void 0;
 const mongoose = require("mongoose");
 const message = require("./Message");
 // User defined type guard
@@ -9,52 +9,56 @@ const message = require("./Message");
 //
 // A better approach is to use JSON schema
 //
-function isInsertion(arg) {
-    return arg && arg.title && typeof (arg.title) == 'string'
-        && arg.authors && Array.isArray(arg.authors) && arg.authors.length
-        && arg.edition != undefined && typeof (arg.edition) == 'number' && arg.edition >= 0
-        && arg.faculty && typeof (arg.faculty) == 'string'
-        && arg.university && typeof (arg.university) == 'string'
-        && arg.insertion_timestamp && arg.insertion_timestamp instanceof Date
-        && arg.insertionist && typeof (arg.insertionist) == 'string'
-        && arg.start_price != undefined && typeof (arg.start_price) == 'number' && arg.start_price >= 0
-        && arg.reserve_price != undefined && typeof (arg.reserve_price) == 'number' && arg.reserve_price > arg.start_price
-        && arg.expire_date && arg.expire_date instanceof Date && arg.expire_date > arg.insertion_timestamp;
+/*
+export function isInsertion(arg: any): arg is Insertion {
+    return arg && arg.title && typeof(arg.title) == 'string'
+               && arg.authors && Array.isArray(arg.authors) && arg.authors.length
+               && arg.edition!=undefined && typeof(arg.edition) == 'number' && arg.edition >= 0
+               && arg.faculty && typeof(arg.faculty) == 'string'
+               && arg.university && typeof(arg.university) == 'string'
+               && arg.insertion_timestamp && arg.insertion_timestamp instanceof Date
+               && arg.insertionist && typeof(arg.insertionist) == 'string'
+               && arg.start_price!=undefined && typeof(arg.start_price) == 'number' && arg.start_price >= 0
+               && arg.reserve_price!=undefined && typeof(arg.reserve_price) == 'number' && arg.reserve_price > arg.start_price
+               && arg.expire_date && arg.expire_date instanceof Date && arg.expire_date > arg.insertion_timestamp
 }
-exports.isInsertion = isInsertion;
-function areReserveAndStartPriceCompatible(body_start, body_reserve, db_start, db_reserve) {
-    if (body_start != undefined && body_reserve != undefined) {
-        if (typeof (body_start) == 'number' && typeof (body_reserve) == 'number')
+*/
+/*
+function areReserveAndStartPriceCompatible( body_start : any, body_reserve : any, db_start : number, db_reserve : number) {
+    if (body_start!=undefined && body_reserve!=undefined){
+        if(typeof(body_start) == 'number' && typeof(body_reserve) == 'number')
             return body_start < body_reserve;
         else
             return false;
     }
     if (body_start != undefined) {
-        if (typeof (body_start) == 'number')
+        if(typeof(body_start) == 'number')
             return body_start < db_reserve;
         else
             return false;
     }
     if (body_reserve != undefined) {
-        if (typeof (body_reserve) == 'number')
+        if(typeof(body_reserve) == 'number')
             return body_reserve > db_start;
         else
             return false;
     }
     return true;
 }
+*/
 /* CONTROLLARE che non metta inserzionista diverso da quello che l'ha creato, current_price, insertion_timestamp, current_winner, ecc. */
-function isValidUpdate(arg, db) {
+/*
+export function isValidUpdate(arg: any, db: Insertion): boolean {
     console.log(JSON.stringify(db));
-    return !(!arg || (arg.title && typeof (arg.title) != 'string')
-        || (arg.authors && (!Array.isArray(arg.authors) || !arg.authors.length))
-        || (arg.edition != undefined && (typeof (arg.edition) != 'number' || arg.edition < 0))
-        || (arg.faculty && typeof (arg.faculty) != 'string')
-        || !areReserveAndStartPriceCompatible(arg.start_price, arg.reserve_price, db.start_price, db.reserve_price)
-        || (arg.university && typeof (arg.university) != 'string')
-        || (arg.expire_date && (arg.expire_date instanceof Date && arg.expire_date <= db.insertion_timestamp)));
+    return !(!arg || (arg.title && typeof(arg.title) != 'string')
+               || (arg.authors && (!Array.isArray(arg.authors) || !arg.authors.length))
+               || (arg.edition!=undefined && (typeof(arg.edition) != 'number' || arg.edition < 0))
+               || (arg.faculty && typeof(arg.faculty) != 'string')
+               || !areReserveAndStartPriceCompatible(arg.start_price, arg.reserve_price, db.start_price, db.reserve_price)
+               || (arg.university && typeof(arg.university) != 'string')
+               || (arg.expire_date && (arg.expire_date !instanceof Date && arg.expire_date <= db.insertion_timestamp)))
 }
-exports.isValidUpdate = isValidUpdate;
+*/
 // We use Mongoose to perform the ODM between our application and
 // mongodb. To do that we need to create a Schema and an associated
 // data model that will be mapped into a mongodb collection
@@ -125,6 +129,21 @@ var insertionSchema = new mongoose.Schema({
         required: false,
         default: false
     },
+    history: [{
+            user: {
+                type: mongoose.SchemaTypes.ObjectId,
+                ref: 'User',
+                required: true
+            },
+            timestamp: {
+                type: mongoose.SchemaTypes.Date,
+                required: true
+            },
+            price: {
+                type: mongoose.SchemaTypes.Number,
+                required: true
+            },
+        }]
 });
 function getSchema() { return insertionSchema; }
 exports.getSchema = getSchema;

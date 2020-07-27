@@ -109,6 +109,10 @@ import mongoose = require('mongoose');
 import {Insertion} from './Insertion';
 import * as insertion from './Insertion';
 
+import * as insertionOperations from './RoutingOperations/InsertionOperations'
+import * as userOperations from './RoutingOperations/UserOperations'
+import * as generalOperations from './RoutingOperations/GeneralOperations'
+
 import {Message} from './Message';
 import * as message from './Message';
 
@@ -134,7 +138,7 @@ import io = require('socket.io');               // Socket.io websocket library
 import { report } from 'process';
 import { AuctionEnded, IosObject } from './IosObject';
 
-
+/*
 function addTokenUserInfoIfExists(req, res, next) {
   // Gather the jwt access token from the request header
   const authHeader = req.headers['authorization']
@@ -151,6 +155,7 @@ function addTokenUserInfoIfExists(req, res, next) {
     })
   }
 }
+*/
 
 declare global {
   namespace Express {
@@ -175,8 +180,10 @@ var app = express();
 // If the token is valid, req.user will be set with the JSON object 
 // decoded to be used by later middleware for authorization and access control.
 //
-var auth = jwt( {secret: process.env.JWT_SECRET} );
 
+/*
+var auth = jwt( {secret: process.env.JWT_SECRET} );
+*/
 
 app.use( cors() );
 
@@ -196,242 +203,32 @@ app.get("/", (req,res) => {
 });
 
 
-function findFilteredInsertions(req,res,next, data){
-  var filter = {};
-  var expressions = [];
-
-  if( req.query.title ) {
-    expressions.push ({ title: { $regex: req.query.title, $options: "i" }  });
-  } 
-  if( req.query.faculty ) {
-    expressions.push ({ faculty: { $regex: req.query.faculty, $options: "i" }  });
-  }
-  if( req.query.university ) {
-    expressions.push ({ university: { $regex: req.query.university, $options: "i" }  });
-  }
-  if( req.query.price ) {
-    expressions.push ({ current_price: { $eq: Number(req.query.price) }  });
-  }
-  if(data){
-    expressions.push ({ insertionist: {$in: data }});
-  }
-
-  filter = expressions.length?{$and: expressions}:{};
-
-  console.log("Using filter: " + JSON.stringify(filter) );
-  console.log(" Using query: " + JSON.stringify(req.query) );
-
-  insertion.getModel().find( filter , {messages : 0, reserve_price : 0} ).sort({insertion_timestamp:-1}).then( (documents) => {
-    return res.status(200).json( documents );
-  }).catch( (reason) => {
-    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-  })
-}
-
-app.get("/insertions", (req,res,next) => {
-
-  var userfilter = {};
-  var userexpressions = [];
-
-  if( req.query.location ) {
-    userexpressions.push ({ location: { $regex: req.query.location, $options: "i" }  });
-  }
-  console.log(req.query.user);
-  console.log(typeof(req.query.user));
-  if( req.query.user ) {
-    userexpressions.push ({ $or: [{ username: {$regex: req.query.user, $options: "i"} }, { mail: {$regex: req.query.user, $options: "i"} }]});
-  }
-
-  userfilter = userexpressions.length?{$and: userexpressions}:null;
-
-  if(userfilter){
-     user.getModel().find( userfilter ).select("_id").then( (documents) => {
-      return documents;
-    }).then( (data) => {
-      findFilteredInsertions(req,res,next,data);
-    }).catch( (reason) => {
-      return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-    })
-  }else{
-    findFilteredInsertions(req,res,next,null);
-  }
-});
-
-app.post( "/insertions", auth, (req,res,next) => {
-
-  console.log("Received: " + JSON.stringify(req.body) );
-
-  // Check mod role
-  if( user.newUser(req.user).hasModRole() ) {
-    return next({ statusCode:404, error: true, errormessage: "Unauthorized: MOds can't create new Insertions"} );
-  }
-
-  var recinsertion = req.body;
-  recinsertion.expire_date = new Date(recinsertion.expire_date);
-  recinsertion.insertion_timestamp = new Date();
-  recinsertion.insertionist = req.user.id;
-  //recinsertion.current_winner = null;
-
-  if( insertion.isInsertion( recinsertion )) {
-    insertion.getModel().create( recinsertion ).then( ( data ) => {
-      // Notify all socket.io clients
-      /*ios.emit('broadcast', data );*/
-
-      return res.status(200).json({ error: false, errormessage: "", id: data._id });
-    }).catch((reason) => {
-      return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-    } )
-
-  } else {
-    return next({ statusCode:404, error: true, errormessage: "Data is not a valid Insertion" });
-  }
-
-});
-
-app.get("/insertions/:id", addTokenUserInfoIfExists, (req,res,next)=> { 
-
-   insertion.getModel().findById( req.params.id ).then( (insertion)=> {
-
-    if(!req.user || (!req.user.mod && (req.user.id != insertion.insertionist)))
-      insertion.reserve_price = undefined;
-
-    return res.status(200).json( insertion );
-  }).catch( (reason) => {
-    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-  })
-});
+app.get("/insertions", insertionOperations.getInsertions);
 
 
-app.delete( '/insertions/:id', auth, (req,res,next) => {
-
-  // Check mod role
-  if( !user.newUser(req.user).hasModRole() ) {
-    return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not a moderator"} );
-  }
-  
-  // req.params.id contains the :id URL component
-
-  insertion.getModel().findByIdAndDelete(req.params.id).then( ()=> {
-      return res.status(200).json( {error:false, errormessage:""} );
-  }).catch( (reason)=> {
-      return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-  })
-
-});
-
-app.put( '/insertions/:id/content', auth, (req,res,next) =>{
-
-  var body = req.body;
-  insertion.getModel().findById( req.params.id ).then( (insertion)=> {
-      return insertion;
-  }).then((data)=>{
-    if( !user.newUser(req.user).hasModRole() && req.user.id != data.insertionist) {
-      return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not a moderator"} );
-    }
-    if(body.expire_date)
-      body.expire_date = new Date(body.expire_date);
-
-    if(insertion.isValidUpdate( body,data)) {
-      insertion.getModel().findByIdAndUpdate(data.id, body, function(err){
-        if(err)
-          return next({ statusCode:404, error: true, errormessage: "DB error: "+err });
-        else{
-          console.log("Database Update");
-          return res.status(200).json( {error:false, errormessage:""} );
-        }
-      });
-    }else return next({ statusCode:404, error: true, errormessage: "Data is not a valid Insertion" });
-
-  }).catch( (reason) => {
-    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-  })
-});
-
-app.put( '/insertions/:id/public_messages', auth, (req,res,next) =>{
-
-  var body = req.body;
-  insertion.getModel().findById( req.params.id ).then( (insertion)=> {
-      return insertion;
-  }).then((data)=>{
-
-      body.timestamp = new Date()
-      body.author = req.user.id
-
-      if(message.isMessage(body)){
-        var m = message.newMessage(body);
-        data.messages.push(m);
-
-        data.save().then( (data) =>  {
-          return res.status(200).json({ error: false, errormessage: "", id: data._id });
-        }).catch( (reason) => {
-          return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
-        })
-    }else
-      return next({ statusCode:404, error: true, errormessage: "Data is not a valid Message" });
+app.post( "/insertions", generalOperations.auth, insertionOperations.postInsertion);
 
 
-  }).catch( (reason) => {
-    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-  })
-});
-
-app.put( '/insertions/:id/public_messages/:m_id', auth, (req,res,next) =>{
-
-  var body = req.body;
-  insertion.getModel().findById( req.params.id ).then( (data)=> {
-      body.timestamp = new Date()
-      body.author = req.user.id
-
-      if(message.isMessage(body)){
-        var m = message.newMessage(body);
-
-        data.messages.find((info) => {
-          info._id == req.params.m_id
-          return info
-        }).responses.push(m)
-
-        data.save().then( (data) =>  {
-          return res.status(200).json({ error: false, errormessage: "", id: data._id });
-        }).catch( (reason) => {
-          return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
-        })
-    }else
-      return next({ statusCode:404, error: true, errormessage: "Data is not a valid Message" });
-  }).catch( (reason) => {
-    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-  })
-});
-
-app.put( '/insertions/:id/price', auth, (req,res,next) =>{
-
-  var body = req.body;
-  insertion.getModel().findById( req.params.id ).then( (insertion)=> {
-      return insertion;
-  }).then((data)=>{
-    if(new Date() >= new Date(data.expire_date))
-        return next({ statusCode:500, error: true, errormessage: "Insertion is already closed"} );
-
-      if(body.current_price!=undefined && typeof body.current_price == 'number' && 
-        (body.current_price > data.start_price) &&
-        (data.current_price == undefined || data.current_price < body.current_price)) {
-            data.current_price = body.current_price;
-            data.current_winner = req.user.id;
-            data.save().then( (data) =>  {
-              return res.status(200).json({ error: false, errormessage: "", id: data._id });
-        }).catch( (reason) => {
-          return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
-        })
-      }else
-          return next({ statusCode:404, error: true, errormessage: "Invalid Data"} );
+app.get("/insertions/:id", generalOperations.addTokenUserInfoIfExists, insertionOperations.getInsertionById);
 
 
-  }).catch( (reason) => {
-    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-  })
-});
+app.delete( '/insertions/:id', generalOperations.auth, insertionOperations.deleteInsertionById);
+
+
+app.put( '/insertions/:id/content', generalOperations.auth, insertionOperations.putInsertionContentById);
+
+
+app.put( '/insertions/:id/public_messages', generalOperations.auth, insertionOperations.putInsertionPublicMessageById);
+
+
+app.put( '/insertions/:id/public_messages/:m_id', generalOperations.auth, insertionOperations.putInsertionAnswerToPublicMessageById);
+
+
+app.put( '/insertions/:id/price', generalOperations.auth, insertionOperations.putInsertionPriceById);
+
 
 /* nel body passiamo solo insertion_id e messaggio */
-app.post( "/private_chat", auth, (req,res,next) => {
+app.post( "/private_chat", generalOperations.auth, (req,res,next) => {
   var body = req.body;
   console.log(req.user.id)
   private_chat.getModel().find({$and: [{insertion_id: body.insertion_id}, {sender: req.user.id}]}).then((data) =>{
@@ -469,7 +266,7 @@ app.post( "/private_chat", auth, (req,res,next) => {
   })
 });
 
-app.get("/private_chat", auth, (req,res,next)=> { 
+app.get("/private_chat", generalOperations.auth, (req,res,next)=> { 
 
   private_chat.getModel().find( {$or: [{sender: req.user.id}, {insertionist: req.user.id}]})
                                 .sort({"messages.timestamp" : -1}).then( (documents) => {
@@ -479,7 +276,7 @@ app.get("/private_chat", auth, (req,res,next)=> {
   })
 });
 
-app.put("/private_chat/:id", auth, (req,res,next)=>{
+app.put("/private_chat/:id", generalOperations.auth, (req,res,next)=>{
   var body = req.body;
   private_chat.getModel().findById(req.params.id).then( (chat)=> {
       return chat;
@@ -508,7 +305,7 @@ app.put("/private_chat/:id", auth, (req,res,next)=>{
   })
 })
 
-app.get("/private_chat/:id", auth, (req,res,next)=> { 
+app.get("/private_chat/:id", generalOperations.auth, (req,res,next)=> { 
 
   private_chat.getModel().findById( req.params.id ).then( (document) => { 
     if(document.sender == req.user.id || document.insertionist == req.user.id)
@@ -520,58 +317,11 @@ app.get("/private_chat/:id", auth, (req,res,next)=> {
   })
 });
 
-app.post('/users/mods', auth, (req,res,next) => {
 
-  if(req.user.mod){
-    if(!user.isMod(req.body))
-      return next({ statusCode:404, error: true, errormessage: "Invalid Moderator Data"} );
+app.post('/users/mods', generalOperations.auth, userOperations.postMod);
 
-      var u = user.newUser(req.body);
 
-      if( !req.body.password ) {
-        return next({ statusCode:404, error: true, errormessage: "Password field missing"} );
-      }
-      u.setPassword( req.body.password );
-
-      u.setMod();
-
-      u.save().then( (data) => {
-        return res.status(200).json({ error: false, errormessage: "", id: data._id });
-      }).catch( (reason) => {
-        if( reason.code === 11000 )
-          return next({statusCode:404, error:true, errormessage: "Mod already exists"} );
-        return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
-      })
-  }else
-    return next({ statusCode:404, error: true, errormessage: "Just a moderator can add a new moderator" });
-});
-
-app.post('/users/students', addTokenUserInfoIfExists, (req,res,next) => {
-
-  if(!req.user){
-    if(!user.isUser(req.body))
-        return next({ statusCode:404, error: true, errormessage: "Invalid Data"} );
-
-    var u = user.newUser(req.body);
-
-    if( !req.body.password ) {
-      return next({ statusCode:404, error: true, errormessage: "Password field missing"} );
-    }
-    u.setPassword( req.body.password );
-
-    u.validateUser();
-
-    u.save().then( (data) => {
-      return res.status(200).json({ error: false, errormessage: "", id: data._id });
-    }).catch( (reason) => {
-      if( reason.code === 11000 )
-        return next({statusCode:404, error:true, errormessage: "User already exists"} );
-      return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
-    })
-  }else
-    return next({ statusCode:404, error: true, errormessage: "You can't sign up a new user while you are logged in"});
-
-});
+app.post('/users/students', generalOperations.addTokenUserInfoIfExists, userOperations.postStudent);
 
 /*app.get('/users/:mail', auth, (req,res,next) => {
 
@@ -584,94 +334,18 @@ app.post('/users/students', addTokenUserInfoIfExists, (req,res,next) => {
 
 });*/
 
-app.get('/users', (req,res,next) => {
+app.get('/users', userOperations.getUsers);
 
-  // req.params.mail contains the :mail URL component
-  user.getModel().find({},{digest: 0, salt:0 }).then( (user)=> {
-    return res.status(200).json( user );
-  }).catch( (reason) => {
-    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-  })
 
-});
+app.put('/users', generalOperations.auth, userOperations.putUser);
 
-app.put('/users', auth, (req,res,next)=>{
-  var body = req.body;
-  user.getModel().findById( req.user.id ).then( (user)=> {
-    return user;
-  }).then((data)=>{
-    
-    if(req.user.mod && !req.user.validated)
-      user.validateMod (req, res, next, body, data);
 
-    else
-      user.updateUser(req, res, next, body, data)
-      
-    data.save().then( (data) => {
-      return res.status(200).json({ error: false, errormessage: "", id: data._id });
-    }).catch( (reason) => {
-      if( reason.code === 11000 )
-        return next({statusCode:404, error:true, errormessage: "User already exists"} );
-      return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
-    })
-  })
-});
-
-app.delete( '/users/:id', auth, (req,res,next) => {
-
-  // Check mod role
-  if( !user.newUser(req.user).hasModRole() ) {
-    return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not an moderator"} );
-  }
-  
-  // req.params.id contains the :id URL component
-
-  user.getModel().findById(req.params.id).then( (data)=> {
-    if(!data.hasModRole()){
-      data.remove().then(()=>{
-        return res.status(200).json( {error:false, errormessage:""} );
-      }).catch( (reason)=> {
-        return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-      });
-    }else
-      return next({ statusCode:404, error: true, errormessage: "Unauthorized: moderator can't be deleted"} )
-  }).catch( (reason)=> {
-      return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-  })
-});
+app.delete( '/users/:id', generalOperations.auth, userOperations.deleteUserById);
 
 
 
 /*****************************************DA PROVARE***************************************/ 
-app.get('/users/stats', auth, (req,res,next) => {
-
-  if (req.user.mod) {
-    var active_insertion_list = insertion.getModel().countDocuments({closed: { $ne: true }});
-    var completed_insertion_list = insertion.getModel().countDocuments(
-      {closed: { $eq: true }}
-      ).where('current_price').gte('reserve_price');
-    var active_insertion_list = insertion.getModel().countDocuments(
-      {closed: { $eq: true }}
-      ).where('current_price').lt('reserve_price');
-
-  } else {
-    var user_insertion_list = insertion.getModel().find({insertionist: { $eq: req.user.id }});
-    /*var user_participation_list = insertion.getModel().find({current_winner: { $eq: req.user.id }});*/
-    var user_winner_list = insertion.getModel().find({ $and: [{insertionist: { $eq: req.user.id }}, {closed: { $eq: true }} ]});
-
-    Promise.all([user_insertion_list,/*var user_participation_list,*/ user_winner_list]).then(function(result) {
-      var obj = {
-        insertion_list: result[0],
-        /*participation_list: result[1],*/
-        winner_list: result[1]
-       }
-      return res.status(200).json( obj );
-    })
-    .catch(function(reason) {
-      return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-    });
-  }
-});
+app.get('/users/stats', generalOperations.auth, userOperations.getUserStats );
 
 // Login endpoint uses passport middleware to check
 // user credentials before generating a new JWT
@@ -759,6 +433,7 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
         } );
         u.setMod();
         u.setPassword("mod");
+        u.validateUser();
         u.save().then( ()=> {
           console.log("Moderator user created");
         
@@ -775,6 +450,7 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
                           faculty: "informatica",
                           university: "Ca Foscari",
                           messages: [],
+                          history: [],
                           insertion_timestamp: new Date(),
                           insertionist: u.id,
                           reserve_price: 10,

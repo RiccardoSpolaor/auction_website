@@ -18,7 +18,12 @@ export interface Insertion extends mongoose.Document {
     current_price: number,
     expire_date: Date,
     current_winner: string,
-    closed: boolean
+    closed: boolean,
+    history: [{
+        user: string,
+        timestamp: Date,
+        price: Number
+    }],
 
     //messages: [message.Message]
 }
@@ -29,6 +34,8 @@ export interface Insertion extends mongoose.Document {
 //
 // A better approach is to use JSON schema
 //
+
+/*
 export function isInsertion(arg: any): arg is Insertion {
     return arg && arg.title && typeof(arg.title) == 'string' 
                && arg.authors && Array.isArray(arg.authors) && arg.authors.length
@@ -41,7 +48,9 @@ export function isInsertion(arg: any): arg is Insertion {
                && arg.reserve_price!=undefined && typeof(arg.reserve_price) == 'number' && arg.reserve_price > arg.start_price
                && arg.expire_date && arg.expire_date instanceof Date && arg.expire_date > arg.insertion_timestamp
 }
+*/
 
+/*
 function areReserveAndStartPriceCompatible( body_start : any, body_reserve : any, db_start : number, db_reserve : number) {
     if (body_start!=undefined && body_reserve!=undefined){
         if(typeof(body_start) == 'number' && typeof(body_reserve) == 'number')
@@ -63,9 +72,9 @@ function areReserveAndStartPriceCompatible( body_start : any, body_reserve : any
     }
     return true;
 }
-
+*/
 /* CONTROLLARE che non metta inserzionista diverso da quello che l'ha creato, current_price, insertion_timestamp, current_winner, ecc. */
-
+/*
 export function isValidUpdate(arg: any, db: Insertion): boolean {
     console.log(JSON.stringify(db));
     return !(!arg || (arg.title && typeof(arg.title) != 'string')
@@ -76,7 +85,7 @@ export function isValidUpdate(arg: any, db: Insertion): boolean {
                || (arg.university && typeof(arg.university) != 'string') 
                || (arg.expire_date && (arg.expire_date !instanceof Date && arg.expire_date <= db.insertion_timestamp)))
 }
-
+*/
 
 // We use Mongoose to perform the ODM between our application and
 // mongodb. To do that we need to create a Schema and an associated
@@ -149,6 +158,21 @@ var insertionSchema = new mongoose.Schema( {
         required: false,
         default: false
     },
+    history: [{
+        user: {
+            type: mongoose.SchemaTypes.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        timestamp: {
+            type: mongoose.SchemaTypes.Date,
+            required: true
+        },
+        price: {
+            type: mongoose.SchemaTypes.Number,
+            required: true
+        },
+    }]
 })
 
 

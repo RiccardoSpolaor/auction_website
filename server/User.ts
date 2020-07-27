@@ -126,12 +126,14 @@ export function getModel() : mongoose.Model< User >  { // Return Model as single
 }
 
 
-
+/*
 function validateEmail(email) {
     const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     return re.test(String(email).toLowerCase());
 }
+*/
 
+/*
 export function validateMod (req: any, res : any, next : any, body : any, data : User) {
     var errors : Array<string> = [];
 
@@ -168,6 +170,9 @@ export function validateMod (req: any, res : any, next : any, body : any, data :
     data.validateUser();  
 }
 
+*/
+
+/*
 export function updateUser (req: any, res : any, next : any, body : any, data : User) {
     var errors : Array<string> = [];
 
@@ -206,8 +211,8 @@ export function updateUser (req: any, res : any, next : any, body : any, data : 
     
     if (errors.length)
         return next({ statusCode:404, error: true, errormessage: "Errors: " + errors});  
-}
-
+} */
+/*
 export function isUser(arg: any): boolean {
     return arg && arg.username && typeof(arg.username) == 'string'
                && arg.name && typeof(arg.name) == 'string'
@@ -216,7 +221,8 @@ export function isUser(arg: any): boolean {
                && arg.location && typeof(arg.location) == 'string' 
                && arg.mod==undefined && arg.validated==undefined && arg.salt==undefined && arg.digest==undefined 
 }
-
+*/
+/*
 export function isCorrectUpdate(arg: any): boolean {
     return arg && (!arg.username ||  typeof(arg.username) == 'string' )
                && (!arg.name || typeof(arg.name) == 'string')
@@ -225,12 +231,15 @@ export function isCorrectUpdate(arg: any): boolean {
                && (!arg.location || typeof(arg.location) == 'string') 
                && arg.mod==undefined && arg.validated==undefined && arg.salt==undefined && arg.digest==undefined 
 }
+*/
 
+/*
 export function isMod(arg: any): boolean {
     return arg && arg.username && typeof(arg.username) == 'string'
                && arg.mail==undefined && arg.name==undefined && arg.surname==undefined && arg.location==undefined
                && arg.mod==undefined && arg.validated==undefined && arg.salt==undefined && arg.digest==undefined 
 }
+*/
 
 export function newUser( data ): User {
     var usermodel = getModel();

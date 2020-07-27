@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.newUser = exports.isMod = exports.isCorrectUpdate = exports.isUser = exports.updateUser = exports.validateMod = exports.getModel = exports.getSchema = void 0;
+exports.newUser = exports.getModel = exports.getSchema = void 0;
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 var userSchema = new mongoose.Schema({
@@ -96,29 +96,41 @@ function getModel() {
     return userModel;
 }
 exports.getModel = getModel;
+/*
 function validateEmail(email) {
     const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     return re.test(String(email).toLowerCase());
 }
-function validateMod(req, res, next, body, data) {
-    var errors = [];
+*/
+/*
+export function validateMod (req: any, res : any, next : any, body : any, data : User) {
+    var errors : Array<string> = [];
+
     if (!body)
-        return next({ statusCode: 404, error: true, errormessage: "Missing Data" });
-    if (!body.username || !(typeof (body.username) == 'string'))
+        return next({ statusCode:404, error: true, errormessage: "Missing Data"});
+
+    if (!body.username || !(typeof(body.username) == 'string'))
         errors.push('Missing or invalid Username');
-    if (!body.mail || typeof (body.mail) != 'string' || !validateEmail(body.mail))
+    
+    if (!body.mail || typeof(body.mail) != 'string' || !validateEmail(body.mail))
         errors.push('Missing or invalid Mail');
-    if (!body.password || !(typeof (body.password) == 'string'))
+    
+    if (!body.password || !(typeof(body.password) == 'string'))
         errors.push('Missing or invalid Password');
-    if (!body.name || !(typeof (body.name) == 'string'))
+    
+    if (!body.name || !(typeof(body.name) == 'string'))
         errors.push('Missing or invalid Name');
-    if (!body.surname || !(typeof (body.surname) == 'string'))
+    
+    if (!body.surname || !(typeof(body.surname) == 'string'))
         errors.push('Missing or invalid Surname');
-    if (!body.location || !(typeof (body.location) == 'string'))
+    
+    if (!body.location || !(typeof(body.location) == 'string'))
         errors.push('Missing or invalid Location');
+
     if (errors.length)
-        return next({ statusCode: 404, error: true, errormessage: "Errors: " + errors });
-    data.setPassword(body.password);
+        return next({ statusCode:404, error: true, errormessage: "Errors: " + errors});
+    
+    data.setPassword( body.password );
     data.username = body.username;
     data.name = body.name;
     data.surname = body.surname;
@@ -126,64 +138,75 @@ function validateMod(req, res, next, body, data) {
     data.mail = body.mail;
     data.validateUser();
 }
-exports.validateMod = validateMod;
-function updateUser(req, res, next, body, data) {
-    var errors = [];
+
+*/
+/*
+export function updateUser (req: any, res : any, next : any, body : any, data : User) {
+    var errors : Array<string> = [];
+
     if (!body)
-        return next({ statusCode: 404, error: true, errormessage: "Missing Data" });
+        return next({ statusCode:404, error: true, errormessage: "Missing Data"});
+
     if (body.username)
-        if (!(typeof (body.username) == 'string'))
+        if(!(typeof(body.username) == 'string'))
             errors.push('Invalid Username');
         else
             data.username = body.username;
+    
     if (body.mail)
-        if (typeof (body.mail) != 'string' || !validateEmail(body.mail))
+        if(typeof(body.mail) != 'string' || !validateEmail(body.mail))
             errors.push('Invalid Mail');
         else
             data.mail = body.mail;
+    
     if (body.name)
-        if (!(typeof (body.name) == 'string'))
+        if(!(typeof(body.name) == 'string'))
             errors.push('Invalid Name');
         else
             data.name = body.name;
+
     if (body.surname)
-        if (!(typeof (body.surname) == 'string'))
+        if(!(typeof(body.surname) == 'string'))
             errors.push('Invalid Surname');
         else
             data.surname = body.surname;
+        
     if (body.location)
-        if (!(typeof (body.location) == 'string'))
+        if(!(typeof(body.location) == 'string'))
             errors.push('Invalid Location');
         else
             data.location = body.location;
+    
     if (errors.length)
-        return next({ statusCode: 404, error: true, errormessage: "Errors: " + errors });
+        return next({ statusCode:404, error: true, errormessage: "Errors: " + errors});
+} */
+/*
+export function isUser(arg: any): boolean {
+    return arg && arg.username && typeof(arg.username) == 'string'
+               && arg.name && typeof(arg.name) == 'string'
+               && arg.surname && typeof(arg.surname) == 'string'
+               && arg.mail && typeof(arg.mail) == 'string' && validateEmail(arg.mail)
+               && arg.location && typeof(arg.location) == 'string'
+               && arg.mod==undefined && arg.validated==undefined && arg.salt==undefined && arg.digest==undefined
 }
-exports.updateUser = updateUser;
-function isUser(arg) {
-    return arg && arg.username && typeof (arg.username) == 'string'
-        && arg.name && typeof (arg.name) == 'string'
-        && arg.surname && typeof (arg.surname) == 'string'
-        && arg.mail && typeof (arg.mail) == 'string' && validateEmail(arg.mail)
-        && arg.location && typeof (arg.location) == 'string'
-        && arg.mod == undefined && arg.validated == undefined && arg.salt == undefined && arg.digest == undefined;
+*/
+/*
+export function isCorrectUpdate(arg: any): boolean {
+    return arg && (!arg.username ||  typeof(arg.username) == 'string' )
+               && (!arg.name || typeof(arg.name) == 'string')
+               && (!arg.surname || typeof(arg.surname) == 'string')
+               && (!arg.mail || (typeof(arg.mail) == 'string' && validateEmail(arg.mail)))
+               && (!arg.location || typeof(arg.location) == 'string')
+               && arg.mod==undefined && arg.validated==undefined && arg.salt==undefined && arg.digest==undefined
 }
-exports.isUser = isUser;
-function isCorrectUpdate(arg) {
-    return arg && (!arg.username || typeof (arg.username) == 'string')
-        && (!arg.name || typeof (arg.name) == 'string')
-        && (!arg.surname || typeof (arg.surname) == 'string')
-        && (!arg.mail || (typeof (arg.mail) == 'string' && validateEmail(arg.mail)))
-        && (!arg.location || typeof (arg.location) == 'string')
-        && arg.mod == undefined && arg.validated == undefined && arg.salt == undefined && arg.digest == undefined;
+*/
+/*
+export function isMod(arg: any): boolean {
+    return arg && arg.username && typeof(arg.username) == 'string'
+               && arg.mail==undefined && arg.name==undefined && arg.surname==undefined && arg.location==undefined
+               && arg.mod==undefined && arg.validated==undefined && arg.salt==undefined && arg.digest==undefined
 }
-exports.isCorrectUpdate = isCorrectUpdate;
-function isMod(arg) {
-    return arg && arg.username && typeof (arg.username) == 'string'
-        && arg.mail == undefined && arg.name == undefined && arg.surname == undefined && arg.location == undefined
-        && arg.mod == undefined && arg.validated == undefined && arg.salt == undefined && arg.digest == undefined;
-}
-exports.isMod = isMod;
+*/
 function newUser(data) {
     var usermodel = getModel();
     var user = new usermodel(data);
