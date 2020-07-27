@@ -1,0 +1,33 @@
+<div *ngFor="let insertion of insertions" class="card" style="margin: 5px;" > 
+    <div class="card-body">
+        <div class = "card-block float-right text-align-right">    
+          <p class="card-text">by: &nbsp; <a href = #>{{insertion.insertionist.username}}&nbsp;<i class="far fa-user-circle"></i></a></p> 
+          <p class="card-text mb-2">from: &nbsp;{{insertion.insertionist.location}}</p> 
+          <p class="card-text text-muted mb-2"><i class="far fa-clock"></i>&nbsp;{{insertion.insertion_timestamp | date}} / {{insertion.insertion_timestamp | date:'shortTime'}}</p>
+        </div>
+        <a href = #><h2 class="card-title"><i class="fa fa-book"></i>&nbsp;{{insertion.title}}</h2></a>
+        <h4 class="card-subtitle mb-2"> {{insertion.authors.join(' ')}}</h4>
+        <h6 class="card-subtitle text-muted mb-2"> edition:&nbsp;{{insertion.edition}}</h6> 
+        <p class="card-subtitle">{{ insertion.title }}</p>
+       <!--- <span *ngFor="let tag of message.tags" class="badge badge-secondary tag">{{tag}}</span>--->
+    </div>
+</div>
+
+<!---
+<ul class="nav justify-content-end bottomfooter">
+  <li class="nav-item">
+    <div class="btn-group dropup">
+      <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        {{us.get_username()}}
+      </button>
+      <div class="dropdown-menu">
+        <div class="dropdown-item" href="#">{{us.get_mail()}}</div>
+        <div *ngIf="us.is_admin()" class="dropdown-item" href="#"><i class="fas fa-check"></i> Admin role</div>
+        <div *ngIf="us.is_moderator()" class="dropdown-item" href="#"><i class="fas fa-check"></i> Moderator role</div>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item nav-link" (click)="logout()" >Logout</a>
+      </div>
+    </div>
+  </li>
+</ul>
+-->

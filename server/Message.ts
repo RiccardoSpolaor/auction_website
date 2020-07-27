@@ -9,7 +9,7 @@ export interface Message extends mongoose.Document {
         author: string,
         timestamp: Date
     }],
-    private: false
+    private: boolean
 }
 
 // User defined type guard
