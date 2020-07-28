@@ -34,6 +34,7 @@ export interface Insertion {
         timestamp: Date,
         price: Number
     }],
+    remaining_time: string
 
     //messages: [message.Message]
 }

@@ -25,7 +25,7 @@ export class InsertionListComponent implements OnInit {
     console.log('err')
     this.get_insertions();
     this.sio.connect().subscribe( (m) => {
-      this.get_insertions();
+      //this.get_insertions();
     });
   }
 
@@ -34,7 +34,7 @@ export class InsertionListComponent implements OnInit {
     this.ihs.get_insertions().subscribe(
       ( insertions ) => {
         this.insertions = insertions;
-
+        this.setRemainingTime()
       } , (err) => {
         // We need to login again
         //this.logout();
@@ -42,6 +42,28 @@ export class InsertionListComponent implements OnInit {
       }
     );
   }
+
+
+  public setRemainingTime() {
+    setInterval ( () => {
+      this.insertions.forEach(elem => {
+        const date1 = new Date()
+        const date2 = new Date(elem.expire_date)
+        const diffTime = date2.getTime() - date1.getTime();
+        var seconds = Math.floor(diffTime / 1000);
+        var minutes = Math.floor(seconds / 60);
+        var hours = Math.floor(minutes / 60);
+        var days = Math.floor(hours / 24);
+
+        hours %= 24
+        minutes %= 60;
+        seconds %= 60;
+
+        elem.remaining_time = 'Days: ' + days + ' Hours: ' + hours + ' Minutes: ' + minutes + ' Seconds: ' + seconds
+    })
+  }, 1000 )
+}
+
 /*
   logout() {
     this.us.logout();
