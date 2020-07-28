@@ -1,5 +1,6 @@
   <!--Navbar-->
-  <mdb-navbar SideClass="navbar navbar-expand-lg navbar-dark bg-primary fixed-top scrolling-navbar">
+  <div class = 'sticky-top' data-toggle = 'affix'>
+  <mdb-navbar SideClass="navbar navbar-expand-lg navbar-dark bg-primary" > <!---fixed-top scrolling-navbar-->
   
   
     <!-- Navbar brand -->
@@ -7,7 +8,10 @@
   
     <!-- Collapsible content -->
     <links>
-  
+      <a dropdownToggle mdbWavesEffect type="button" data-toggle="collapse" class="nav-link dropdown-toggle waves-light" mdbWavesEffect data-target="#demo">
+        Search<span class="caret"></span>
+      </a>
+
       <!---<ul class="navbar-nav mr-auto nav-flex-icons">
         <li class="nav dropdown" dropdown>
           <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light" mdbWavesEffect>
@@ -27,7 +31,7 @@
         <li class="nav-item dropdown" dropdown>
           <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light" mdbWavesEffect>
             <i class="fa fa-user"></i><span class="caret"></span></a>
-          <div *dropdownMenu class="dropdown-menu dropdown dropdown-primary" role="menu">
+          <div *dropdownMenu class="dropdown-menu dropdown-menu-right dropdown-primary" role="menu">
             <a class="dropdown-item waves-light" mdbWavesEffect href="#">Action</a>
             <a class="dropdown-item waves-light" mdbWavesEffect href="#">Another action</a>
             <a class="dropdown-item waves-light" mdbWavesEffect href="#">Something else here</a>
@@ -36,11 +40,69 @@
           </div>
         </li>
       </ul>
-    </links
-    >
+    </links>
     <!-- Collapsible content -->
 
   
   </mdb-navbar>
+
+  <mdb-navbar class = 'collapse' SideClass="navbar navbar-expand-lg navbar-light blue lighten-5" id='demo'> <!---fixed-top scrolling-navbar-->
+  
+  
+    <!-- Navbar brand -->
+  
+    <!-- Collapsible content -->
+  
+      <!---<ul class="navbar-nav mr-auto nav-flex-icons">
+        <li class="nav dropdown" dropdown>
+          <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light" mdbWavesEffect>
+            Search<span class="caret"></span></a>
+          <div *dropdownMenu class="dropdown-menu dropdown dropdown-primary" role="menu">
+            <form class="form-inline my-2 my-lg-0">
+              <input class="form-control mr-sm-2" type="search" placeholder="Title" aria-label="Search">
+              <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+          </div>
+        </li>
+      </ul>--->
+        
+      <!-- Links -->
+  
+      <form class=" ml-auto mr-auto"> 
+        <div class="form-row">
+          <div class="col"> 
+            Filters: 
+          </div> 
+        </div> 
+          <div class="form-row"> 
+            <div class="col"> 
+              <input type="text" class="form-control" placeholder="Title"> 
+            </div> 
+            <div class="col"> 
+              <input type="text" class="form-control" placeholder="Faculty"> 
+            </div> 
+            <div class="col"> 
+              <input type="text" class="form-control" placeholder="University"> 
+            </div> 
+          </div>
+          <div class="form-row">
+            <div class="col"> 
+              <input type="text" class="form-control" placeholder="Location"> 
+            </div> 
+            <div class="col"> 
+              <input type="text" class="form-control" placeholder="User"> 
+            </div> 
+            <div class="col"> 
+              <input type="text" class="form-control" placeholder="Price"> 
+            </div>  
+          </div>
+          <div class="form-row">
+            <div class="col"> 
+              <button class="btn btn-outline-success my-2 my-sm-2" type="submit">Search</button> 
+            </div> 
+          </div>
+        </form>
+  </mdb-navbar>
+</div>
   <!--/.Navbar-->
   
