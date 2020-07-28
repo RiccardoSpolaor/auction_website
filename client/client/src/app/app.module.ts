@@ -1,6 +1,8 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
+import { MDBBootstrapModule } from 'angular-bootstrap-md';
+
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 
@@ -18,13 +20,16 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { InsertionListComponent } from './Components/insertion-list/insertion-list.component';
 import { InsertionHttpService } from './Services/insertion-http.service';
+import { NavbarComponent } from './Components/navbar/navbar.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     InsertionListComponent,
+    NavbarComponent,
   ],
   imports: [
+    MDBBootstrapModule.forRoot(),
     BrowserModule,
     FormsModule,
     HttpClientModule,
@@ -38,3 +43,4 @@ import { InsertionHttpService } from './Services/insertion-http.service';
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+ 
