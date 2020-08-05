@@ -260,7 +260,7 @@ export function updateInsertionContent (req : express.Request,res : express.Resp
 export function putInsertionContentById  ( req : express.Request,res : express.Response, next : express.NextFunction ) {
 
   var body = req.body;
-  console.log(body)
+  
 
   insertion.getModel().findById( req.params.id ).then( (data)=> {
     if( !user.newUser(req.user).hasModRole() && req.user.id != data.insertionist)

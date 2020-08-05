@@ -4,7 +4,7 @@
 import {Message} from './Message'
 
 export interface Insertion {
-    //readonly _id: mongoose.Schema.Types.ObjectId,
+    _id: string,
     title: string,
     authors: [string],
     edition: number,
@@ -28,15 +28,13 @@ export interface Insertion {
     history: [{
         user: {
             _id: string,
-            usernme: string,
+            username: string,
             mail: string
         }
         timestamp: Date,
-        price: Number
+        price: number
     }],
     remaining_time: string
-
-    //messages: [message.Message]
 }
 
 // User defined type guard

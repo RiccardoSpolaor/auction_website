@@ -367,26 +367,25 @@ mongoose.connect('mongodb://localhost:27017/auction_website').then(function onco
         server.listen(8080, () => console.log("HTTP Server started on port 8080"));
         setInterval(function () {
             insertion.getModel().find({ $and: [{ expire_date: { $lte: new Date() } }, { closed: { $ne: true } }] }, { messages: 0, reserve_price: 0 }).sort({ insertion_timestamp: -1 }).then((documents) => {
-                /*var response = []
-                 for(var i in documents){
-                   response.push(new AuctionEnded(i));
-                 }
-                                 // Notify all socket.io clients*/
-                ios.emit('broadcast', { data: 'hey', ciao: 'ciao' });
+                if (documents.length) {
+                    documents.forEach(doc => {
+                        doc.closed = true;
+                        doc.save();
+                    });
+                    Promise.all(documents)
+                        .then(function () {
+                        console.log("Insertions closed");
+                        // Notify all socket.io clients INSERTION CLOSED*/
+                        ios.emit('broadcast', { data: 'hey', ciao: 'ciao' });
+                    })
+                        .catch(function (reason) {
+                        console.log("Unable to close: " + reason);
+                    });
+                }
             }).catch((ignore) => {
                 console.log(ignore);
             });
         }, 2000);
-        // To start an HTTPS server we create an https.Server instance 
-        // passing the express application middleware. Then, we start listening
-        // on port 8443
-        //
-        /*
-        https.createServer({
-          key: fs.readFileSync('keys/key.pem'),
-          cert: fs.readFileSync('keys/cert.pem')
-        }, app).listen(8443);
-        */
     });
 }, function onrejected(err) {
     console.log("Unable to connect to MongoDB" + err);

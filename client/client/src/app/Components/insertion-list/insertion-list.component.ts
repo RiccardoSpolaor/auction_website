@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 import { SocketioService } from '../../Services/socketio.service';
 import { UserService } from '../../Services/user.service';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
-
 import { Insertion } from '../../Objects/Insertion';
 
 
@@ -19,32 +18,27 @@ export class InsertionListComponent implements OnInit {
 
   public insertions: Insertion[]
 
-  constructor( private sio: SocketioService , public ihs: InsertionHttpService, public us: UserService, private router: Router ) { }
+  constructor( private sio: SocketioService , public ihs: InsertionHttpService, public us: UserService, private router: Router , private route: ActivatedRoute) { }
 
   ngOnInit() {
-    console.log('err')
-    this.get_insertions();
+    this.get_insertions(this.route.snapshot.queryParams);
     this.sio.connect().subscribe( (m) => {
       //this.get_insertions();
     });
   }
 
-  public get_insertions() {
-    console.log('err')
-    this.ihs.get_insertions().subscribe(
+  public get_insertions(params? : any) {
+    this.ihs.get_insertions(params).subscribe(
       ( insertions ) => {
         this.insertions = insertions;
         this.setRemainingTime()
       } , (err) => {
-        // We need to login again
-        //this.logout();
         console.log(err)
       }
     );
   }
 
-
-  public setRemainingTime() {
+  private setRemainingTime() {
     setInterval ( () => {
       this.insertions.forEach(elem => {
         const date1 = new Date()
@@ -59,14 +53,8 @@ export class InsertionListComponent implements OnInit {
         minutes %= 60;
         seconds %= 60;
 
-        elem.remaining_time = 'Days: ' + days + ' Hours: ' + hours + ' Minutes: ' + minutes + ' Seconds: ' + seconds
-    })
-  }, 1000 )
-}
-
-/*
-  logout() {
-    this.us.logout();
-    this.router.navigate(['/']);
-  }*/
+        elem.remaining_time = days + 'd ' + hours + 'h ' + minutes + 'm ' + seconds + 's'
+      })
+    }, 1000 )
+  }
 }

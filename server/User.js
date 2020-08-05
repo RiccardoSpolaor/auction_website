@@ -55,7 +55,7 @@ userSchema.methods.setPassword = function (pwd) {
     // In cryptography, an HMAC (sometimes disabbreviated as either keyed-hash message 
     // authentication code or hash-based message authentication code) is a specific type 
     // of message authentication code (MAC) involving a cryptographic hash function and 
-    // a secret cryptographic key.
+    // a secret cryptographic key.    at processTicksAndRejections (internal/process/task_queues.js:79:11) {
     //
     var hmac = crypto.createHmac('sha512', this.salt);
     hmac.update(pwd);

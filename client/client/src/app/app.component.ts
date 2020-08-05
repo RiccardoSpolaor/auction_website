@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { UserService } from './Services/user.service';
 
 @Component({
   selector: 'app-root',
@@ -7,4 +8,14 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   public title = 'Client'
+
+  constructor( private us: UserService){}
+
+  ngOnInit(): void {
+    this.us.set_token_from_storage();
+  }
+
+
 }
+
+

@@ -21,12 +21,22 @@ import { AppComponent } from './app.component';
 import { InsertionListComponent } from './Components/insertion-list/insertion-list.component';
 import { InsertionHttpService } from './Services/insertion-http.service';
 import { NavbarComponent } from './Components/navbar/navbar.component';
+import { LoginComponent } from './Components/login/login.component';
+import { SignupComponent } from './Components/signup/signup.component';
+import { SignupmodComponent } from './Components/signupmod/signupmod.component';
+import { EditProfileComponent } from './Components/edit-profile/edit-profile.component';
+import { InsertionComponent } from './Components/insertion/insertion.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     InsertionListComponent,
     NavbarComponent,
+    LoginComponent,
+    SignupComponent,
+    SignupmodComponent,
+    EditProfileComponent,
+    InsertionComponent,
   ],
   imports: [
     MDBBootstrapModule.forRoot(),

@@ -44,6 +44,7 @@ export function postMod ( req : express.Request,res : express.Response, next : e
         return next({ statusCode:404, error: true, errormessage: "Invalid Moderator Data"} );
   
       var u = user.newUser(req.body);
+     
   
       if( !req.body.password ) {
         return next({ statusCode:404, error: true, errormessage: "Password field missing"} );
@@ -51,7 +52,7 @@ export function postMod ( req : express.Request,res : express.Response, next : e
       u.setPassword( req.body.password );
   
       u.setMod();
-  
+
       u.save().then( (data) => {
         return res.status(200).json({ error: false, errormessage: "", id: data._id });
       }).catch( (reason) => {

@@ -217,7 +217,6 @@ function updateInsertionContent(req, res, next, body, data) {
 exports.updateInsertionContent = updateInsertionContent;
 function putInsertionContentById(req, res, next) {
     var body = req.body;
-    console.log(body);
     insertion.getModel().findById(req.params.id).then((data) => {
         if (!user.newUser(req.user).hasModRole() && req.user.id != data.insertionist)
             return next({ statusCode: 404, error: true, errormessage: "Unauthorized: user is not a moderator or the insertionist." });

@@ -4,13 +4,12 @@ import { tap, catchError } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
 import * as jwtdecode from 'jwt-decode';
 
-
-
 interface TokenData {
   username:string,
   mail:string,
-  roles:string[],
-  id:string
+  mod:boolean,
+  id:string,
+  validated:boolean
 }
 
 @Injectable()
@@ -21,11 +20,11 @@ export class UserHttpService {
 
   }
 
-  public token = '';
+  //public token = '';
+  public token = undefined;
   public url = 'http://localhost:8080';
 
-  login( mail: string, password: string, remember: boolean ): Observable<any> {
-
+  login( mail: string, password: string): Observable<any> {
     console.log('Login: ' + mail + ' ' + password );
     const options = {
       headers: new HttpHeaders({
@@ -39,16 +38,16 @@ export class UserHttpService {
       tap( (data) => {
         console.log(JSON.stringify(data));
         this.token = data.token;
-        if ( remember ) {
-          localStorage.setItem('postmessages_token', this.token );
-        }
+        localStorage.setItem('session_id', this.token );
       }));
   }
 
   logout() {
     console.log('Logging out');
-    this.token = '';
-    localStorage.setItem('postmessages_token', this.token);
+    this.token = undefined;
+    localStorage.setItem('session_id', '');
+    
+
   }
 
   register( user ): Observable<any> {
@@ -59,7 +58,7 @@ export class UserHttpService {
       })
     };
 
-    return this.http.post( this.url + '/users', user, options ).pipe(
+    return this.http.post( this.url + '/users/students', user, options ).pipe(
       tap( (data) => {
         console.log(JSON.stringify(data) );
       })
@@ -67,7 +66,48 @@ export class UserHttpService {
 
   }
 
+  registerMod( user ): Observable<any> {
+    const options = {
+      headers: new HttpHeaders({
+        authorization: 'Bearer ' + this.get_token(),
+        'cache-control': 'no-cache',
+        'Content-Type':  'application/json',
+      })
+    };
+
+    return this.http.post( this.url + '/users/mods', user, options ).pipe(
+      tap( (data) => {
+        console.log(JSON.stringify(data) );
+      })
+    );
+  }
+
+  edit( user ): Observable<any> {
+    const options = {
+      headers: new HttpHeaders({
+        authorization: 'Bearer ' + this.get_token(),
+        'cache-control': 'no-cache',
+        'Content-Type':  'application/json',
+      })
+    };
+
+    return this.http.put( this.url + '/users', user, options ).pipe(
+      tap( (data) => {
+        console.log(JSON.stringify(data) );
+        this.token = data.token;
+        localStorage.setItem('session_id', this.token );
+      })
+    );
+  }
+
+  set_token_from_storage(){
+    this.token=localStorage.getItem('session_id')===''?undefined:localStorage.getItem('session_id')
+  }
+
   get_token() {
+    /*if(!this.token){
+      this.token=localStorage.getItem("auction_website_token")
+    }*/
     return this.token;
   }
 
@@ -83,23 +123,11 @@ export class UserHttpService {
     return (jwtdecode(this.token) as TokenData).id;
   }
 
-  is_admin(): boolean {
-    const roles = (jwtdecode(this.token) as TokenData).roles;
-    for ( let idx = 0; idx < roles.length; ++idx ) {
-      if ( roles[idx] === 'ADMIN' ) {
-        return true;
-      }
-    }
-    return false;
+  is_validated(): boolean {
+    return (jwtdecode(this.token) as TokenData).validated;
   }
 
   is_moderator(): boolean {
-    const roles = (jwtdecode(this.token) as TokenData).roles;
-    for ( let idx = 0; idx < roles.length; ++idx ) {
-      if ( roles[idx] === 'MODERATOR' ) {
-        return true;
-      }
-    }
-    return false;
+    return (jwtdecode(this.token) as TokenData).mod;
   }
 }

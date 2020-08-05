@@ -17,7 +17,7 @@ export class InsertionHttpService {
   constructor( private http: HttpClient, private us: UserService ) {
     console.log('Message service instantiated');
     console.log('User service token: ' + us.get_token() );
-   }
+}
 
 
   private handleError(error: HttpErrorResponse) {
@@ -34,31 +34,50 @@ export class InsertionHttpService {
 
     return throwError('Something bad happened; please try again later.');
   }
+  
 
-  private create_options( params = {} ) {
-    return  {
-      headers: new HttpHeaders({
-        authorization: 'Bearer ' + this.us.get_token(),
-        'cache-control': 'no-cache',
-        'Content-Type':  'application/json',
-      }),
-      params: new HttpParams( {fromObject: params} )
-    };
-
+  get_insertion(params: any): Observable<Insertion> {
+    if(this.us.get_token()){
+      const options = {
+        headers: new HttpHeaders({
+          authorization: 'Bearer ' + this.us.get_token(),
+          'cache-control': 'no-cache',
+          'Content-Type':  'application/json',
+        })
+      };
+      return this.http.get<Insertion>( this.us.url + '/insertions/'+ params.id, options).pipe(
+          tap( (data) => console.log(JSON.stringify(data))) ,
+          catchError( this.handleError )
+        );
+    }else{
+      return this.http.get<Insertion>( this.us.url + '/insertions/'+ params.id).pipe(
+        tap( (data) => console.log(JSON.stringify(data))) ,
+        catchError( this.handleError )
+      );
+    }
   }
 
-  get_insertions(): Observable<Insertion[]> {
-    return this.http.get<Insertion[]>( this.us.url + '/insertions').pipe(
+  get_insertions(params?: any): Observable<Insertion[]> {
+    return this.http.get<Insertion[]>( this.us.url + '/insertions', {params: params}).pipe(
         tap( (data) => console.log(JSON.stringify(data))) ,
         catchError( this.handleError )
       );
   }
-/*
-  post_message( m: Message ): Observable<Message> {
-    console.log('Posting ' + JSON.stringify(m) );
-    return this.http.post<Message>( this.us.url + '/messages', m,  this.create_options() ).pipe(
-      catchError(this.handleError)
+
+  put_price(params: any, price: number):Observable<any> {
+    const options = {
+      headers: new HttpHeaders({
+        authorization: 'Bearer ' + this.us.get_token(),
+        'cache-control': 'no-cache',
+        'Content-Type':  'application/json',
+      })
+    };
+
+    return this.http.put( this.us.url + '/insertions/'+ params.id + '/price', {current_price: price}, options ).pipe(
+      tap( (data) => {
+        console.log(JSON.stringify(data) );
+
+      })
     );
   }
-*/
 }

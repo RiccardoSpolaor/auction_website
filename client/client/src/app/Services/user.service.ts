@@ -7,8 +7,9 @@ import { Observable } from 'rxjs';
 interface TokenData {
   username:string,
   mail:string,
-  roles:string[],
-  id:string
+  mod:boolean,
+  id:string,
+  validated:boolean
 }
 
 @Injectable()
@@ -16,10 +17,11 @@ export class UserService {
 
   constructor() { }
 
-  private token = '';
+  //private token = '';
+  private token = undefined;
   public url = '';
 
-  login( mail: string, password: string, remember: boolean ): Observable<any> {
+  login( mail: string, password: string): Observable<any> {
     console.log('Login: ' + mail + ' ' + password );
 
     // tslint:disable-next-line:max-line-length
@@ -35,11 +37,28 @@ export class UserService {
     return throwError( { error: {errormessage: 'not implemented'}} );
   }
 
+  registerMod( user ): Observable<any> {
+    return throwError( { error: {errormessage: 'not implemented'}} );
+  }
+
+  edit( user ): Observable<any> {
+    return throwError( { error: {errormessage: 'not implemented'}} );
+  }
+
   logout() {
-    this.token = '';
+    this.token = undefined;
+    localStorage.setItem('session_id', '');
+    
+  }
+
+  set_token_from_storage(){
+    this.token=localStorage.getItem('session_id')===''?undefined:localStorage.getItem('session_id')
   }
 
   get_token() {
+    /*if(!this.token){
+      this.token=localStorage.getItem("auction_website_token")
+    }*/
     return this.token;
   }
 
@@ -55,24 +74,12 @@ export class UserService {
     return (jwtdecode(this.token) as TokenData).id;
   }
 
-  is_admin(): boolean {
-    const roles = (jwtdecode(this.token) as TokenData).roles;
-    for ( let idx = 0; idx < roles.length; ++idx ) {
-      if ( roles[idx] === 'ADMIN' ) {
-        return true;
-      }
-    }
-    return false;
+  is_validated(): boolean {
+    return (jwtdecode(this.token) as TokenData).validated;
   }
 
   is_moderator(): boolean {
-    const roles = (jwtdecode(this.token) as TokenData).roles;
-    for ( let idx = 0; idx < roles.length; ++idx ) {
-      if ( roles[idx] === 'MODERATOR' ) {
-        return true;
-      }
-    }
-    return false;
+    return (jwtdecode(this.token) as TokenData).mod;
   }
 
 }
