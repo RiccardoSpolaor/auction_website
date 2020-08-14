@@ -115,6 +115,10 @@ function getInsertionById(req, res, next) {
                 {
                     path: 'insertionist',
                     select: '_id mail username location'
+                },
+                {
+                    path: 'current_winner',
+                    select: '_id mail username'
                 }]).execPopulate().then((data) => {
                 return res.status(200).json(data);
             }).catch((reason) => {

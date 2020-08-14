@@ -23,7 +23,11 @@ export interface Insertion {
     start_price: number,
     current_price: number,
     expire_date: Date,
-    current_winner: string,
+    current_winner: {
+        _id: string,
+        username: string,
+        mail: string
+    },
     closed: boolean,
     history: [{
         user: {

@@ -56,27 +56,11 @@ export class InsertionComponent implements OnInit {
   }
 
   public get_current_winner(): string{
-    /*var u = this.insertion.history.length?this.insertion.history[this.insertion.history.length-1].user:null;
-    var i = this.insertion.history.length-2;
-    while(u==null && i>=0){
-      u=this.insertion.history[i].user;
-      i--;
-    }
-    return u?u.username:'None';*/
-    return this.insertion.history.length?this.insertion.history[this.insertion.history.length-1].user.username:null;
+    return this.insertion.current_winner ? this.insertion.current_winner.username : 'None';;
   }
 
   public get_current_price(): number{
-    /*var u = this.insertion.history.length?this.insertion.history[this.insertion.history.length-1].user:null;
-    var i = this.insertion.history.length-2;
-    var ris;
-    while(u==null && i>=0){
-      u=this.insertion.history[i].user;
-      ris=this.insertion.history[i].price;
-      i--;
-    }
-    return u?this.insertion.history[this.insertion.history.length-1].price:*/
-    return this.insertion.history.length?this.insertion.history[this.insertion.history.length-1].price:0;
+    return this.insertion.current_price != null ? this.insertion.current_price : 0;
   }
 
   public put_price(price: number){

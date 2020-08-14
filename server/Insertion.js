@@ -133,6 +133,7 @@ var insertionSchema = new mongoose.Schema({
             user: {
                 type: mongoose.SchemaTypes.ObjectId,
                 ref: 'User',
+                required: true
             },
             timestamp: {
                 type: mongoose.SchemaTypes.Date,
