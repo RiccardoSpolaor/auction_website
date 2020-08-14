@@ -22,7 +22,7 @@ export interface Insertion extends mongoose.Document {
     history: [{
         user: string,
         timestamp: Date,
-        price: Number
+        price: number
     }],
 
     //messages: [message.Message]

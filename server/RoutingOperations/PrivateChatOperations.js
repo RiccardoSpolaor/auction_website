@@ -65,7 +65,7 @@ function putPrivateChat(req, res, next) {
     var body = req.body;
     private_chat.getModel().findById(req.params.id).then((data) => {
         if (!data)
-            return next({ statusCode: 404, error: true, errormessage: "Cannot find Insertion" });
+            return next({ statusCode: 404, error: true, errormessage: "Cannot find Chat" });
         if (data.sender == req.user.id || data.insertionist == req.user.id) {
             body.timestamp = new Date();
             body.author = req.user.id;

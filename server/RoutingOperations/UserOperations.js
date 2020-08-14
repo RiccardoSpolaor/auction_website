@@ -167,6 +167,39 @@ function putUser(req, res, next) {
     });
 }
 exports.putUser = putUser;
+function deleteUserOpenInsertions(data) {
+    return insertion.getModel().deleteMany({ $and: [{ closed: { $ne: true } }, { insertionist: data.id }] });
+}
+function changeCurrentWinnersAndCurrentPrice(data) {
+    return insertion.getModel().find({ current_winner: data.id }).populate('history.user', '_id').then((documents) => {
+        documents.forEach(doc => {
+            console.log(JSON.stringify(doc.history));
+            var i = doc.history.length - 1;
+            var flag = true;
+            while (flag && i >= 0) {
+                if (doc.history[i].user && doc.history[i].user._id != data.id) {
+                    flag = false;
+                    doc.current_winner = doc.history[i].user;
+                    doc.current_price = doc.history[i].price;
+                }
+                i--;
+            }
+            if (flag) {
+                doc.current_winner = null;
+                doc.current_price = null;
+            }
+            doc.save();
+        });
+        return Promise.all(documents);
+    });
+    /*var u = this.insertion.history.length?this.insertion.history[this.insertion.history.length-1].user:null;
+       var i = this.insertion.history.length-2;
+       while(u==null && i>=0){
+         u=this.insertion.history[i].user;
+         i--;
+       }
+       return u?u.username:'None';*/
+}
 function deleteUserById(req, res, next) {
     // Check mod role
     if (!user.newUser(req.user).hasModRole()) {
@@ -175,11 +208,25 @@ function deleteUserById(req, res, next) {
     // req.params.id contains the :id URL component
     user.getModel().findById(req.params.id).then((data) => {
         if (!data.hasModRole()) {
-            data.remove().then(() => {
-                return res.status(200).json({ error: false, errormessage: "" });
+            deleteUserOpenInsertions(data).then(() => {
+                changeCurrentWinnersAndCurrentPrice(data).then(() => {
+                    data.remove().then(() => {
+                        return res.status(200).json({ error: false, errormessage: "" });
+                    }).catch((reason) => {
+                        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
+                    });
+                }).catch((reason) => {
+                    return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
+                });
             }).catch((reason) => {
                 return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
             });
+            /*
+            data.remove().then(()=>{
+              return res.status(200).json( {error:false, errormessage:""} );
+            }).catch( (reason)=> {
+              return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+            });*/
         }
         else
             return next({ statusCode: 404, error: true, errormessage: "Unauthorized: moderator can't be deleted" });
