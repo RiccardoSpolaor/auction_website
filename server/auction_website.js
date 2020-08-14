@@ -105,6 +105,7 @@ const insertionOperations = require("./RoutingOperations/InsertionOperations");
 const userOperations = require("./RoutingOperations/UserOperations");
 const privateChatOperations = require("./RoutingOperations/PrivateChatOperations");
 const generalOperations = require("./RoutingOperations/GeneralOperations");
+const notification = require("./Notification");
 const user = require("./User");
 const express = require("express");
 const bodyparser = require("body-parser"); // body-parser middleware is used to parse the request body and
@@ -362,11 +363,9 @@ mongoose.connect('mongodb://localhost:27017/auction_website').then(function onco
                     timestamp: new Date(),
                     authormail: u.mail
                   });*/
-                Promise.all([ins1])
-                    .then(function () {
+                Promise.all([ins1]).then(function () {
                     console.log("Messages saved");
-                })
-                    .catch(function (reason) {
+                }).catch(function (reason) {
                     console.log("Unable to save: " + reason);
                 });
             }
@@ -383,17 +382,48 @@ mongoose.connect('mongodb://localhost:27017/auction_website').then(function onco
         setInterval(function () {
             insertion.getModel().find({ $and: [{ expire_date: { $lte: new Date() } }, { closed: { $ne: true } }] }, { messages: 0, reserve_price: 0 }).sort({ insertion_timestamp: -1 }).then((documents) => {
                 if (documents.length) {
+                    var notifications = [];
+                    var iosMessages = [];
                     documents.forEach(doc => {
                         doc.closed = true;
                         doc.save();
+                        if (doc.current_winner) {
+                            var notifWinner = notification
+                                .getModel()
+                                .create({
+                                timestamp: new Date(),
+                                content: 'You won the insertion: ' + doc.title + '!',
+                                read: false,
+                                insertion: doc.id,
+                                to: doc.current_winner
+                            });
+                            notifications.push(notifWinner);
+                            iosMessages.push({ type: 'notification', user: doc.current_winner });
+                        }
+                        var notifInsertionist = notification
+                            .getModel()
+                            .create({
+                            timestamp: new Date(),
+                            content: (doc.current_winner ? 'Somebody won ' : 'No one won ') + 'your insertion: ' + doc.title + '!',
+                            read: false,
+                            insertion: doc.id,
+                            to: doc.insertionist
+                        });
+                        notifications.push(notifInsertionist);
+                        iosMessages.push({ type: 'notification', user: doc.insertionist });
                     });
                     Promise.all(documents)
-                        .then(function () {
+                        .then(() => {
                         console.log("Insertions closed");
-                        // Notify all socket.io clients INSERTION CLOSED*/
-                        ios.emit('broadcast', { data: 'hey', ciao: 'ciao' });
-                    })
-                        .catch(function (reason) {
+                        Promise.all(notifications).then(() => {
+                            // Notify all socket.io clients INSERTION CLOSED*/
+                            iosMessages.forEach(m => {
+                                ios.emit('broadcast', m);
+                            });
+                        }).catch(function (reason) {
+                            console.log("Unable to send notifications: " + reason);
+                        });
+                    }).catch(function (reason) {
                         console.log("Unable to close: " + reason);
                     });
                 }

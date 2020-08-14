@@ -117,6 +117,9 @@ import * as generalOperations from './RoutingOperations/GeneralOperations'
 import {Message} from './Message';
 import * as message from './Message';
 
+import {Notification} from './Notification';
+import * as notification from './Notification';
+
 import {PrivateChat} from './PrivateChat';
 import * as private_chat from './PrivateChat';
 
@@ -496,11 +499,9 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
                           authormail: u.mail
                         });*/
 
-                      Promise.all([ins1])
-                        .then(function() {
+                      Promise.all([ins1]).then(function() {
                           console.log("Messages saved");
-                        })
-                        .catch(function(reason) {
+                        }).catch(function(reason) {
                           console.log("Unable to save: " + reason);
                         });
 
@@ -522,20 +523,53 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
             insertion.getModel().find({$and: [{expire_date: {$lte: new Date()}},{closed: {$ne: true}}]},{messages : 0, reserve_price : 0} 
             ).sort({insertion_timestamp:-1}).then( (documents) => {
               if(documents.length){
+                
+                var notifications : Array<Promise<Notification>> = [];
+                var iosMessages : Array<any> = []
+
                 documents.forEach(doc => {
                   doc.closed=true;
                   doc.save();
+                  if (doc.current_winner) {
+                    var notifWinner = notification
+                      .getModel()
+                      .create({
+                        timestamp : new Date(),
+                        content: 'You won the insertion: ' + doc.title + '!',
+                        read: false,
+                        insertion: doc.id,
+                        to: doc.current_winner
+                    });
+                    notifications.push(notifWinner)
+                    iosMessages.push({type: 'notification', user: doc.current_winner})
+                  }
+                  var notifInsertionist = notification
+                    .getModel()
+                    .create({
+                      timestamp : new Date(),
+                      content: (doc.current_winner ? 'Somebody won ' : 'No one won ') + 'your insertion: ' + doc.title + '!',
+                      read: false,
+                      insertion: doc.id,
+                      to: doc.insertionist
+                  });
+                  notifications.push(notifInsertionist)
+                  iosMessages.push({type: 'notification', user: doc.insertionist})
                 });
 
                 Promise.all(documents)
-                .then(function() {
+                .then( () => {
                   console.log("Insertions closed");
 
-    // Notify all socket.io clients INSERTION CLOSED*/
-    ios.emit('broadcast', {data: 'hey', ciao: 'ciao'});
+                  Promise.all(notifications).then( () => {
+                        // Notify all socket.io clients INSERTION CLOSED*/
+                        iosMessages.forEach(m => {
+                          ios.emit('broadcast', m);
+                        });
+                  } ) .catch(function(reason) {
+                    console.log("Unable to send notifications: " + reason);
+                  });
 
-                })
-                .catch(function(reason) {
+                }).catch(function(reason) {
                   console.log("Unable to close: " + reason);
                 });
 

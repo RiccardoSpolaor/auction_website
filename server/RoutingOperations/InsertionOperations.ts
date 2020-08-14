@@ -102,7 +102,9 @@ export function postInsertion ( req : express.Request,res : express.Response, ne
 
   var recinsertion = req.body;
   recinsertion.expire_date = new Date(recinsertion.expire_date);
+  
   recinsertion.insertion_timestamp = new Date();
+  
   recinsertion.insertionist = req.user.id;
 
   if( isInsertion( recinsertion )) {

@@ -79,7 +79,7 @@ function postInsertion(req, res, next) {
     }
     var recinsertion = req.body;
     recinsertion.expire_date = new Date(recinsertion.expire_date);
-    recinsertion.insertion_timestamp = new Date();
+    recinsertion.insertion_timestamp = new Date(new Date().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }));
     recinsertion.insertionist = req.user.id;
     if (isInsertion(recinsertion)) {
         insertion.getModel().create(recinsertion).then((data) => {
