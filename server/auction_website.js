@@ -103,9 +103,8 @@ const mongoose = require("mongoose");
 const insertion = require("./Insertion");
 const insertionOperations = require("./RoutingOperations/InsertionOperations");
 const userOperations = require("./RoutingOperations/UserOperations");
+const privateChatOperations = require("./RoutingOperations/PrivateChatOperations");
 const generalOperations = require("./RoutingOperations/GeneralOperations");
-const message = require("./Message");
-const private_chat = require("./PrivateChat");
 const user = require("./User");
 const express = require("express");
 const bodyparser = require("body-parser"); // body-parser middleware is used to parse the request body and
@@ -147,87 +146,103 @@ app.put('/insertions/:id/public_messages', generalOperations.auth, insertionOper
 app.put('/insertions/:id/public_messages/:m_id', generalOperations.auth, insertionOperations.putInsertionAnswerToPublicMessageById);
 app.put('/insertions/:id/price', generalOperations.auth, insertionOperations.putInsertionPriceById);
 /* nel body passiamo solo insertion_id e messaggio */
-app.post("/private_chat", generalOperations.auth, (req, res, next) => {
-    var body = req.body;
-    console.log(req.user.id);
-    private_chat.getModel().find({ $and: [{ insertion_id: body.insertion_id }, { sender: req.user.id }] }).then((data) => {
-        console.log(data);
-        if (data.length) // UTILIZZARE app.put("/private_chat/:id")
-            return next({ statusCode: 404, error: true, errormessage: "c'è" });
-        else {
-            insertion.getModel().findById(body.insertion_id).then((insertion) => {
-                return insertion;
-            }).then((data) => {
-                var m = { content: body.message, author: req.user.id, timestamp: new Date() };
-                if (message.isMessage(m)) {
-                    var messages = [m];
-                    var chat = { insertion_id: data.id, insertionist: data.insertionist.toString(), sender: req.user.id, messages: messages };
-                    if (private_chat.isPrivateChat(chat)) {
-                        private_chat.getModel().create(chat).then((data) => {
-                            // Notify all socket.io clients
-                            /*ios.emit('broadcast', data );*/
-                            return res.status(200).json({ error: false, errormessage: "", id: data._id });
-                        }).catch((reason) => {
-                            return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
-                        });
-                    }
-                    else
-                        return next({ statusCode: 404, error: true, errormessage: "Data is not a valid Private Chat" });
-                }
-                else
-                    return next({ statusCode: 404, error: true, errormessage: "Data is not a valid Message" });
-            }).catch((reason) => {
-                return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
-            });
-        }
-    }).catch((reason) => {
-        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
-    });
-});
-app.get("/private_chat", generalOperations.auth, (req, res, next) => {
-    private_chat.getModel().find({ $or: [{ sender: req.user.id }, { insertionist: req.user.id }] })
-        .sort({ "messages.timestamp": -1 }).then((documents) => {
-        return res.status(200).json(documents);
-    }).catch((reason) => {
-        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
-    });
-});
-app.put("/private_chat/:id", generalOperations.auth, (req, res, next) => {
-    var body = req.body;
-    private_chat.getModel().findById(req.params.id).then((chat) => {
-        return chat;
-    }).then((data) => {
-        if (data.sender == req.user.id || data.insertionist == req.user.id) {
-            body.timestamp = new Date();
-            body.author = req.user.id;
-            if (message.isMessage(body)) {
-                var m = message.newMessage(body);
-                data.messages.push(m);
-                data.save().then((data) => {
+app.post("/private_chat", generalOperations.auth, privateChatOperations.postPrivateChat);
+/*
+app.post( "/private_chat", generalOperations.auth, (req,res,next) => {
+  var body = req.body;
+  console.log(req.user.id)
+  private_chat.getModel().find({$and: [{insertion_id: body.insertion_id}, {sender: req.user.id}]}).then((data) =>{
+    console.log(data)
+      if(data.length) // UTILIZZARE app.put("/private_chat/:id")
+        return next({ statusCode:404, error: true, errormessage: "c'è"});
+      else{
+        insertion.getModel().findById(body.insertion_id).then((insertion)=> {
+          return insertion;
+        }).then((data)=>{
+            var m = {content: body.message, author: req.user.id, timestamp: new Date()}
+            if(message.isMessage(m)){
+                var messages = [m];
+                var chat = {insertion_id: data.id, insertionist: data.insertionist.toString(), sender: req.user.id, messages: messages}
+      
+                if(private_chat.isPrivateChat(chat)){
+                  private_chat.getModel().create( chat ).then( ( data ) => {
+                    // Notify all socket.io clients
+                    //ios.emit('broadcast', data );
+              
                     return res.status(200).json({ error: false, errormessage: "", id: data._id });
-                }).catch((reason) => {
-                    return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason.errmsg });
-                });
-            }
-            else
-                return next({ statusCode: 404, error: true, errormessage: "Data is not a valid Message" });
-        }
-        else
-            return next({ statusCode: 404, error: true, errormessage: "You can't post in this chat" });
-    }).catch((reason) => {
-        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
-    });
+                  }).catch((reason) => {
+                    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+                  })
+                }else
+                  return next({ statusCode:404, error: true, errormessage: "Data is not a valid Private Chat" });
+          }else
+            return next({ statusCode:404, error: true, errormessage: "Data is not a valid Message" });
+        }).catch( (reason) => {
+          return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+        })
+      }
+  }).catch( (reason) => {
+  return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+  })
 });
-app.get("/private_chat/:id", generalOperations.auth, (req, res, next) => {
-    private_chat.getModel().findById(req.params.id).then((document) => {
-        if (document.sender == req.user.id || document.insertionist == req.user.id)
-            return res.status(200).json(document);
-        else
-            return next({ statusCode: 404, error: true, errormessage: "You can't acces this chat" });
-    }).catch((reason) => {
-        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
-    });
+*/
+app.get("/private_chat", generalOperations.auth, privateChatOperations.getPrivateChat);
+/*
+app.get("/private_chat", generalOperations.auth, (req,res,next)=> {
+
+  private_chat.getModel().find( {$or: [{sender: req.user.id}, {insertionist: req.user.id}]})
+                                .sort({"messages.timestamp" : -1}).then( (documents) => {
+    return res.status(200).json( documents );
+  }).catch( (reason) => {
+    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+  })
 });
+*/
+app.put("/private_chat/:id", generalOperations.auth, privateChatOperations.putPrivateChat);
+/*
+app.put("/private_chat/:id", generalOperations.auth, (req,res,next)=>{
+  var body = req.body;
+  private_chat.getModel().findById(req.params.id).then( (chat)=> {
+      return chat;
+  }).then((data)=>{
+
+    if(data.sender == req.user.id || data.insertionist == req.user.id){
+      body.timestamp = new Date()
+      body.author = req.user.id
+
+      if(message.isMessage(body)){
+        var m = message.newMessage(body);
+        data.messages.push(m);
+
+        data.save().then( (data) =>  {
+          return res.status(200).json({ error: false, errormessage: "", id: data._id });
+        }).catch( (reason) => {
+          return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
+        })
+      }else
+        return next({ statusCode:404, error: true, errormessage: "Data is not a valid Message" });
+    }else
+      return next({ statusCode:404, error: true, errormessage: "You can't post in this chat" });
+
+  }).catch( (reason) => {
+    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+  })
+})
+*/
+app.get("/private_chat/:id", generalOperations.auth, privateChatOperations.getPrivateChatById);
+/*
+app.get("/private_chat/:id", generalOperations.auth, (req,res,next)=> {
+
+  private_chat.getModel().findById( req.params.id ).then( (document) => {
+    if(document.sender == req.user.id || document.insertionist == req.user.id)
+      return res.status(200).json( document);
+    else
+      return next({ statusCode:404, error: true, errormessage: "You can't acces this chat" });
+  }).catch( (reason) => {
+    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+  })
+});
+*/
 app.post('/users/mods', generalOperations.auth, userOperations.postMod);
 app.post('/users/students', generalOperations.addTokenUserInfoIfExists, userOperations.postStudent);
 /*app.get('/users/:mail', auth, (req,res,next) => {

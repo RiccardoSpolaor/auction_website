@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getModel = exports.getSchema = exports.isPrivateChat = void 0;
+exports.getModel = exports.getSchema = void 0;
 const mongoose = require("mongoose");
 const message = require("./Message");
 // User defined type guard
@@ -10,13 +10,14 @@ const message = require("./Message");
 // A better approach is to use JSON schema
 //
 // passo solo insertion_id perchè dall'inserzione recupero l'insertionist 
-function isPrivateChat(arg) {
-    return arg && arg.insertion_id && typeof (arg.insertion_id) == 'string'
-        && arg.insertionist && typeof (arg.insertionist) == 'string'
-        && arg.sender && typeof (arg.sender) == 'string'
-        && arg.messages && Array.isArray(arg.messages) && arg.messages.length == 1;
+/*
+export function isPrivateChat(arg: any): arg is PrivateChat {
+    return arg && arg.insertion_id && typeof(arg.insertion_id) == 'string'
+               && arg.insertionist && typeof(arg.insertionist) == 'string'
+               && arg.sender && typeof(arg.sender) == 'string'
+               && arg.messages && Array.isArray(arg.messages) && arg.messages.length == 1
 }
-exports.isPrivateChat = isPrivateChat;
+*/
 /*
 export function isValidUpdate(arg: any, db: Insertion): boolean {
     console.log(JSON.stringify(db));

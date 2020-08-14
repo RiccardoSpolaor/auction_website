@@ -111,6 +111,7 @@ import * as insertion from './Insertion';
 
 import * as insertionOperations from './RoutingOperations/InsertionOperations'
 import * as userOperations from './RoutingOperations/UserOperations'
+import * as privateChatOperations from './RoutingOperations/PrivateChatOperations'
 import * as generalOperations from './RoutingOperations/GeneralOperations'
 
 import {Message} from './Message';
@@ -228,6 +229,10 @@ app.put( '/insertions/:id/price', generalOperations.auth, insertionOperations.pu
 
 
 /* nel body passiamo solo insertion_id e messaggio */
+
+app.post( "/private_chat", generalOperations.auth, privateChatOperations.postPrivateChat); 
+
+/*
 app.post( "/private_chat", generalOperations.auth, (req,res,next) => {
   var body = req.body;
   console.log(req.user.id)
@@ -247,7 +252,7 @@ app.post( "/private_chat", generalOperations.auth, (req,res,next) => {
                 if(private_chat.isPrivateChat(chat)){
                   private_chat.getModel().create( chat ).then( ( data ) => {
                     // Notify all socket.io clients
-                    /*ios.emit('broadcast', data );*/
+                    //ios.emit('broadcast', data );
               
                     return res.status(200).json({ error: false, errormessage: "", id: data._id });
                   }).catch((reason) => {
@@ -265,7 +270,11 @@ app.post( "/private_chat", generalOperations.auth, (req,res,next) => {
   return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
   })
 });
+*/
 
+app.get("/private_chat", generalOperations.auth, privateChatOperations.getPrivateChat) 
+
+/*
 app.get("/private_chat", generalOperations.auth, (req,res,next)=> { 
 
   private_chat.getModel().find( {$or: [{sender: req.user.id}, {insertionist: req.user.id}]})
@@ -275,7 +284,12 @@ app.get("/private_chat", generalOperations.auth, (req,res,next)=> {
     return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
   })
 });
+*/
 
+
+app.put("/private_chat/:id", generalOperations.auth, privateChatOperations.putPrivateChat)
+
+/*
 app.put("/private_chat/:id", generalOperations.auth, (req,res,next)=>{
   var body = req.body;
   private_chat.getModel().findById(req.params.id).then( (chat)=> {
@@ -304,7 +318,12 @@ app.put("/private_chat/:id", generalOperations.auth, (req,res,next)=>{
     return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
   })
 })
+*/
 
+app.get("/private_chat/:id", generalOperations.auth, privateChatOperations.getPrivateChatById) 
+
+
+/*
 app.get("/private_chat/:id", generalOperations.auth, (req,res,next)=> { 
 
   private_chat.getModel().findById( req.params.id ).then( (document) => { 
@@ -316,7 +335,7 @@ app.get("/private_chat/:id", generalOperations.auth, (req,res,next)=> {
     return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
   })
 });
-
+*/
 
 app.post('/users/mods', generalOperations.auth, userOperations.postMod);
 

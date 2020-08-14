@@ -18,12 +18,15 @@ export interface PrivateChat extends mongoose.Document {
 //
 
 // passo solo insertion_id perchè dall'inserzione recupero l'insertionist 
+
+/*
 export function isPrivateChat(arg: any): arg is PrivateChat {
     return arg && arg.insertion_id && typeof(arg.insertion_id) == 'string'
                && arg.insertionist && typeof(arg.insertionist) == 'string'
                && arg.sender && typeof(arg.sender) == 'string'
                && arg.messages && Array.isArray(arg.messages) && arg.messages.length == 1
 }
+*/
 
 /* 
 export function isValidUpdate(arg: any, db: Insertion): boolean {
