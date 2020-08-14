@@ -78,8 +78,8 @@ function postInsertion(req, res, next) {
         return next({ statusCode: 404, error: true, errormessage: "Unauthorized: Mods can't create new Insertions" });
     }
     var recinsertion = req.body;
-    recinsertion.expire_date = new Date(recinsertion.expire_date);
-    recinsertion.insertion_timestamp = new Date(new Date().toLocaleString('it-IT', { timeZone: 'Europe/Rome' }));
+    recinsertion.expire_date = new Date(recinsertion.expire_date.year, recinsertion.expire_date.month, recinsertion.expire_date.day, recinsertion.expire_date.hours, recinsertion.expire_date.minutes);
+    recinsertion.insertion_timestamp = new Date();
     recinsertion.insertionist = req.user.id;
     if (isInsertion(recinsertion)) {
         insertion.getModel().create(recinsertion).then((data) => {
