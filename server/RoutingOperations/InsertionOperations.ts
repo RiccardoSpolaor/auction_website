@@ -302,7 +302,7 @@ export function putInsertionPublicMessageById ( req : express.Request,res : expr
 
     if(message.isMessage(body)){
       var m = message.newMessage(body);
-      data.messages.push(m);
+      data.messages.unshift(m);
 
       data.save().then( (data) =>  {
         return res.status(200).json({ error: false, errormessage: "", id: data._id });

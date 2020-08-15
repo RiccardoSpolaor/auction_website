@@ -204,7 +204,7 @@ function updateInsertionContent(req, res, next, body, data) {
         else
             data.university = body.university;
     if (body.expire_date)
-        var expire_date = new Date(body.expire_date);
+        var expire_date = new Date(body.expire_date.year, body.expire_date.month, body.expire_date.day, body.expire_date.hours, body.expire_date.minutes);
     if (!expire_date.getDate || isNaN(expire_date.getDate()) || expire_date <= data.insertion_timestamp)
         errors.push('Invalid Expire Date');
     else
@@ -239,7 +239,7 @@ function putInsertionPublicMessageById(req, res, next) {
         body.author = req.user.id;
         if (message.isMessage(body)) {
             var m = message.newMessage(body);
-            data.messages.push(m);
+            data.messages.unshift(m);
             data.save().then((data) => {
                 return res.status(200).json({ error: false, errormessage: "", id: data._id });
             }).catch((reason) => {

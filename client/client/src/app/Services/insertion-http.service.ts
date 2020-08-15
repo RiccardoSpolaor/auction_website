@@ -74,10 +74,35 @@ export class InsertionHttpService {
     };
 
     return this.http.put( this.us.url + '/insertions/'+ params.id + '/price', {current_price: price}, options ).pipe(
-      tap( (data) => {
+      /*tap( (data) => {
         console.log(JSON.stringify(data) );
-
-      })
+      })*/
+      catchError(this.handleError)
     );
   }
+
+
+  put_message( params: any, m: any ): Observable<any> {
+    const options = {
+      headers: new HttpHeaders({
+        authorization: 'Bearer ' + this.us.get_token(),
+        'cache-control': 'no-cache',
+        'Content-Type':  'application/json',
+      })
+    };
+    console.log('Posting ' + JSON.stringify(m) );
+
+    if (params.m_id) {
+      return this.http.put( this.us.url + '/insertions/' + params.id + '/public_messages/' + params.m_id, {content: m},  options ).pipe(
+        catchError(this.handleError)
+      );
+    }else {
+      return this.http.put( this.us.url + '/insertions/' + params.id + '/public_messages', {content: m},  options ).pipe(
+        catchError(this.handleError)
+      );
+    }
+  }
+
+
+
 }

@@ -20,14 +20,14 @@ export class InsertionComponent implements OnInit {
   constructor( private sio: SocketioService , public ihs: InsertionHttpService, public us: UserService, private router: Router , private route: ActivatedRoute) { }
 
   ngOnInit() {
-    this.get_insertion(this.route.snapshot.params);
+    this.get_insertion();
     this.sio.connect().subscribe( (m) => {
       //this.get_insertions();
     });
   }
 
-  public get_insertion(params : any) {
-    this.ihs.get_insertion(params).subscribe(
+  public get_insertion() {
+    this.ihs.get_insertion(this.route.snapshot.params).subscribe(
       ( insertion ) => {
         this.insertion = insertion;
         this.setRemainingTime()
@@ -67,7 +67,7 @@ export class InsertionComponent implements OnInit {
     this.ihs.put_price(this.route.snapshot.params,Number(price)).subscribe(
       ( data ) => {
         this.errmessage = undefined;
-        this.get_insertion(this.route.snapshot.params);
+        this.get_insertion();
       } , (err) => {
         this.errmessage = err.message;
       }

@@ -26,6 +26,7 @@ import { SignupComponent } from './Components/signup/signup.component';
 import { SignupmodComponent } from './Components/signupmod/signupmod.component';
 import { EditProfileComponent } from './Components/edit-profile/edit-profile.component';
 import { InsertionComponent } from './Components/insertion/insertion.component';
+import { MessagePostComponent } from './Components/message-post/message-post.component';
 
 @NgModule({
   declarations: [
@@ -37,6 +38,7 @@ import { InsertionComponent } from './Components/insertion/insertion.component';
     SignupmodComponent,
     EditProfileComponent,
     InsertionComponent,
+    MessagePostComponent
   ],
   imports: [
     MDBBootstrapModule.forRoot(),

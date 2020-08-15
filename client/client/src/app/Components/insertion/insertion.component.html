@@ -1,12 +1,14 @@
-<div [ngClass]="{'border-success': !insertion.closed, 'border-danger': insertion.closed}" class="card mb-3" style="margin: 5px;" > 
+<div *ngIf = 'insertion' [ngClass]="{'border-success': !insertion.closed, 'border-danger': insertion.closed}" class="card mb-3" style="margin: 5px;" 
+[ngStyle]="{'background-color': insertion.closed ? 'rgb(245, 175, 158)' : 'rgb(191, 238, 191)'}"> 
 
     <div [ngClass]="{'bg-success': !insertion.closed, 'bg-danger': insertion.closed}" class="card-header p-3 mb-2 text-black">
-        <h6 *ngIf='!insertion.closed' class ="float-left font-weight-bold">OPEN</h6>
-        <h6 *ngIf='insertion.closed' class ="float-left font-weight-bold">CLOSED</h6>
-        <h6 *ngIf='!insertion.closed' class ="float-right text-align-right"><b class = "font-weight-bold">Remaining time: </b>{{ insertion.remaining_time }}</h6>
+        <h5 *ngIf='!insertion.closed' class ="float-left font-weight-bold">OPEN</h5>
+        <h5 *ngIf='insertion.closed' class ="float-left font-weight-bold">CLOSED</h5>
+        <h5 *ngIf='!insertion.closed' class ="float-right text-align-right"><b class = "font-weight-bold">Remaining time: </b>{{ insertion.remaining_time }}</h5>
     </div>
 
     <div class="card-body">
+
         <div class = "card-block float-right text-align-right">    
             <p class="card-text">by: &nbsp; {{insertion.insertionist.username}}&nbsp;<i class="far fa-user-circle"></i></p> 
             <p class="card-text mb-2">from: &nbsp;{{insertion.insertionist.location}}</p> 
@@ -23,7 +25,7 @@
         <h6 class="card-subtitle text-center">Current price: {{ get_current_price() }}</h6>
         <h6 *ngIf="hasToken() && (getToken().mod || getToken().id == insertion.insertionist._id)" class="card-subtitle text-center my-1">Reserve price: {{ insertion.reserve_price }}</h6>
 
-        <div *ngIf="hasToken() && !getToken().mod && getToken().id != insertion.insertionist._id" class="form-group text-center">
+        <div *ngIf="!insertion.closed && hasToken() && !getToken().mod && getToken().id != insertion.insertionist._id" class="form-group text-center">
             <input type="text" #price required name="price" class="form-control text-center my-1" style="width: 200px; margin:auto;" placeholder="Enter price">
     
             <div *ngIf="errmessage" class="alert alert-danger" role="alert">
@@ -37,6 +39,30 @@
 
         <!--- <span *ngFor="let tag of message.tags" class="badge badge-secondary tag">{{tag}}</span>--->
     </div>
+</div>
+
+<div *ngIf = 'insertion'>
+    <h4 *ngIf = 'insertion.messages.length' class="font-weight-bold mb-3" style="margin: 3px;">Questions and Answers:</h4>
+
+    <app-message-post (posted)="get_insertion()" ></app-message-post>
+
+    <div *ngFor = "let message of insertion.messages" class = "card mb-3 border-dark" style="margin: 3px; background-color: rgb(246, 241, 190)" >
+        <div class="card-body">
+            <h5 class="card-title"><i class="fa fa-user"></i>&nbsp;{{message.author.username}}</h5>        
+            <h6 class="card-subtitle mb-2 text-muted">{{message.timestamp | date}} / {{message.timestamp | date:'shortTime'}}</h6>
+            <p class="card-text">{{ message.content }}</p>
+            <h6 *ngIf = 'message.responses.length' class="font-weight-bold" style="margin-left: 50px; margin-right: 50px;">Answers:</h6>
+            <span *ngFor="let response of message.responses" class="card mb-3 border-dark" style="margin-left: 50px; margin-right: 50px;">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fa fa-user"></i>&nbsp;{{response.author.username}}</h5>        
+                    <h6 class="card-subtitle mb-2 text-muted">{{response.timestamp | date}} / {{response.timestamp | date:'shortTime'}}</h6>
+                    <p class="card-text">{{ response.content }}</p>
+                </div>
+            </span>
+        </div>
+    </div>
+
+
 </div>
 
  
