@@ -42,23 +42,28 @@
 </div>
 
 <div *ngIf = 'insertion'>
+
+    <app-message-post isAnswer="false" (posted)="get_insertion()"></app-message-post>
     <h4 *ngIf = 'insertion.messages.length' class="font-weight-bold mb-3" style="margin: 3px;">Questions and Answers:</h4>
 
-    <app-message-post (posted)="get_insertion()" ></app-message-post>
-
     <div *ngFor = "let message of insertion.messages" class = "card mb-3 border-dark" style="margin: 3px; background-color: rgb(246, 241, 190)" >
-        <div class="card-body">
-            <h5 class="card-title"><i class="fa fa-user"></i>&nbsp;{{message.author.username}}</h5>        
-            <h6 class="card-subtitle mb-2 text-muted">{{message.timestamp | date}} / {{message.timestamp | date:'shortTime'}}</h6>
-            <p class="card-text">{{ message.content }}</p>
-            <h6 *ngIf = 'message.responses.length' class="font-weight-bold" style="margin-left: 50px; margin-right: 50px;">Answers:</h6>
-            <span *ngFor="let response of message.responses" class="card mb-3 border-dark" style="margin-left: 50px; margin-right: 50px;">
-                <div class="card-body">
-                    <h5 class="card-title"><i class="fa fa-user"></i>&nbsp;{{response.author.username}}</h5>        
-                    <h6 class="card-subtitle mb-2 text-muted">{{response.timestamp | date}} / {{response.timestamp | date:'shortTime'}}</h6>
-                    <p class="card-text">{{ response.content }}</p>
-                </div>
-            </span>
+        <div class="container">
+            <div class="card-body mr-2 ml-2">
+                <button type="submit" class="btn btn-outline-dark float-right text-align-right" routerLink="/insertions/{{insertion._id}}/public_message/{{message._id}}">
+                    Reply <i class="fa fa-reply"></i>
+                </button>  
+                <h5 class="card-title"><i class="fa fa-user"></i>&nbsp;{{message.author.username}}</h5>      
+                <h6 class="card-subtitle mb-2 text-muted">{{message.timestamp | date}} / {{message.timestamp | date:'shortTime'}}</h6>
+                <p class="card-text">{{ message.content }}</p>
+                <h6 *ngIf = 'message.responses.length' class="font-weight-bold" style="margin-left: 50px; margin-right: 50px;">Answers:</h6>
+                <span *ngFor="let response of message.responses" class="card mb-3 border-dark" style="margin-left: 50px; margin-right: 50px;">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fa fa-user"></i>&nbsp;{{response.author.username}}</h5>        
+                        <h6 class="card-subtitle mb-2 text-muted">{{response.timestamp | date}} / {{response.timestamp | date:'shortTime'}}</h6>
+                        <p class="card-text">{{ response.content }}</p>
+                    </div>
+                </span>
+            </div>
         </div>
     </div>
 

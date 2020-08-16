@@ -29,11 +29,11 @@
  * 
  *     /insertions/:id/public_messages/:m_id     -         PUT         Posts an answer to a message 
  * 
- *     /private_chat                      -                GET         Returns all the private chats of the current user where he is either the sender or the receiver 
- *     /private_chat                      -                POST        Create a new private chat where the sender is the current user and the receiver (è quello dell'nserzione visualizzata al momento e lo stesso vale per l'id )
+ *     /private_chats                     -                GET         Returns all the private chats of the current user where he is either the sender or the receiver 
+ *     /private_chats                     -                POST        Create a new private chat where the sender is the current user and the receiver (è quello dell'nserzione visualizzata al momento e lo stesso vale per l'id )
  * 
- *     /private_chat/:id                  -                GET         Returns all the messsages of a specific chat
- *     /private_chat/:id                  -                PUT         Post a message in a specific chat
+ *     /private_chats/:id                  -                GET         Returns all the messsages of a specific chat
+ *     /private_chats/:id                  -                PUT         Post a message in a specific chat
  * 
  *     /users                ?           ?mod               GET         Returns the list of users
  *                                  
@@ -233,7 +233,7 @@ app.put( '/insertions/:id/price', generalOperations.auth, insertionOperations.pu
 
 /* nel body passiamo solo insertion_id e messaggio */
 
-app.post( "/private_chat", generalOperations.auth, privateChatOperations.postPrivateChat); 
+app.post( "/private_chats", generalOperations.auth, privateChatOperations.postPrivateChat); 
 
 /*
 app.post( "/private_chat", generalOperations.auth, (req,res,next) => {
@@ -275,7 +275,7 @@ app.post( "/private_chat", generalOperations.auth, (req,res,next) => {
 });
 */
 
-app.get("/private_chat", generalOperations.auth, privateChatOperations.getPrivateChat) 
+app.get("/private_chats", generalOperations.auth, privateChatOperations.getPrivateChat) 
 
 /*
 app.get("/private_chat", generalOperations.auth, (req,res,next)=> { 
@@ -290,7 +290,7 @@ app.get("/private_chat", generalOperations.auth, (req,res,next)=> {
 */
 
 
-app.put("/private_chat/:id", generalOperations.auth, privateChatOperations.putPrivateChat)
+app.put("/private_chats/:id", generalOperations.auth, privateChatOperations.putPrivateChat)
 
 /*
 app.put("/private_chat/:id", generalOperations.auth, (req,res,next)=>{
@@ -323,7 +323,7 @@ app.put("/private_chat/:id", generalOperations.auth, (req,res,next)=>{
 })
 */
 
-app.get("/private_chat/:id", generalOperations.auth, privateChatOperations.getPrivateChatById) 
+app.get("/private_chats/:id", generalOperations.auth, privateChatOperations.getPrivateChatById) 
 
 
 /*
@@ -389,7 +389,7 @@ app.get("/login", passport.authenticate('basic', { session: false }), (req,res,n
   };
 
   console.log("Login granted. Generating token" );
-  var token_signed = jsonwebtoken.sign(tokendata, process.env.JWT_SECRET, { expiresIn: '1h' } );
+  var token_signed = jsonwebtoken.sign(tokendata, process.env.JWT_SECRET, { expiresIn: '7d' } );
 
   // Note: You can manually check the JWT content at https://jwt.io
 

@@ -5,7 +5,7 @@
           <p class="card-text mb-2">from: &nbsp;{{insertion.insertionist.location}}</p> 
           <p class="card-text text-muted mb-2"><i class="far fa-clock"></i>&nbsp;{{insertion.insertion_timestamp | date}} / {{insertion.insertion_timestamp | date:'shortTime'}}</p>
         </div>
-        <a [routerLink]="['/insertion', insertion._id]"><h2 class="card-title"><i class="fa fa-book"></i>&nbsp;{{insertion.title}}</h2></a>
+        <a [routerLink]="['/insertions', insertion._id]"><h2 class="card-title"><i class="fa fa-book"></i>&nbsp;{{insertion.title}}</h2></a>
         <h4 class="card-subtitle mb-2"> {{insertion.authors.join(' ')}}</h4>
         <h6 class="card-subtitle text-muted mb-2"> edition:&nbsp;{{insertion.edition}}</h6> 
         <p class="card-subtitle">{{ insertion.faculty }}</p>

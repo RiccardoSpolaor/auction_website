@@ -1,0 +1,48 @@
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+
+import { SocketioService } from '../../Services/socketio.service';
+import { UserService } from '../../Services/user.service';
+import { InsertionHttpService } from '../../Services/insertion-http.service';
+import { Insertion } from '../../Objects/Insertion';
+import { Message } from '../../Objects/Message';
+
+@Component({
+  selector: 'app-message-reply',
+  templateUrl: './message-reply.component.html',
+  styleUrls: ['./message-reply.component.css']
+})
+export class MessageReplyComponent implements OnInit {
+
+  public insertion : Insertion
+  public message : Message
+  constructor( public ihs: InsertionHttpService, public us: UserService, private router: Router , private route: ActivatedRoute) {}
+
+  ngOnInit(): void {
+    this.get_insertion()
+  }
+
+  public get_insertion() {
+    this.ihs.get_insertion(this.route.snapshot.params).subscribe(
+      ( insertion ) => {
+        this.insertion = insertion;
+        this.get_message();
+      } , (err) => {
+        console.log(err)
+      }
+    );
+  }
+
+  public get_message() {
+    this.message = this.insertion.messages.find((element)=>{return element._id==this.route.snapshot.params.m_id})
+    if(!this.message)
+      console.log("Not Found")
+
+  }
+
+  public returnToInsertion(){
+    this.router.navigate(['/insertions/'+this.route.snapshot.params.id])
+  }
+
+
+}

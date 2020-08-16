@@ -1,11 +1,18 @@
-<div class="jumbotron">
+<div class="jumbotron mb-3 py-4">
     <div class="container">
-        <div class="form-group">
+        <h3>Post new message</h3>
+        <div class="form-group my-3">
             <!--<label for="messagetext">Message</label>-->
             <textarea class="form-control" [(ngModel)]="message" #messagetx id="messagetext" 
-            rows="3" (keyup.enter)="post_message()" placeholder="Enter your message here"></textarea>
+            rows="3" placeholder="Enter your message here"></textarea>
         </div>
-    
-        <button type="submit" class="btn btn-primary" (click)="post_message()" >Post <i class="fas fa-paper-plane"></i></button>
+        <div *ngIf="isAnswer=='false'">
+            <div class="checkbox ml-1">
+              <input #check type="checkbox">
+              <label for="checkbox"> &nbsp; Post as private message</label>
+            </div>
+            <button type="submit" class="btn btn-primary" (click)="post_message(check.checked)" >Post <i class="fas fa-paper-plane"></i></button>
+        </div>
+        <button *ngIf="isAnswer=='true'" type="submit" class="btn btn-primary" (click)="post_message()" >Post <i class="fas fa-paper-plane"></i></button>
     </div>
 </div>

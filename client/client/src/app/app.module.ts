@@ -27,6 +27,9 @@ import { SignupmodComponent } from './Components/signupmod/signupmod.component';
 import { EditProfileComponent } from './Components/edit-profile/edit-profile.component';
 import { InsertionComponent } from './Components/insertion/insertion.component';
 import { MessagePostComponent } from './Components/message-post/message-post.component';
+import { MessageReplyComponent } from './Components/message-reply/message-reply.component';
+import { PrivateChatListComponent } from './Components/private-chat-list/private-chat-list.component';
+import { PrivateChatHttpService } from './Services/private-chat-http.service';
 
 @NgModule({
   declarations: [
@@ -38,7 +41,9 @@ import { MessagePostComponent } from './Components/message-post/message-post.com
     SignupmodComponent,
     EditProfileComponent,
     InsertionComponent,
-    MessagePostComponent
+    MessagePostComponent,
+    MessageReplyComponent,
+    PrivateChatListComponent
   ],
   imports: [
     MDBBootstrapModule.forRoot(),
@@ -50,7 +55,8 @@ import { MessagePostComponent } from './Components/message-post/message-post.com
   providers: [
     {provide: UserService, useClass: UserHttpService },
     {provide: SocketioService, useClass: SocketioService },
-    {provide: InsertionHttpService, useClass: InsertionHttpService} /* Here we can select the specifc service instance */
+    {provide: InsertionHttpService, useClass: InsertionHttpService}, /* Here we can select the specifc service instance */
+    {provide: PrivateChatHttpService, useClass: PrivateChatHttpService}
   ],
   bootstrap: [AppComponent]
 })

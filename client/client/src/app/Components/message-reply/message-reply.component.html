@@ -1,0 +1,10 @@
+<div class = "card mb-3 border-dark" style="margin: 3px; background-color: rgb(246, 241, 190)" >
+    <div class="container">
+        <div class="card-body mr-2 ml-2">
+            <h5 class="card-title"><i class="fa fa-user"></i>&nbsp;{{message.author.username}}</h5>      
+            <h6 class="card-subtitle mb-2 text-muted">{{message.timestamp | date}} / {{message.timestamp | date:'shortTime'}}</h6>
+            <p class="card-text">{{ message.content }}</p>
+        </div>
+    </div>
+</div>
+<app-message-post isAnswer="true" (posted)="returnToInsertion()"></app-message-post>

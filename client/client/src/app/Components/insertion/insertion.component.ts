@@ -6,7 +6,6 @@ import { UserService } from '../../Services/user.service';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
 import { Insertion } from '../../Objects/Insertion';
 
-
 @Component({
   selector: 'app-insertion',
   templateUrl: './insertion.component.html',
@@ -17,7 +16,7 @@ export class InsertionComponent implements OnInit {
   public insertion: Insertion;
   public errmessage = undefined;
 
-  constructor( private sio: SocketioService , public ihs: InsertionHttpService, public us: UserService, private router: Router , private route: ActivatedRoute) { }
+  constructor( private sio: SocketioService , public ihs: InsertionHttpService, public us: UserService, private router: Router , private route: ActivatedRoute) {}
 
   ngOnInit() {
     this.get_insertion();

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Message } from '../Objects/Message';
 import { Insertion } from '../Objects/Insertion';
 
 import { Observable } from 'rxjs';
@@ -15,7 +14,7 @@ export class InsertionHttpService {
   private messages = [];
 
   constructor( private http: HttpClient, private us: UserService ) {
-    console.log('Message service instantiated');
+    console.log('Insertion service instantiated');
     console.log('User service token: ' + us.get_token() );
 }
 

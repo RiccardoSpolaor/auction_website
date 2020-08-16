@@ -3,10 +3,11 @@
 
 
 export interface Message {
+    _id: string,
     content: string,
     author: {
         _id: string,
-        usernme: string,
+        username: string,
         mail: string
     },
     timestamp: Date,
