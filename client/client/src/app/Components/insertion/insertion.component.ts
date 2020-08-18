@@ -68,7 +68,7 @@ export class InsertionComponent implements OnInit {
         this.errmessage = undefined;
         this.get_insertion();
       } , (err) => {
-        this.errmessage = err.message;
+        this.errmessage = err.error.errormessage || err.error.message;
       }
     );
   }
@@ -84,6 +84,16 @@ export class InsertionComponent implements OnInit {
       id: this.us.get_id(),
       mod: this.us.is_moderator(),
       validated: this.us.is_validated()
+    }
+  }
+
+  public delete_insertion() {
+    if(confirm("Do you wanna?")) {
+      this.ihs.delete_insertion (this.route.snapshot.params).subscribe(
+        (data) => {
+          this.router.navigate(['/insertions'])
+        }
+      );
     }
   }
    

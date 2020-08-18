@@ -30,6 +30,8 @@ import { MessagePostComponent } from './Components/message-post/message-post.com
 import { MessageReplyComponent } from './Components/message-reply/message-reply.component';
 import { PrivateChatListComponent } from './Components/private-chat-list/private-chat-list.component';
 import { PrivateChatHttpService } from './Services/private-chat-http.service';
+import { PostInsertionComponent } from './Components/post-insertion/post-insertion.component';
+import { EditInsertionComponent } from './Components/edit-insertion/edit-insertion.component';
 
 @NgModule({
   declarations: [
@@ -43,7 +45,9 @@ import { PrivateChatHttpService } from './Services/private-chat-http.service';
     InsertionComponent,
     MessagePostComponent,
     MessageReplyComponent,
-    PrivateChatListComponent
+    PrivateChatListComponent,
+    PostInsertionComponent,
+    EditInsertionComponent
   ],
   imports: [
     MDBBootstrapModule.forRoot(),

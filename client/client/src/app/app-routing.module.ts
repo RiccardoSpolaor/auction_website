@@ -8,6 +8,8 @@ import { EditProfileComponent } from './Components/edit-profile/edit-profile.com
 import { InsertionComponent } from './Components/insertion/insertion.component';
 import { MessageReplyComponent } from './Components/message-reply/message-reply.component';
 import { PrivateChatListComponent } from './Components/private-chat-list/private-chat-list.component';
+import { PostInsertionComponent } from './Components/post-insertion/post-insertion.component';
+import { EditInsertionComponent } from './Components/edit-insertion/edit-insertion.component'
 
 const routes: Routes = [
   { path: '', redirectTo: '/insertions', pathMatch: 'full' },
@@ -18,7 +20,9 @@ const routes: Routes = [
   { path: 'editprofile', component: EditProfileComponent },
   { path: 'insertions/:id', component: InsertionComponent },
   { path: 'insertions/:id/public_message/:m_id', component: MessageReplyComponent},
-  { path: 'private_chats', component: PrivateChatListComponent}
+  { path: 'private_chats', component: PrivateChatListComponent},
+  { path: 'postinsertion', component : PostInsertionComponent},
+  { path: 'editinsertion/:id', component : EditInsertionComponent}
 ];
 
 @NgModule({

@@ -14,7 +14,18 @@
             <p class="card-text mb-2">from: &nbsp;{{insertion.insertionist.location}}</p> 
             <p class="card-text text-muted mb-2"><i class="far fa-clock"></i>&nbsp;{{insertion.insertion_timestamp | date}} / {{insertion.insertion_timestamp | date:'shortTime'}}</p>
         </div>
-        <h2 class="card-title"><i class="fa fa-book"></i>&nbsp;{{insertion.title}}</h2>
+        <h2 class="card-title"><i class="fa fa-book"></i>&nbsp;{{insertion.title}} &nbsp;
+            <button class ="btn btn-outline-dark text-align-right" 
+            *ngIf="!insertion.closed && hasToken() && ((getToken().mod && getToken().validated) || getToken().id == insertion.insertionist._id)" 
+            [routerLink]="['/editinsertion', insertion._id]" >
+                <i class="fa fa-edit"></i>
+            </button>
+            <button class ="btn btn-outline-dark text-align-right" 
+            *ngIf="hasToken() && getToken().mod && getToken().validated" 
+            (click) = "delete_insertion()">
+                <i class="fa fa-trash"></i>
+            </button>
+        </h2>
         <h4 class="card-subtitle mb-2"> {{insertion.authors.join(' ')}}</h4>
         <h6 class="card-subtitle text-muted mb-2"> edition:&nbsp;{{insertion.edition}}</h6> 
         <p class="card-subtitle">{{ insertion.faculty }}</p>
@@ -23,13 +34,13 @@
         <h6 class="card-subtitle">Current winner: {{ get_current_winner() }}</h6>
         <h6 class="card-subtitle text-center text-muted mb-2">Start price: {{ insertion.start_price }}</h6>
         <h6 class="card-subtitle text-center">Current price: {{ get_current_price() }}</h6>
-        <h6 *ngIf="hasToken() && (getToken().mod || getToken().id == insertion.insertionist._id)" class="card-subtitle text-center my-1">Reserve price: {{ insertion.reserve_price }}</h6>
+        <h6 *ngIf="hasToken() && ((getToken().mod && getToken().validated) || getToken().id == insertion.insertionist._id)" class="card-subtitle text-center my-1">Reserve price: {{ insertion.reserve_price }}</h6>
 
         <div *ngIf="!insertion.closed && hasToken() && !getToken().mod && getToken().id != insertion.insertionist._id" class="form-group text-center">
             <input type="text" #price required name="price" class="form-control text-center my-1" style="width: 200px; margin:auto;" placeholder="Enter price">
     
-            <div *ngIf="errmessage" class="alert alert-danger" role="alert">
-                Login error: {{errmessage}}
+            <div *ngIf="errmessage" class="alert alert-danger" role="alert" style="width: 200px; margin:auto;" >
+                Error: {{errmessage}}
             </div>
             
             <button class='btn btn-outline-success my-2 my-sm-2'(click)="put_price(price.value);">Bet</button>

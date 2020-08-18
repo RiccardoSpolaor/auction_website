@@ -63,6 +63,22 @@ export class InsertionHttpService {
       );
   }
 
+  post_insertion(insertion : any) : Observable <any> {
+    const options = {
+      headers: new HttpHeaders({
+        authorization: 'Bearer ' + this.us.get_token(),
+        'cache-control': 'no-cache',
+        'Content-Type':  'application/json',
+      })
+    };
+
+    return this.http.post( this.us.url + '/insertions', insertion, options ).pipe(
+      tap( (data) => {
+        console.log(JSON.stringify(data) );
+      })
+    );
+  }
+
   put_price(params: any, price: number):Observable<any> {
     const options = {
       headers: new HttpHeaders({
@@ -73,10 +89,9 @@ export class InsertionHttpService {
     };
 
     return this.http.put( this.us.url + '/insertions/'+ params.id + '/price', {current_price: price}, options ).pipe(
-      /*tap( (data) => {
+      tap( (data) => {
         console.log(JSON.stringify(data) );
-      })*/
-      catchError(this.handleError)
+      })
     );
   }
 
@@ -102,6 +117,19 @@ export class InsertionHttpService {
     }
   }
 
+  delete_insertion( params: any ): Observable<any> {
+    const options = {
+      headers: new HttpHeaders({
+        authorization: 'Bearer ' + this.us.get_token(),
+        'cache-control': 'no-cache',
+        'Content-Type':  'application/json',
+      })
+    };
+    console.log('Deleting Insertion ' + JSON.stringify(params.id) );
 
+    return this.http.delete( this.us.url + '/insertions/' + params.id, options ).pipe(
+      catchError(this.handleError)
+    );
+  }
 
 }
