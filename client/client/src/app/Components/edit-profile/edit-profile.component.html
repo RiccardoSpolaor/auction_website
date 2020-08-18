@@ -68,7 +68,7 @@
       </div>  
     
       <div *ngIf="errmessage" class="alert alert-danger" role="alert">
-        Login error: {{errmessage}}
+        Edit Error: {{errmessage}}
       </div>
     
       <button class="btn btn-lg btn-primary btn-block" [disabled]="getToken().mod && !getToken().validated && (!mail.valid || !password.valid || !username.valid || !name.valid || !surname.valid || !location.valid)" (click)="edit();">Edit</button>

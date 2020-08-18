@@ -117,6 +117,25 @@ export class InsertionHttpService {
     }
   }
 
+  edit_insertion (params: any, insertion: any ): Observable<any> {
+    const options = {
+      headers: new HttpHeaders({
+        authorization: 'Bearer ' + this.us.get_token(),
+        'cache-control': 'no-cache',
+        'Content-Type':  'application/json',
+      })
+    };
+    console.log('Editing Insertion ' + params.id );
+
+    
+    return this.http.put( this.us.url + '/insertions/' + params.id + '/content', insertion,  options ).pipe(
+      tap( (data) => {
+        console.log(JSON.stringify(data))
+      })
+    );
+    
+  }
+
   delete_insertion( params: any ): Observable<any> {
     const options = {
       headers: new HttpHeaders({

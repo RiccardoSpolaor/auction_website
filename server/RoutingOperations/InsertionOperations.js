@@ -203,12 +203,13 @@ function updateInsertionContent(req, res, next, body, data) {
             errors.push('Invalid University');
         else
             data.university = body.university;
-    if (body.expire_date)
+    if (body.expire_date) {
         var expire_date = new Date(body.expire_date.year, body.expire_date.month, body.expire_date.day, body.expire_date.hours, body.expire_date.minutes);
-    if (!expire_date.getDate || isNaN(expire_date.getDate()) || expire_date <= data.insertion_timestamp)
-        errors.push('Invalid Expire Date');
-    else
-        data.expire_date = expire_date;
+        if (!expire_date.getDate || isNaN(expire_date.getDate()) || expire_date <= data.insertion_timestamp)
+            errors.push('Invalid Expire Date');
+        else
+            data.expire_date = expire_date;
+    }
     if (errors.length)
         return next({ statusCode: 404, error: true, errormessage: "Errors: " + errors });
     data.save().then((data) => {

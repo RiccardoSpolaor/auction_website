@@ -249,7 +249,7 @@ export function updateInsertionContent (req : express.Request,res : express.Resp
     else
       data.university = body.university
 
-  if (body.expire_date) 
+  if (body.expire_date) {
     var expire_date : Date = new Date(
       body.expire_date.year, 
       body.expire_date.month,
@@ -260,6 +260,7 @@ export function updateInsertionContent (req : express.Request,res : express.Resp
       errors.push('Invalid Expire Date');
     else
       data.expire_date = expire_date
+  }
 
   if (errors.length)
       return next({ statusCode:404, error: true, errormessage: "Errors: " + errors});
