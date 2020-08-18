@@ -32,9 +32,9 @@
         <p class="card-subtitle">{{ insertion.university }}</p>
         <br><br>
         <h6 class="card-subtitle">Current winner: {{ get_current_winner() }}</h6>
-        <h6 class="card-subtitle text-center text-muted mb-2">Start price: {{ insertion.start_price }}</h6>
-        <h6 class="card-subtitle text-center">Current price: {{ get_current_price() }}</h6>
-        <h6 *ngIf="hasToken() && ((getToken().mod && getToken().validated) || getToken().id == insertion.insertionist._id)" class="card-subtitle text-center my-1">Reserve price: {{ insertion.reserve_price }}</h6>
+        <h6 class="card-subtitle text-center text-muted mb-2">Start price: {{ insertion.start_price | currency }}</h6>
+        <h6 class="card-subtitle text-center">Current price: {{ get_current_price() | currency }}</h6>
+        <h6 *ngIf="hasToken() && ((getToken().mod && getToken().validated) || getToken().id == insertion.insertionist._id)" class="card-subtitle text-center my-1">Reserve price: {{ insertion.reserve_price | currency }}</h6>
 
         <div *ngIf="!insertion.closed && hasToken() && !getToken().mod && getToken().id != insertion.insertionist._id" class="form-group text-center">
             <input type="text" #price required name="price" class="form-control text-center my-1" style="width: 200px; margin:auto;" placeholder="Enter price">
