@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { SocketioService } from '../../Services/socketio.service';
@@ -11,10 +11,11 @@ import { Insertion } from '../../Objects/Insertion';
   templateUrl: './insertion.component.html',
   styleUrls: ['./insertion.component.css']
 })
-export class InsertionComponent implements OnInit {
+export class InsertionComponent implements OnInit, OnDestroy {
 
   public insertion: Insertion;
   public errmessage = undefined;
+  private interval
 
   constructor( private sio: SocketioService , public ihs: InsertionHttpService, public us: UserService, private router: Router , private route: ActivatedRoute) {}
 
@@ -25,33 +26,54 @@ export class InsertionComponent implements OnInit {
     });
   }
 
+  ngOnDestroy() {
+    clearInterval(this.interval)
+  }
+
   public get_insertion() {
     this.ihs.get_insertion(this.route.snapshot.params).subscribe(
       ( insertion ) => {
         this.insertion = insertion;
-        this.setRemainingTime()
+        this.insertion.remaining_time = this.getRemainingTime()
+        if (this.insertion.remaining_time) {
+          this.interval = setInterval(() => {
+            this.insertion.remaining_time = this.getRemainingTime()
+            if (!this.insertion.remaining_time) {
+              this.insertion.closed = true;
+              clearInterval(this.interval)
+            }
+          }, 1000)
+        }
+        else {
+          this.insertion.closed = true
+        }
+        //this.setRemainingTime()
       } , (err) => {
         console.log(err)
+        this.router.navigate(['**'])
       }
     );
   }
 
-  private setRemainingTime() {
-    setInterval ( () => {
-        const date1 = new Date()
-        const date2 = new Date(this.insertion.expire_date)
-        const diffTime = date2.getTime() - date1.getTime();
-        var seconds = Math.floor(diffTime / 1000);
-        var minutes = Math.floor(seconds / 60);
-        var hours = Math.floor(minutes / 60);
-        var days = Math.floor(hours / 24);
 
-        hours %= 24
-        minutes %= 60;
-        seconds %= 60;
+  private getRemainingTime() {
+    const date1 = new Date()
+    const date2 = new Date(this.insertion.expire_date)
+    const diffTime = date2.getTime() - date1.getTime();
 
-        this.insertion.remaining_time = days + 'd ' + hours + 'h ' + minutes + 'm ' + seconds + 's'
-      }, 1000 )
+    if (diffTime <= 0)
+      return undefined
+
+    var seconds = Math.floor(diffTime / 1000);
+    var minutes = Math.floor(seconds / 60);
+    var hours = Math.floor(minutes / 60);
+    var days = Math.floor(hours / 24);
+
+    hours %= 24
+    minutes %= 60;
+    seconds %= 60;
+
+    return days + 'd ' + hours + 'h ' + minutes + 'm ' + seconds + 's'
   }
 
   public get_current_winner(): string{
@@ -88,7 +110,7 @@ export class InsertionComponent implements OnInit {
   }
 
   public delete_insertion() {
-    if(confirm("Do you wanna?")) {
+    if(confirm("Do you really want to delete this insertion?")) {
       this.ihs.delete_insertion (this.route.snapshot.params).subscribe(
         (data) => {
           this.router.navigate(['/insertions'])

@@ -1,0 +1,48 @@
+<div class="container" style="width: 800px; margin-top: 20px;" >
+
+    <div>  
+        <h1 class="h3 mb-3 font-weight-normal">Users List</h1>
+    </div>
+
+    <div *ngFor="let user of users" class="card" style="margin: 5px;" > 
+        <div class="card-body" [ngClass]="{'text-muted': !user.mod}" >
+            <h4 class="card-subtitle mb-2">
+                <i class = 'fa' [ngClass]="{ 'fa-user-circle': !user.mod, 'fa-star': user.mod }"></i> 
+                {{user.username}} ({{ hasToken() && getToken().id == user._id ? 'YOU' : (user.mod ? 'moderator':'user')}})
+                <button *ngIf = '!user.mod' type= 'button' class ='float-right btn-sm btn btn-outline-dark text-align-right' (click) = 'delete_user(user._id)'>
+                    <i class="fa fa-trash"></i>
+                </button>     
+            </h4>
+
+            <button type= 'button' class ='btn-sm btn btn-outline-dark text-align-right dropdown-toggle' data-toggle= 'collapse' attr.data-target = "#toggle-{{user._id}}">
+                <span class="caret">Info &nbsp; </span>
+            </button> 
+            <div id = 'toggle-{{user._id}}' class = 'collapse my-3' >
+                <h6 class="card-subtitle mb-2">mail: {{user.mail ? user.mail : 'none'}} </h6>
+                <h6 class="card-subtitle mb-2">location: {{user.location ? user.location : 'none'}} </h6>
+                <h6 class="card-subtitle mb-2">name: {{user.name ? user.name : 'none'}} </h6>
+                <h6 class="card-subtitle mb-2">surname: {{user.surname ? user.surname : 'none'}} </h6>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!--
+<div *ngFor="let insertion of insertions" [ngClass]="{'border-success': !insertion.closed, 'border-danger': insertion.closed}" class="card" style="margin: 5px;" > 
+    <div class="card-body">
+        <div class = "card-block float-right text-align-right">    
+          <p class="card-text">by: &nbsp;{{insertion.insertionist.username}}&nbsp;<i class="far fa-user-circle"></i></p> 
+          <p class="card-text mb-2">from: &nbsp;{{insertion.insertionist.location}}</p> 
+          <p class="card-text text-muted mb-2"><i class="far fa-clock"></i>&nbsp;{{insertion.insertion_timestamp | date}} / {{insertion.insertion_timestamp | date:'shortTime'}}</p>
+        </div>
+        <a [routerLink]="['/insertions', insertion._id]"><h2 class="card-title"><i class="fa fa-book"></i>&nbsp;{{insertion.title}}</h2></a>
+        <h4 class="card-subtitle mb-2"> {{insertion.authors.join(' ')}}</h4>
+        <h6 class="card-subtitle text-muted mb-2"> edition:&nbsp;{{insertion.edition}}</h6> 
+        <p class="card-subtitle">{{ insertion.faculty }}</p>
+        <p class="card-subtitle">{{ insertion.university }}</p>
+        <p *ngIf='insertion.current_price' class="card-subtitle">{{ insertion.current_price }}</p>
+        <p *ngIf='!insertion.closed' class="card-subtitle">Remaining time: {{ insertion.remaining_time }}</p>
+    </div>
+</div>
+
+-->

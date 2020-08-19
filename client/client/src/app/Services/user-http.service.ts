@@ -4,6 +4,8 @@ import { tap, catchError } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
 import * as jwtdecode from 'jwt-decode';
 
+import {User} from '../Objects/User'
+
 interface TokenData {
   username:string,
   mail:string,
@@ -100,6 +102,22 @@ export class UserHttpService {
     );
   }
 
+  delete_user(id : string): Observable<any> {
+    const options = {
+      headers: new HttpHeaders({
+        authorization: 'Bearer ' + this.get_token(),
+        'cache-control': 'no-cache',
+        'Content-Type':  'application/json',
+      })
+    };
+
+    return this.http.delete( this.url + '/users/' + id, options ).pipe(
+      tap( (data) => {
+        console.log(JSON.stringify(data) );
+      })
+    );
+  }
+
   set_token_from_storage(){
     this.token=localStorage.getItem('session_id')===''?undefined:localStorage.getItem('session_id')
   }
@@ -109,6 +127,14 @@ export class UserHttpService {
       this.token=localStorage.getItem("auction_website_token")
     }*/
     return this.token;
+  }
+
+  get_users() : Observable <User[]> {
+    return this.http.get<User[]>( this.url + '/users' ).pipe(
+      tap( (data) => {
+        console.log(JSON.stringify(data) );
+      })
+    );
   }
 
   get_username() {

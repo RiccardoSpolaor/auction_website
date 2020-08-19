@@ -14,7 +14,7 @@ export class EditInsertionComponent implements OnInit {
   public errmessage = undefined;
   public oldInsertion = { title: '', authors: [], edition: undefined, faculty: '', university: '', reserve_price: undefined, start_price: undefined, 
     expire_date: undefined, current_price: undefined , insertion_timestamp: undefined};
-  public insertion = { title: undefined, authors: undefined, edition: undefined, faculty: undefined, university: undefined, reserve_price: undefined, start_price: undefined, expire_date: undefined};
+  public insertion = { title: undefined, authors: [], edition: undefined, faculty: undefined, university: undefined, reserve_price: undefined, start_price: undefined, expire_date: undefined};
   public authorInput
 
   constructor(private ihs : InsertionHttpService, private router: Router, private route : ActivatedRoute) { }
@@ -48,6 +48,7 @@ export class EditInsertionComponent implements OnInit {
         this.insertion.authors = this.oldInsertion.authors;
       } , (err) => {
         console.log(err)
+        this.router.navigate(['**'])
       }
     );
   }

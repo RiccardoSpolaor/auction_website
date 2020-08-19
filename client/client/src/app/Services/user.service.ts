@@ -4,6 +4,8 @@ import { of } from 'rxjs';
 import {throwError} from 'rxjs';
 import { Observable } from 'rxjs';
 
+import {User} from '../Objects/User'
+
 interface TokenData {
   username:string,
   mail:string,
@@ -45,6 +47,10 @@ export class UserService {
     return throwError( { error: {errormessage: 'not implemented'}} );
   }
 
+  delete_user(id : string): Observable<any> {
+    return throwError( { error: {errormessage: 'not implemented'}} );
+  }
+
   logout() {
     this.token = undefined;
     localStorage.setItem('session_id', '');
@@ -60,6 +66,10 @@ export class UserService {
       this.token=localStorage.getItem("auction_website_token")
     }*/
     return this.token;
+  }
+
+  get_users(): Observable<User[]> {
+    return throwError( { error: {errormessage: 'not implemented'}} );
   }
 
   get_username() {

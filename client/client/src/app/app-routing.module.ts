@@ -10,6 +10,8 @@ import { MessageReplyComponent } from './Components/message-reply/message-reply.
 import { PrivateChatListComponent } from './Components/private-chat-list/private-chat-list.component';
 import { PostInsertionComponent } from './Components/post-insertion/post-insertion.component';
 import { EditInsertionComponent } from './Components/edit-insertion/edit-insertion.component'
+import { PageNotFoundComponent } from './Components/page-not-found/page-not-found.component'
+import { UserListComponent } from './Components/user-list/user-list.component'
 
 const routes: Routes = [
   { path: '', redirectTo: '/insertions', pathMatch: 'full' },
@@ -22,7 +24,9 @@ const routes: Routes = [
   { path: 'insertions/:id/public_message/:m_id', component: MessageReplyComponent},
   { path: 'private_chats', component: PrivateChatListComponent},
   { path: 'postinsertion', component : PostInsertionComponent},
-  { path: 'editinsertion/:id', component : EditInsertionComponent}
+  { path: 'editinsertion/:id', component : EditInsertionComponent},
+  { path: 'userlist', component: UserListComponent},
+  { path: '**',component: PageNotFoundComponent }
 ];
 
 @NgModule({
