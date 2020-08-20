@@ -15,6 +15,8 @@ export class EditProfileComponent implements OnInit {
   constructor( public us: UserService, public router: Router ) { }
 
   ngOnInit() {
+    if (!this.us.get_token())
+      this.router.navigate(['**'])
   }
 
   getToken(){

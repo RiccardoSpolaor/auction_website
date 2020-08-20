@@ -54,13 +54,13 @@
 
 <div *ngIf = 'insertion'>
 
-    <app-message-post isAnswer="false" (posted)="get_insertion()"></app-message-post>
+    <app-message-post *ngIf = 'hasToken()' isAnswer="false" (posted)="get_insertion()"></app-message-post>
     <h4 *ngIf = 'insertion.messages.length' class="font-weight-bold mb-3" style="margin: 3px;">Questions and Answers:</h4>
 
     <div *ngFor = "let message of insertion.messages" class = "card mb-3 border-dark" style="margin: 3px; background-color: rgb(246, 241, 190)" >
         <div class="container">
             <div class="card-body mr-2 ml-2">
-                <button type="submit" class="btn btn-outline-dark float-right text-align-right" routerLink="/insertions/{{insertion._id}}/public_message/{{message._id}}">
+                <button *ngIf = 'hasToken()' type="submit" class="btn btn-outline-dark float-right text-align-right" routerLink="/insertions/{{insertion._id}}/public_message/{{message._id}}">
                     Reply <i class="fa fa-reply"></i>
                 </button>  
                 <h5 class="card-title"><i class="fa fa-user"></i>&nbsp;{{message.author.username}}</h5>      

@@ -39,7 +39,7 @@ function isMod(arg: any): boolean {
 
 export function postMod ( req : express.Request,res : express.Response, next : express.NextFunction ) {
 
-    if(req.user.mod){
+    if(req.user.mod && req.user.validated){
       if(!isMod(req.body))
         return next({ statusCode:404, error: true, errormessage: "Invalid Moderator Data"} );
   
@@ -61,7 +61,7 @@ export function postMod ( req : express.Request,res : express.Response, next : e
         return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
       })
     }else
-      return next({ statusCode:404, error: true, errormessage: "Just a moderator can add a new moderator" });
+      return next({ statusCode:404, error: true, errormessage: "Just a validated moderator can add a new moderator" });
 }
 
 export function postStudent ( req : express.Request,res : express.Response, next : express.NextFunction ) {
@@ -300,6 +300,8 @@ export function deleteUserById ( req : express.Request,res : express.Response, n
 export function getUserStats ( req : express.Request,res : express.Response, next : express.NextFunction ) {
 
     if (req.user.mod) {
+      if(!req.user.validated)
+        return next({ statusCode:404, error: true, errormessage: "Unauthorized: moderator is not validated"} )
       var active_insertion_list = insertion.getModel().countDocuments({closed: { $ne: true }});
       var completed_insertion_list = insertion.getModel().countDocuments(
         {closed: { $eq: true }}

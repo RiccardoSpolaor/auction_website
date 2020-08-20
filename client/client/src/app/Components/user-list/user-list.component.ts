@@ -16,7 +16,10 @@ export class UserListComponent implements OnInit {
   constructor( private us : UserService, private router: Router) { }
 
   ngOnInit(): void {
-    this.get_users()
+    if (this.us.get_token() && this.us.is_moderator() && this.us.is_validated())
+      this.get_users()
+    else 
+      this.router.navigate(['**'])
   }
 
   public get_users() {

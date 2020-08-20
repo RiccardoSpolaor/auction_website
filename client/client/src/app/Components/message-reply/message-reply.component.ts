@@ -19,24 +19,34 @@ export class MessageReplyComponent implements OnInit {
   constructor( public ihs: InsertionHttpService, public us: UserService, private router: Router , private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.get_insertion()
+    if (this.us.get_token())
+      this.get_insertion()
+    else
+      this.router.navigate(['**'])
   }
 
   public get_insertion() {
     this.ihs.get_insertion(this.route.snapshot.params).subscribe(
       ( insertion ) => {
-        this.insertion = insertion;
-        this.get_message();
+        if (!insertion)
+          this.router.navigate(['**'])
+        else {
+          this.insertion = insertion;
+          this.get_message();
+        }
       } , (err) => {
         console.log(err)
+        this.router.navigate(['**'])
       }
     );
   }
 
   public get_message() {
     this.message = this.insertion.messages.find((element)=>{return element._id==this.route.snapshot.params.m_id})
-    if(!this.message)
+    if(!this.message) {
       console.log("Not Found")
+      this.router.navigate(['**'])
+    }
 
   }
 

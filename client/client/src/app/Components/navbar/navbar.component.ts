@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService } from '../../Services/user.service';
+import { NotificationHttpService } from '../../Services/notification-http.service';
 
 @Component({
   selector: 'app-navbar',
@@ -9,11 +10,28 @@ import { UserService } from '../../Services/user.service';
 })
 export class NavbarComponent implements OnInit {
 
-  constructor(private router: Router, private us: UserService) { 
-  }
+  public notificationsCount : number
+
+  constructor(private router: Router, private us: UserService, private nhs : NotificationHttpService) { }
 
   ngOnInit(): void {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false //ricarica nuovamente la pagina
+    
+    if(this.us.get_token())
+      this.getUnreadNotificationsCount()
+      
+    this.nhs.notificationsState.subscribe(() => this.getUnreadNotificationsCount() )
+  }
+
+  public getUnreadNotificationsCount() {
+    this.nhs.get_unread_notifications_count().subscribe(
+      ( notificationsCount ) => {
+        this.notificationsCount = notificationsCount;
+      } , (err) => {
+        console.log(err)
+        this.notificationsCount = 0;
+      }
+    );
   }
 
   hasToken(): boolean {
@@ -32,6 +50,7 @@ export class NavbarComponent implements OnInit {
 
   logout(){
     this.us.logout();
+    this.notificationsCount = undefined
     this.router.navigate(['/insertions']);
   }
 

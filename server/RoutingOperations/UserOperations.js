@@ -22,7 +22,7 @@ function isMod(arg) {
         && arg.mod == undefined && arg.validated == undefined && arg.salt == undefined && arg.digest == undefined;
 }
 function postMod(req, res, next) {
-    if (req.user.mod) {
+    if (req.user.mod && req.user.validated) {
         if (!isMod(req.body))
             return next({ statusCode: 404, error: true, errormessage: "Invalid Moderator Data" });
         var u = user.newUser(req.body);
@@ -40,7 +40,7 @@ function postMod(req, res, next) {
         });
     }
     else
-        return next({ statusCode: 404, error: true, errormessage: "Just a moderator can add a new moderator" });
+        return next({ statusCode: 404, error: true, errormessage: "Just a validated moderator can add a new moderator" });
 }
 exports.postMod = postMod;
 function postStudent(req, res, next) {
@@ -238,6 +238,8 @@ exports.deleteUserById = deleteUserById;
 /*****************************************DA PROVARE***************************************/
 function getUserStats(req, res, next) {
     if (req.user.mod) {
+        if (!req.user.validated)
+            return next({ statusCode: 404, error: true, errormessage: "Unauthorized: moderator is not validated" });
         var active_insertion_list = insertion.getModel().countDocuments({ closed: { $ne: true } });
         var completed_insertion_list = insertion.getModel().countDocuments({ closed: { $eq: true } }).where('current_price').gte('reserve_price');
         var active_insertion_list = insertion.getModel().countDocuments({ closed: { $eq: true } }).where('current_price').lt('reserve_price');

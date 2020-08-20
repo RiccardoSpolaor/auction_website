@@ -14,6 +14,8 @@ export class SignupmodComponent implements OnInit {
   constructor( public us: UserService, public router: Router ) { }
 
   ngOnInit() {
+    if (!this.us.get_token() || !this.us.is_moderator() || !this.us.is_validated())
+      this.router.navigate(['**'])
   }
 
   signup() {

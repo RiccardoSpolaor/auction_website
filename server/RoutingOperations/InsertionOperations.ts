@@ -130,7 +130,7 @@ export function getInsertionById  ( req : express.Request,res : express.Response
 
   insertion.getModel().findById( req.params.id ).then( (data)=> {
     if (data) {
-      if(!req.user || (!req.user.mod && req.user.id != data.insertionist))
+      if(!req.user || ((!req.user.mod || !req.user.validated) && req.user.id != data.insertionist))
         data.reserve_price = undefined;
 
       data.populate([{

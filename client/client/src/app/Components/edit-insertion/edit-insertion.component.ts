@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
+import { UserService } from '../../Services/user.service';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import {Insertion} from '../../Objects/Insertion'
@@ -17,7 +18,7 @@ export class EditInsertionComponent implements OnInit {
   public insertion = { title: undefined, authors: [], edition: undefined, faculty: undefined, university: undefined, reserve_price: undefined, start_price: undefined, expire_date: undefined};
   public authorInput
 
-  constructor(private ihs : InsertionHttpService, private router: Router, private route : ActivatedRoute) { }
+  constructor(private ihs : InsertionHttpService, private router: Router, private route : ActivatedRoute, private us : UserService) { }
 
   ngOnInit() {
     this.get_insertion();
@@ -34,18 +35,22 @@ export class EditInsertionComponent implements OnInit {
   public get_insertion() {
     this.ihs.get_insertion(this.route.snapshot.params).subscribe(
       ( insertion : Insertion ) => {
-        this.oldInsertion.title = insertion.title;
-        this.oldInsertion.authors = insertion.authors;
-        this.oldInsertion.edition = insertion.edition;
-        this.oldInsertion.faculty = insertion.faculty;
-        this.oldInsertion.university = insertion.university
-        this.oldInsertion.reserve_price = insertion.reserve_price;
-        this.oldInsertion.start_price = insertion.start_price;
-        this.oldInsertion.current_price = insertion.current_price;
-        this.oldInsertion.expire_date = insertion.expire_date;
-        this.oldInsertion.insertion_timestamp = insertion.insertion_timestamp
+        if (!insertion || insertion.closed || !this.us.get_token() || (this.us.get_id() != insertion.insertionist._id  && (!this.us.is_moderator() || !this.us.is_validated() )))
+          this.router.navigate(['**'])
+        else {
+          this.oldInsertion.title = insertion.title;
+          this.oldInsertion.authors = insertion.authors;
+          this.oldInsertion.edition = insertion.edition;
+          this.oldInsertion.faculty = insertion.faculty;
+          this.oldInsertion.university = insertion.university
+          this.oldInsertion.reserve_price = insertion.reserve_price;
+          this.oldInsertion.start_price = insertion.start_price;
+          this.oldInsertion.current_price = insertion.current_price;
+          this.oldInsertion.expire_date = insertion.expire_date;
+          this.oldInsertion.insertion_timestamp = insertion.insertion_timestamp
 
-        this.insertion.authors = this.oldInsertion.authors;
+          this.insertion.authors = this.oldInsertion.authors;
+        }
       } , (err) => {
         console.log(err)
         this.router.navigate(['**'])

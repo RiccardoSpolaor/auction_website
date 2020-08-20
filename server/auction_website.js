@@ -36,6 +36,10 @@
  *     /private_chats/:id                  -                GET         Returns all the messsages of a specific chat
  *     /private_chats/:id                  -                PUT         Post a message in a specific chat
  *
+ *     /notifications                       -               GET         Returns the notifications of the current user
+ *     /notifications/unreadcount         -                 GET         Returns the number of unread notifications of the current user
+ *     /notifications/:id                 -                 PUT         Signals the notification as read
+ *
  *     /users                ?           ?mod               GET         Returns the list of users
  *
  *     /users/:mail           ?           -                GET         Get user info by mail
@@ -104,6 +108,7 @@ const insertion = require("./Insertion");
 const insertionOperations = require("./RoutingOperations/InsertionOperations");
 const userOperations = require("./RoutingOperations/UserOperations");
 const privateChatOperations = require("./RoutingOperations/PrivateChatOperations");
+const notificationOperations = require("./RoutingOperations/NotificationOperations");
 const generalOperations = require("./RoutingOperations/GeneralOperations");
 const notification = require("./Notification");
 const user = require("./User");
@@ -261,6 +266,9 @@ app.put('/users', generalOperations.auth, userOperations.putUser);
 app.delete('/users/:id', generalOperations.auth, userOperations.deleteUserById);
 /*****************************************DA PROVARE***************************************/
 app.get('/users/stats', generalOperations.auth, userOperations.getUserStats);
+app.get('/notifications', generalOperations.auth, notificationOperations.getNotifications);
+app.get('/notifications/unreadcount', generalOperations.auth, notificationOperations.getUnreadNotificationsCount);
+app.put('/notifications/:id', generalOperations.auth, notificationOperations.putNotificationAsRead);
 // Login endpoint uses passport middleware to check
 // user credentials before generating a new JWT
 app.get("/login", passport.authenticate('basic', { session: false }), (req, res, next) => {

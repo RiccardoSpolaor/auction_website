@@ -98,7 +98,7 @@ exports.postInsertion = postInsertion;
 function getInsertionById(req, res, next) {
     insertion.getModel().findById(req.params.id).then((data) => {
         if (data) {
-            if (!req.user || (!req.user.mod && req.user.id != data.insertionist))
+            if (!req.user || ((!req.user.mod || !req.user.validated) && req.user.id != data.insertionist))
                 data.reserve_price = undefined;
             data.populate([{
                     path: 'messages.author',

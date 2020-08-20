@@ -33,19 +33,23 @@ export class InsertionComponent implements OnInit, OnDestroy {
   public get_insertion() {
     this.ihs.get_insertion(this.route.snapshot.params).subscribe(
       ( insertion ) => {
-        this.insertion = insertion;
-        this.insertion.remaining_time = this.getRemainingTime()
-        if (this.insertion.remaining_time) {
-          this.interval = setInterval(() => {
-            this.insertion.remaining_time = this.getRemainingTime()
-            if (!this.insertion.remaining_time) {
-              this.insertion.closed = true;
-              clearInterval(this.interval)
-            }
-          }, 1000)
-        }
+        if (!insertion)
+          this.router.navigate(['**'])
         else {
-          this.insertion.closed = true
+          this.insertion = insertion;
+          this.insertion.remaining_time = this.getRemainingTime()
+          if (this.insertion.remaining_time) {
+            this.interval = setInterval(() => {
+              this.insertion.remaining_time = this.getRemainingTime()
+              if (!this.insertion.remaining_time) {
+                this.insertion.closed = true;
+                clearInterval(this.interval)
+              }
+            }, 1000)
+          }
+          else {
+            this.insertion.closed = true
+          }
         }
         //this.setRemainingTime()
       } , (err) => {
