@@ -160,8 +160,8 @@ function putUser(req, res, next) {
             var token_signed = jsonwebtoken.sign(tokendata, process.env.JWT_SECRET, { expiresIn: '7d' });
             return res.status(200).json({ error: false, errormessage: "", id: data._id, token: token_signed });
         }).catch((reason) => {
-            /*if( reason.code === 11000 )
-              return next({statusCode:404, error:true, errormessage: "User already exists"} );*/
+            if (reason.code === 11000)
+                return next({ statusCode: 404, error: true, errormessage: "User already exists" });
             return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason.errmsg });
         });
     });

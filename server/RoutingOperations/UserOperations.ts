@@ -44,7 +44,6 @@ export function postMod ( req : express.Request,res : express.Response, next : e
         return next({ statusCode:404, error: true, errormessage: "Invalid Moderator Data"} );
   
       var u = user.newUser(req.body);
-     
   
       if( !req.body.password ) {
         return next({ statusCode:404, error: true, errormessage: "Password field missing"} );
@@ -56,7 +55,7 @@ export function postMod ( req : express.Request,res : express.Response, next : e
       u.save().then( (data) => {
         return res.status(200).json({ error: false, errormessage: "", id: data._id });
       }).catch( (reason) => {
-        if( reason.code === 11000 )
+        if( reason.code === 11000 ) 
           return next({statusCode:404, error:true, errormessage: "Mod already exists"} );
         return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
       })
@@ -212,8 +211,8 @@ export function putUser ( req : express.Request,res : express.Response, next : e
         return res.status(200).json({ error: false, errormessage: "", id: data._id, token: token_signed });
 
       }).catch( (reason) => {
-        /*if( reason.code === 11000 )
-          return next({statusCode:404, error:true, errormessage: "User already exists"} );*/
+        if( reason.code === 11000 )
+          return next({statusCode:404, error:true, errormessage: "User already exists"} );
         return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
       })
     })

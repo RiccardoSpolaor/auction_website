@@ -30,7 +30,8 @@ var userSchema = new mongoose.Schema({
     mail: {
         type: mongoose.SchemaTypes.String,
         required: function () { return !this.mod; },
-        unique: true
+        unique: true,
+        sparse: true
     },
     location: {
         type: mongoose.SchemaTypes.String,
