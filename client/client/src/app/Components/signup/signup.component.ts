@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UserService } from '../../Services/user.service';
+import { UserHttpService } from '../../Services/user-http.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -12,18 +12,18 @@ export class SignupComponent implements OnInit {
   public errmessage = undefined;
   public user = { mail: '', password: '', username: '', location: '', name: '', surname: ''};
 
-  constructor( public us: UserService, public router: Router ) { }
+  constructor( public uhs: UserHttpService, public router: Router ) { }
 
   ngOnInit() {
   }
 
   signup() {
-    this.us.register( this.user ).subscribe( (d) => {
+    this.uhs.register( this.user ).subscribe( (d) => {
       console.log('Registration ok: ' + JSON.stringify(d) );
       this.errmessage = undefined;
-      this.us.login(this.user.mail, this.user.password).subscribe( (d) => {
+      this.uhs.login(this.user.mail, this.user.password).subscribe( (d) => {
         console.log('Login granted: ' + JSON.stringify(d) );
-        console.log('User service token: ' + this.us.get_token() );
+        console.log('User service token: ' + this.uhs.get_token() );
         this.errmessage = undefined;
         this.router.navigate(['/insertions']);
       }, (err) => {

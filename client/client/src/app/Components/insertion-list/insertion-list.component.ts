@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { SocketioService } from '../../Services/socketio.service';
-import { UserService } from '../../Services/user.service';
+import { UserHttpService } from '../../Services/user-http.service';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
 import { Insertion } from '../../Objects/Insertion';
 
@@ -19,7 +19,7 @@ export class InsertionListComponent implements OnInit, OnDestroy {
   public insertions: Insertion[]
   private interval
 
-  constructor( private sio: SocketioService , public ihs: InsertionHttpService, public us: UserService, private router: Router , private route: ActivatedRoute) { }
+  constructor( private sio: SocketioService , public ihs: InsertionHttpService, private router: Router , private route: ActivatedRoute) { }
 
   ngOnInit() {
     this.get_insertions(this.route.snapshot.queryParams);

@@ -9,7 +9,6 @@ import { HttpClientModule } from '@angular/common/http';
 // Services
 //import { MessageService } from './message.service';
 //import { MessageHttpService } from './message-http.service';
-import { UserService } from './Services/user.service';
 import { UserHttpService } from './Services/user-http.service';
 //import { UserLoginComponent } from './Services/user-login/user-login.component';
 //import { UserSignupComponent } from './Services/user-signup/user-signup.component';
@@ -61,7 +60,7 @@ import { UserListComponent } from './Components/user-list/user-list.component';
     AppRoutingModule
   ],
   providers: [
-    {provide: UserService, useClass: UserHttpService },
+    {provide: UserHttpService, useClass: UserHttpService },
     {provide: SocketioService, useClass: SocketioService },
     {provide: InsertionHttpService, useClass: InsertionHttpService}, /* Here we can select the specifc service instance */
     {provide: PrivateChatHttpService, useClass: PrivateChatHttpService}

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { SocketioService } from '../../Services/socketio.service';
-import { UserService } from '../../Services/user.service';
+import { UserHttpService } from '../../Services/user-http.service';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
 import { Insertion } from '../../Objects/Insertion';
 import { Message } from '../../Objects/Message';
@@ -16,10 +16,10 @@ export class MessageReplyComponent implements OnInit {
 
   public insertion : Insertion
   public message : Message
-  constructor( public ihs: InsertionHttpService, public us: UserService, private router: Router , private route: ActivatedRoute) {}
+  constructor( public ihs: InsertionHttpService, public uhs: UserHttpService, private router: Router , private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    if (this.us.get_token())
+    if (this.uhs.get_token())
       this.get_insertion()
     else
       this.router.navigate(['**'])

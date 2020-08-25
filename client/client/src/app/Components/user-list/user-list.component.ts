@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router'
 import { SocketioService } from '../../Services/socketio.service';
-import { UserService } from '../../Services/user.service';
+import { UserHttpService } from '../../Services/user-http.service';
 import { User } from '../../Objects/User'
 
 @Component({
@@ -13,17 +13,17 @@ export class UserListComponent implements OnInit {
 
   public users : User[]
 
-  constructor( private us : UserService, private router: Router) { }
+  constructor( private uhs : UserHttpService, private router: Router) { }
 
   ngOnInit(): void {
-    if (this.us.get_token() && this.us.is_moderator() && this.us.is_validated())
+    if (this.uhs.get_token() && this.uhs.is_moderator() && this.uhs.is_validated())
       this.get_users()
     else 
       this.router.navigate(['**'])
   }
 
   public get_users() {
-    this.us.get_users().subscribe(
+    this.uhs.get_users().subscribe(
       ( users ) => {
         this.users = users;
       }, (err) => {
@@ -33,22 +33,22 @@ export class UserListComponent implements OnInit {
   }
 
   hasToken(): boolean {
-    return this.us.get_token()!= undefined
+    return this.uhs.get_token()!= undefined
   }
 
   getToken(){
     return {
-      username: this.us.get_username(),
-      mail: this.us.get_mail(),
-      id: this.us.get_id(),
-      mod: this.us.is_moderator(),
-      validated: this.us.is_validated()
+      username: this.uhs.get_username(),
+      mail: this.uhs.get_mail(),
+      id: this.uhs.get_id(),
+      mod: this.uhs.is_moderator(),
+      validated: this.uhs.is_validated()
     }
   }
 
   public delete_user(id : string) {
     if(confirm("Do you really want to delete this user?")) {
-      this.us.delete_user(id).subscribe(
+      this.uhs.delete_user(id).subscribe(
         () => {
           this.get_users()
         }, (err) => {

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
-import { UserService } from '../../Services/user.service';
+import { UserHttpService } from '../../Services/user-http.service';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import {Insertion} from '../../Objects/Insertion'
@@ -18,7 +18,7 @@ export class EditInsertionComponent implements OnInit {
   public insertion = { title: undefined, authors: [], edition: undefined, faculty: undefined, university: undefined, reserve_price: undefined, start_price: undefined, expire_date: undefined};
   public authorInput
 
-  constructor(private ihs : InsertionHttpService, private router: Router, private route : ActivatedRoute, private us : UserService) { }
+  constructor(private ihs : InsertionHttpService, private router: Router, private route : ActivatedRoute, private uhs : UserHttpService) { }
 
   ngOnInit() {
     this.get_insertion();
@@ -35,7 +35,7 @@ export class EditInsertionComponent implements OnInit {
   public get_insertion() {
     this.ihs.get_insertion(this.route.snapshot.params).subscribe(
       ( insertion : Insertion ) => {
-        if (!insertion || insertion.closed || !this.us.get_token() || (this.us.get_id() != insertion.insertionist._id  && (!this.us.is_moderator() || !this.us.is_validated() )))
+        if (!insertion || insertion.closed || !this.uhs.get_token() || (this.uhs.get_id() != insertion.insertionist._id  && (!this.uhs.is_moderator() || !this.uhs.is_validated() )))
           this.router.navigate(['**'])
         else {
           this.oldInsertion.title = insertion.title;

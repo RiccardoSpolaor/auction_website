@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
-import { UserService } from '../../Services/user.service';
+import { UserHttpService } from '../../Services/user-http.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -14,10 +14,10 @@ export class PostInsertionComponent implements OnInit {
   public insertion = { title: '', authors: [], edition: undefined, faculty: '', university: '', reserve_price: undefined, start_price: undefined, expire_date: undefined};
   public authorInput
 
-  constructor(private ihs : InsertionHttpService, private router: Router, private us : UserService) { }
+  constructor(private ihs : InsertionHttpService, private router: Router, private uhs : UserHttpService) { }
 
   ngOnInit(): void {
-    if (!this.us.get_token() || this.us.is_moderator() )
+    if (!this.uhs.get_token() || this.uhs.is_moderator() )
       this.router.navigate(['**'])
   }
 

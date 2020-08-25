@@ -5,16 +5,16 @@ import { Observable } from 'rxjs';
 import { throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { UserService } from './user.service';
+import { UserHttpService } from './user-http.service';
 
 @Injectable()
 
 export class PrivateChatHttpService {
 
 
-  constructor( private http: HttpClient, private us: UserService ) {
+  constructor( private http: HttpClient, private uhs: UserHttpService ) {
     console.log('Private chat service instantiated');
-    console.log('User service token: ' + us.get_token() );
+    console.log('User service token: ' + uhs.get_token() );
   }
 
   private handleError(error: HttpErrorResponse) {
@@ -50,12 +50,12 @@ export class PrivateChatHttpService {
   get_chats(): Observable<PrivateChat[]> {
     const options = {
       headers: new HttpHeaders({
-        authorization: 'Bearer ' + this.us.get_token(),
+        authorization: 'Bearer ' + this.uhs.get_token(),
         'cache-control': 'no-cache',
         'Content-Type':  'application/json',
       })
     };
-    return this.http.get<PrivateChat[]>( this.us.url + '/private_chats', options).pipe(
+    return this.http.get<PrivateChat[]>( this.uhs.url + '/private_chats', options).pipe(
         tap( (data) => console.log(JSON.stringify(data))) ,
         catchError( this.handleError )
       );

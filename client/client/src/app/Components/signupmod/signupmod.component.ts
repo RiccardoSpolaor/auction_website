@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UserService } from '../../Services/user.service';
+import { UserHttpService } from '../../Services/user-http.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -11,15 +11,15 @@ export class SignupmodComponent implements OnInit {
   public errmessage = undefined;
   public user = { password: '', username: ''};
 
-  constructor( public us: UserService, public router: Router ) { }
+  constructor( public uhs: UserHttpService, public router: Router ) { }
 
   ngOnInit() {
-    if (!this.us.get_token() || !this.us.is_moderator() || !this.us.is_validated())
+    if (!this.uhs.get_token() || !this.uhs.is_moderator() || !this.uhs.is_validated())
       this.router.navigate(['**'])
   }
 
   signup() {
-    this.us.registerMod( this.user ).subscribe( (d) => {
+    this.uhs.registerMod( this.user ).subscribe( (d) => {
       console.log('Registration ok: ' + JSON.stringify(d) );
       this.errmessage = undefined;
       this.router.navigate(["/insertions"]);

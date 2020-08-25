@@ -7,7 +7,7 @@ import { Subject } from 'rxjs';
 
 import { tap, catchError } from 'rxjs/operators';
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { UserService } from './user.service';
+import { UserHttpService } from './user-http.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,9 +18,9 @@ export class NotificationHttpService {
   private notificationsStateSource = new Subject<any>();
   public notificationsState = this.notificationsStateSource.asObservable();
 
-  constructor(private http: HttpClient, private us: UserService ) {
+  constructor(private http: HttpClient, private uhs: UserHttpService ) {
     console.log('Notification service instantiated');
-    console.log('User service token: ' + us.get_token() );
+    console.log('User service token: ' + uhs.get_token() );
   }
 
   set_notifications_state_after_login() {
@@ -30,13 +30,13 @@ export class NotificationHttpService {
   get_unread_notifications_count(): Observable<number> {
     const options = {
       headers: new HttpHeaders({
-        authorization: 'Bearer ' + this.us.get_token(),
+        authorization: 'Bearer ' + this.uhs.get_token(),
         'cache-control': 'no-cache',
         'Content-Type':  'application/json',
       })
     };
     
-    return this.http.get<number>( this.us.url + '/notifications/unreadcount', options ).pipe(
+    return this.http.get<number>( this.uhs.url + '/notifications/unreadcount', options ).pipe(
       tap( (data) => {
         console.log(data);
       })

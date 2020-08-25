@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { SocketioService } from '../../Services/socketio.service';
-import { UserService } from '../../Services/user.service';
+import { UserHttpService } from '../../Services/user-http.service';
 import { PrivateChatHttpService } from '../../Services/private-chat-http.service';
 import { PrivateChat } from '../../Objects/PrivateChat';
 
@@ -17,7 +17,7 @@ export class PrivateChatListComponent implements OnInit {
   public chats: PrivateChat[]
   public active_chat: PrivateChat
 
-  constructor( private sio: SocketioService , public pchs: PrivateChatHttpService, public us: UserService, private router: Router , private route: ActivatedRoute) { }
+  constructor( private sio: SocketioService , public pchs: PrivateChatHttpService, public uhs: UserHttpService, private router: Router , private route: ActivatedRoute) { }
 
   async ngOnInit() {
     await this.get_chats();
@@ -39,7 +39,7 @@ export class PrivateChatListComponent implements OnInit {
   }
 
   public get_other_user(chat:PrivateChat){
-    var token_info = this.us.get_token()._id;
+    var token_info = this.uhs.get_token()._id;
     if(chat.sender && chat.sender._id!=token_info)
       return chat.sender.username;
     

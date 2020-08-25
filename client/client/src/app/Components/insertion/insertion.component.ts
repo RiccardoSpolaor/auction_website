@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { SocketioService } from '../../Services/socketio.service';
-import { UserService } from '../../Services/user.service';
+import { UserHttpService } from '../../Services/user-http.service';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
 import { Insertion } from '../../Objects/Insertion';
 
@@ -17,7 +17,7 @@ export class InsertionComponent implements OnInit, OnDestroy {
   public errmessage = undefined;
   private interval
 
-  constructor( private sio: SocketioService , public ihs: InsertionHttpService, public us: UserService, private router: Router , private route: ActivatedRoute) {}
+  constructor( private sio: SocketioService , public ihs: InsertionHttpService, public uhs: UserHttpService, private router: Router , private route: ActivatedRoute) {}
 
   ngOnInit() {
     this.get_insertion();
@@ -100,16 +100,16 @@ export class InsertionComponent implements OnInit, OnDestroy {
   }
 
   hasToken(): boolean {
-    return this.us.get_token()!= undefined
+    return this.uhs.get_token()!= undefined
   }
 
   getToken(){
     return {
-      username: this.us.get_username(),
-      mail: this.us.get_mail(),
-      id: this.us.get_id(),
-      mod: this.us.is_moderator(),
-      validated: this.us.is_validated()
+      username: this.uhs.get_username(),
+      mail: this.uhs.get_mail(),
+      id: this.uhs.get_id(),
+      mod: this.uhs.is_moderator(),
+      validated: this.uhs.is_validated()
     }
   }
 

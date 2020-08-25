@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { UserService } from './Services/user.service';
+import { UserHttpService } from './Services/user-http.service';
 
 @Component({
   selector: 'app-root',
@@ -9,10 +9,10 @@ import { UserService } from './Services/user.service';
 export class AppComponent {
   public title = 'Client'
 
-  constructor( private us: UserService){}
+  constructor( private uhs: UserHttpService){}
 
   ngOnInit(): void {
-    this.us.set_token_from_storage();
+    this.uhs.set_token_from_storage();
   }
 
 

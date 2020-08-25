@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { UserService } from './user.service';
+import { UserHttpService } from './user-http.service';
 
 
 @Injectable()
@@ -13,9 +13,9 @@ export class InsertionHttpService {
 
   private messages = [];
 
-  constructor( private http: HttpClient, private us: UserService ) {
+  constructor( private http: HttpClient, private uhs: UserHttpService ) {
     console.log('Insertion service instantiated');
-    console.log('User service token: ' + us.get_token() );
+    console.log('User service token: ' + uhs.get_token() );
 }
 
 
@@ -36,20 +36,20 @@ export class InsertionHttpService {
   
 
   get_insertion(params: any): Observable<Insertion> {
-    if(this.us.get_token()){
+    if(this.uhs.get_token()){
       const options = {
         headers: new HttpHeaders({
-          authorization: 'Bearer ' + this.us.get_token(),
+          authorization: 'Bearer ' + this.uhs.get_token(),
           'cache-control': 'no-cache',
           'Content-Type':  'application/json',
         })
       };
-      return this.http.get<Insertion>( this.us.url + '/insertions/'+ params.id, options).pipe(
+      return this.http.get<Insertion>( this.uhs.url + '/insertions/'+ params.id, options).pipe(
           tap( (data) => console.log(JSON.stringify(data))) ,
           catchError( this.handleError )
         );
     }else{
-      return this.http.get<Insertion>( this.us.url + '/insertions/'+ params.id).pipe(
+      return this.http.get<Insertion>( this.uhs.url + '/insertions/'+ params.id).pipe(
         tap( (data) => console.log(JSON.stringify(data))) ,
         catchError( this.handleError )
       );
@@ -57,7 +57,7 @@ export class InsertionHttpService {
   }
 
   get_insertions(params?: any): Observable<Insertion[]> {
-    return this.http.get<Insertion[]>( this.us.url + '/insertions', {params: params}).pipe(
+    return this.http.get<Insertion[]>( this.uhs.url + '/insertions', {params: params}).pipe(
         tap( (data) => console.log(JSON.stringify(data))) ,
         catchError( this.handleError )
       );
@@ -66,13 +66,13 @@ export class InsertionHttpService {
   post_insertion(insertion : any) : Observable <any> {
     const options = {
       headers: new HttpHeaders({
-        authorization: 'Bearer ' + this.us.get_token(),
+        authorization: 'Bearer ' + this.uhs.get_token(),
         'cache-control': 'no-cache',
         'Content-Type':  'application/json',
       })
     };
 
-    return this.http.post( this.us.url + '/insertions', insertion, options ).pipe(
+    return this.http.post( this.uhs.url + '/insertions', insertion, options ).pipe(
       tap( (data) => {
         console.log(JSON.stringify(data) );
       })
@@ -82,13 +82,13 @@ export class InsertionHttpService {
   put_price(params: any, price: number):Observable<any> {
     const options = {
       headers: new HttpHeaders({
-        authorization: 'Bearer ' + this.us.get_token(),
+        authorization: 'Bearer ' + this.uhs.get_token(),
         'cache-control': 'no-cache',
         'Content-Type':  'application/json',
       })
     };
 
-    return this.http.put( this.us.url + '/insertions/'+ params.id + '/price', {current_price: price}, options ).pipe(
+    return this.http.put( this.uhs.url + '/insertions/'+ params.id + '/price', {current_price: price}, options ).pipe(
       tap( (data) => {
         console.log(JSON.stringify(data) );
       })
@@ -99,7 +99,7 @@ export class InsertionHttpService {
   put_message( params: any, m: any ): Observable<any> {
     const options = {
       headers: new HttpHeaders({
-        authorization: 'Bearer ' + this.us.get_token(),
+        authorization: 'Bearer ' + this.uhs.get_token(),
         'cache-control': 'no-cache',
         'Content-Type':  'application/json',
       })
@@ -107,11 +107,11 @@ export class InsertionHttpService {
     console.log('Posting ' + JSON.stringify(m) );
 
     if (params.m_id) {
-      return this.http.put( this.us.url + '/insertions/' + params.id + '/public_messages/' + params.m_id, {content: m},  options ).pipe(
+      return this.http.put( this.uhs.url + '/insertions/' + params.id + '/public_messages/' + params.m_id, {content: m},  options ).pipe(
         catchError(this.handleError)
       );
     }else {
-      return this.http.put( this.us.url + '/insertions/' + params.id + '/public_messages', {content: m},  options ).pipe(
+      return this.http.put( this.uhs.url + '/insertions/' + params.id + '/public_messages', {content: m},  options ).pipe(
         catchError(this.handleError)
       );
     }
@@ -120,7 +120,7 @@ export class InsertionHttpService {
   edit_insertion (params: any, insertion: any ): Observable<any> {
     const options = {
       headers: new HttpHeaders({
-        authorization: 'Bearer ' + this.us.get_token(),
+        authorization: 'Bearer ' + this.uhs.get_token(),
         'cache-control': 'no-cache',
         'Content-Type':  'application/json',
       })
@@ -128,7 +128,7 @@ export class InsertionHttpService {
     console.log('Editing Insertion ' + params.id );
 
     
-    return this.http.put( this.us.url + '/insertions/' + params.id + '/content', insertion,  options ).pipe(
+    return this.http.put( this.uhs.url + '/insertions/' + params.id + '/content', insertion,  options ).pipe(
       tap( (data) => {
         console.log(JSON.stringify(data))
       })
@@ -139,14 +139,14 @@ export class InsertionHttpService {
   delete_insertion( params: any ): Observable<any> {
     const options = {
       headers: new HttpHeaders({
-        authorization: 'Bearer ' + this.us.get_token(),
+        authorization: 'Bearer ' + this.uhs.get_token(),
         'cache-control': 'no-cache',
         'Content-Type':  'application/json',
       })
     };
     console.log('Deleting Insertion ' + JSON.stringify(params.id) );
 
-    return this.http.delete( this.us.url + '/insertions/' + params.id, options ).pipe(
+    return this.http.delete( this.uhs.url + '/insertions/' + params.id, options ).pipe(
       catchError(this.handleError)
     );
   }

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { UserService } from '../../Services/user.service';
+import { UserHttpService } from '../../Services/user-http.service';
 import { NotificationHttpService } from '../../Services/notification-http.service';
 
 @Component({
@@ -12,12 +12,12 @@ export class NavbarComponent implements OnInit {
 
   public notificationsCount : number
 
-  constructor(private router: Router, private us: UserService, private nhs : NotificationHttpService) { }
+  constructor(private router: Router, private uhs: UserHttpService, private nhs : NotificationHttpService) { }
 
   ngOnInit(): void {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false //ricarica nuovamente la pagina
     
-    if(this.us.get_token())
+    if(this.uhs.get_token())
       this.getUnreadNotificationsCount()
       
     this.nhs.notificationsState.subscribe(() => this.getUnreadNotificationsCount() )
@@ -35,21 +35,21 @@ export class NavbarComponent implements OnInit {
   }
 
   hasToken(): boolean {
-    return this.us.get_token()!= undefined
+    return this.uhs.get_token()!= undefined
   }
 
   getToken(){
     return {
-      username: this.us.get_username(),
-      mail: this.us.get_mail(),
-      id: this.us.get_id(),
-      mod: this.us.is_moderator(),
-      validated: this.us.is_validated()
+      username: this.uhs.get_username(),
+      mail: this.uhs.get_mail(),
+      id: this.uhs.get_id(),
+      mod: this.uhs.is_moderator(),
+      validated: this.uhs.is_validated()
     }
   }
 
   logout(){
-    this.us.logout();
+    this.uhs.logout();
     this.notificationsCount = undefined
     this.router.navigate(['/insertions']);
   }
