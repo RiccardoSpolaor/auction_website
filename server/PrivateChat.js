@@ -60,7 +60,17 @@ var privateChatSchema = new mongoose.Schema({
     messages: {
         type: [message.getSchema()],
         required: true
-    }
+    },
+    insertionistRead: {
+        type: mongoose.SchemaTypes.Boolean,
+        required: true,
+        default: false
+    },
+    senderRead: {
+        type: mongoose.SchemaTypes.Boolean,
+        required: true,
+        default: true
+    },
 });
 privateChatSchema.index({ insertion_id: 1, sender: 1 }, { unique: true });
 function getSchema() { return privateChatSchema; }

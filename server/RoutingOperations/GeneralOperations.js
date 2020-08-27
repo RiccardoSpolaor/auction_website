@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.addTokenUserInfoIfExists = exports.auth = void 0;
 const jsonwebtoken = require("jsonwebtoken"); // JWT generation
 const jwt = require("express-jwt"); // JWT parsing middleware for express
+//import { AuctionEnded, IosObject } from '../IosObject';
 // We create the JWT authentication middleware
 // provided by the express-jwt library.  
 // 

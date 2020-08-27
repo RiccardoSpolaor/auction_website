@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPrivateChatById = exports.putPrivateChat = exports.getPrivateChat = exports.postPrivateChat = void 0;
+exports.getUnreadChatsCount = exports.getPrivateChatById = exports.putPrivateChatRead = exports.putPrivateChat = exports.getPrivateChat = exports.postPrivateChat = void 0;
 const insertion = require("../Insertion");
 const message = require("../Message");
 const private_chat = require("../PrivateChat");
@@ -72,6 +72,11 @@ function putPrivateChat(req, res, next) {
             if (message.isMessage(body)) {
                 var m = message.newMessage(body);
                 data.messages.push(m);
+                // Signals the interlocutor read flag as false
+                if (data.insertionist == req.user.id)
+                    data.senderRead = false;
+                else
+                    data.insertionistRead = false;
                 data.save().then((data) => {
                     return res.status(200).json({ error: false, errormessage: "", id: data._id });
                 }).catch((reason) => {
@@ -88,6 +93,26 @@ function putPrivateChat(req, res, next) {
     });
 }
 exports.putPrivateChat = putPrivateChat;
+function putPrivateChatRead(req, res, next) {
+    private_chat.getModel().findById(req.params.id).then((data) => {
+        if (!data)
+            return next({ statusCode: 404, error: true, errormessage: "Cannot find Chat" });
+        if (data.sender == req.user.id)
+            data.senderRead = true;
+        else if (data.insertionist == req.user.id)
+            data.insertionistRead = true;
+        else
+            return next({ statusCode: 404, error: true, errormessage: "You can't post in this chat" });
+        data.save().then((data) => {
+            return res.status(200).json({ error: false, errormessage: "", id: data._id });
+        }).catch((reason) => {
+            return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason.errmsg });
+        });
+    }).catch((reason) => {
+        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
+    });
+}
+exports.putPrivateChatRead = putPrivateChatRead;
 function getPrivateChatById(req, res, next) {
     private_chat.getModel().findById(req.params.id).then((document) => {
         if (document.sender == req.user.id || document.insertionist == req.user.id)
@@ -115,4 +140,16 @@ function getPrivateChatById(req, res, next) {
     });
 }
 exports.getPrivateChatById = getPrivateChatById;
+function getUnreadChatsCount(req, res, next) {
+    private_chat.getModel().countDocuments({ $or: [
+            { $and: [{ insertionist: req.user.id }, { insertionistRead: { $ne: true } }] },
+            { $and: [{ sender: req.user.id }, { senderRead: { $ne: true } }] }
+        ]
+    }).then((result) => {
+        return res.status(200).json(result);
+    }).catch((reason) => {
+        return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
+    });
+}
+exports.getUnreadChatsCount = getUnreadChatsCount;
 //# sourceMappingURL=PrivateChatOperations.js.map

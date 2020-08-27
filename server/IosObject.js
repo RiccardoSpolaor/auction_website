@@ -1,22 +1,65 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AuctionEnded = exports.IosObject = void 0;
-var Kinds;
-(function (Kinds) {
-    Kinds["auctionEnded"] = "auctionEnded";
-})(Kinds || (Kinds = {}));
-class IosObject {
-    constructor(kind) {
-        this.kind = kind;
+exports.createIosUser = exports.createiosPrivateChat = exports.createiosPrivateChatList = exports.createIosInsertion = exports.createIosMessage = exports.createIosNotification = void 0;
+var Kind;
+(function (Kind) {
+    Kind["notification"] = "notification";
+    Kind["message"] = "message";
+    Kind["insertion"] = "insertion";
+    Kind["private_chat_list"] = "private_chat_list";
+    Kind["private_chat"] = "private_chat";
+    Kind["user"] = "user";
+})(Kind || (Kind = {}));
+function createIosNotification(user) {
+    return { type: Kind.notification, user: user };
+}
+exports.createIosNotification = createIosNotification;
+function createIosMessage(insertion) {
+    return { type: Kind.message, insertion: insertion };
+}
+exports.createIosMessage = createIosMessage;
+function createIosInsertion(id) {
+    return { type: Kind.insertion, id: id };
+}
+exports.createIosInsertion = createIosInsertion;
+function createiosPrivateChatList(users) {
+    return { type: Kind.private_chat_list, users: users };
+}
+exports.createiosPrivateChatList = createiosPrivateChatList;
+function createiosPrivateChat(id) {
+    return { type: Kind.private_chat, id: id };
+}
+exports.createiosPrivateChat = createiosPrivateChat;
+function createIosUser() {
+    return { type: Kind.user };
+}
+exports.createIosUser = createIosUser;
+/*
+enum Kinds{
+    auctionEnded = "auctionEnded"
+}
+
+export class IosObject {
+
+    constructor(private kind: Kinds, ) {
+        
     }
 }
-exports.IosObject = IosObject;
-class AuctionEnded {
-    constructor(document) {
+
+
+export class AuctionEnded{
+    private insertion;
+    private insertionist;
+    private winner;
+
+
+    constructor(document: Insertion){
+        
         this.insertion = document.id;
         this.insertionist = document.insertionist;
         this.winner = document.current_winner;
     }
+
 }
-exports.AuctionEnded = AuctionEnded;
+*/ 
 //# sourceMappingURL=IosObject.js.map

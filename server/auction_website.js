@@ -32,9 +32,12 @@
  *
  *     /private_chats                     -                GET         Returns all the private chats of the current user where he is either the sender or the receiver
  *     /private_chats                     -                POST        Create a new private chat where the sender is the current user and the receiver (è quello dell'nserzione visualizzata al momento e lo stesso vale per l'id )
+ *     /private_chats/unreadcount         -                GET         Returns the number of unread chats of the current user
+ *
  *
  *     /private_chats/:id                  -                GET         Returns all the messsages of a specific chat
  *     /private_chats/:id                  -                PUT         Post a message in a specific chat
+ *     /private_chats/:id/read             -                PUT         Signals the chat as read by the current user
  *
  *     /notifications                       -               GET         Returns the notifications of the current user
  *     /notifications/unreadcount         -                 GET         Returns the number of unread notifications of the current user
@@ -121,6 +124,8 @@ const passportHTTP = require("passport-http"); // implements Basic and Digest au
 const jsonwebtoken = require("jsonwebtoken"); // JWT generation
 const cors = require("cors"); // Enable CORS middleware
 const io = require("socket.io"); // Socket.io websocket library
+// import { AuctionEnded, IosObject } from './IosObject';
+const iosObject = require("./IosObject");
 var ios = undefined;
 var app = express();
 // We create the JWT authentication middleware
@@ -205,6 +210,8 @@ app.get("/private_chat", generalOperations.auth, (req,res,next)=> {
 });
 */
 app.put("/private_chats/:id", generalOperations.auth, privateChatOperations.putPrivateChat);
+app.put("/private_chats/:id/read", generalOperations.auth, privateChatOperations.putPrivateChatRead);
+app.get("/private_chats/unreadcount", generalOperations.auth, privateChatOperations.getUnreadChatsCount);
 /*
 app.put("/private_chat/:id", generalOperations.auth, (req,res,next)=>{
   var body = req.body;
@@ -400,25 +407,27 @@ mongoose.connect('mongodb://localhost:27017/auction_website').then(function onco
                                 .getModel()
                                 .create({
                                 timestamp: new Date(),
-                                content: 'You won the insertion: ' + doc.title + '!',
+                                content: 'You won the insertion: ' + doc.title + (doc.current_price > doc.reserve_price ? '!' : ", but you didn't reach the reserve price!"),
                                 read: false,
                                 insertion: doc.id,
                                 to: doc.current_winner
                             });
                             notifications.push(notifWinner);
-                            iosMessages.push({ type: 'notification', user: doc.current_winner });
+                            iosMessages.push(iosObject.createIosNotification(doc.current_winner));
+                            //iosMessages.push({type: 'notification', user: doc.current_winner})
                         }
                         var notifInsertionist = notification
                             .getModel()
                             .create({
                             timestamp: new Date(),
-                            content: (doc.current_winner ? 'Somebody won ' : 'No one won ') + 'your insertion: ' + doc.title + '!',
+                            content: (doc.current_winner && doc.current_price > doc.reserve_price ? 'Somebody won ' : 'No one won ') + 'your insertion: ' + doc.title + '!',
                             read: false,
                             insertion: doc.id,
                             to: doc.insertionist
                         });
                         notifications.push(notifInsertionist);
-                        iosMessages.push({ type: 'notification', user: doc.insertionist });
+                        iosMessages.push(iosObject.createIosNotification(doc.insertionist));
+                        //iosMessages.push({type: 'notification', user: doc.insertionist})
                     });
                     Promise.all(documents)
                         .then(() => {

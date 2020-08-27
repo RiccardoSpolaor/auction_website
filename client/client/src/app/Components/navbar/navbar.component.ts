@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserHttpService } from '../../Services/user-http.service';
 import { NotificationHttpService } from '../../Services/notification-http.service';
+import { SocketioService } from '../../Services/socketio.service';
+import { isIosNotification } from '../../Objects/IosObject' 
 
 @Component({
   selector: 'app-navbar',
@@ -12,7 +14,7 @@ export class NavbarComponent implements OnInit {
 
   public notificationsCount : number
 
-  constructor(private router: Router, private uhs: UserHttpService, private nhs : NotificationHttpService) { }
+  constructor(private router: Router, private uhs: UserHttpService, private nhs : NotificationHttpService, private sio : SocketioService) { }
 
   ngOnInit(): void {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false //ricarica nuovamente la pagina
@@ -21,6 +23,11 @@ export class NavbarComponent implements OnInit {
       this.getUnreadNotificationsCount()
       
     this.nhs.notificationsState.subscribe(() => this.getUnreadNotificationsCount() )
+
+    this.sio.connect().subscribe( (m) => {
+      if (this.hasToken() && isIosNotification(m) && m.user == this.getToken().id )
+        this.getUnreadNotificationsCount()
+    });
   }
 
   public getUnreadNotificationsCount() {

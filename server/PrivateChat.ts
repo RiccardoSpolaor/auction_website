@@ -7,7 +7,9 @@ export interface PrivateChat extends mongoose.Document {
     insertion_id: string,
     insertionist: string,
     sender: string,
-    messages: [Message]
+    messages: [Message],
+    insertionistRead: boolean,
+    senderRead: boolean
 }
 
 // User defined type guard
@@ -73,7 +75,17 @@ var privateChatSchema = new mongoose.Schema( {
     messages: {
         type: [message.getSchema()], 
         required: true
-    }
+    },
+    insertionistRead: {
+        type: mongoose.SchemaTypes.Boolean,
+        required: true,
+        default: false
+    },
+    senderRead: {
+        type: mongoose.SchemaTypes.Boolean,
+        required: true,
+        default: true
+    },
 })
 
 privateChatSchema.index({insertion_id: 1, sender: 1}, {unique: true})

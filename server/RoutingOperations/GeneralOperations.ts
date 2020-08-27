@@ -23,7 +23,7 @@ import jwt = require('express-jwt');            // JWT parsing middleware for ex
 import cors = require('cors');                  // Enable CORS middleware
 import io = require('socket.io');               // Socket.io websocket library
 import { report } from 'process';
-import { AuctionEnded, IosObject } from '../IosObject';
+//import { AuctionEnded, IosObject } from '../IosObject';
 
 // We create the JWT authentication middleware
 // provided by the express-jwt library.  
