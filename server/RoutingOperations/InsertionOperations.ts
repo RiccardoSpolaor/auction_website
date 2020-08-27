@@ -13,6 +13,7 @@ import * as private_chat from '../PrivateChat';
 
 import { User } from '../User';
 import * as user from '../User';
+import * as iosObject from '../IosObject'
 
 function isInsertion(arg: any): arg is Insertion {
   return arg && arg.title && typeof(arg.title) == 'string' 
@@ -96,7 +97,7 @@ export function postInsertion ( req : express.Request,res : express.Response, ne
   console.log("Received: " + JSON.stringify(req.body) );
 
   // Checks if user is not a Mod
-  if( user.newUser(req.user).hasModRole() ) {
+  if(req.user.mod) {
     return next({ statusCode:404, error: true, errormessage: "Unauthorized: Mods can't create new Insertions"});
   }
 
@@ -115,7 +116,7 @@ export function postInsertion ( req : express.Request,res : express.Response, ne
   if( isInsertion( recinsertion )) {
     insertion.getModel().create( recinsertion ).then( ( data ) => {
       // Notify all socket.io clients
-      /*ios.emit('broadcast', data );*/
+      //ios.emit('broadcast', iosObject.createIosInsertion(data.id));
       return res.status(200).json({ error: false, errormessage: "", id: data._id });
     }).catch((reason) => {
       return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
@@ -168,7 +169,7 @@ export function getInsertionById  ( req : express.Request,res : express.Response
 export function deleteInsertionById  ( req : express.Request,res : express.Response, next : express.NextFunction ) {
 
   // Check mod role
-  if( !user.newUser(req.user).hasModRole() ) {
+  if(!req.user.mod || !req.user.validated) {
     return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not a moderator"} );
   }
   
@@ -280,7 +281,7 @@ export function putInsertionContentById  ( req : express.Request,res : express.R
   
 
   insertion.getModel().findById( req.params.id ).then( (data)=> {
-    if( !user.newUser(req.user).hasModRole() && req.user.id != data.insertionist)
+    if( (!req.user.mod || !req.user.validated) && req.user.id != data.insertionist)
       return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not a moderator or the insertionist."} );
 
     if(data.closed)

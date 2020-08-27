@@ -35,10 +35,10 @@
  * 
  * 
  *     /private_chats/:id                  -                GET         Returns all the messsages of a specific chat
- *     /private_chats/:id                  -                PUT         Post a message in a specific chat
+ *     /private_chats/:id/message          -                PUT         Post a message in a specific chat
  *     /private_chats/:id/read             -                PUT         Signals the chat as read by the current user
  * 
- *     /notifications                       -               GET         Returns the notifications of the current user
+ *     /notifications                     -               GET         Returns the notifications of the current user
  *     /notifications/unreadcount         -                 GET         Returns the number of unread notifications of the current user
  *     /notifications/:id                 -                 PUT         Signals the notification as read
  * 
@@ -183,9 +183,9 @@ declare global {
     }
 }
 
-
 var ios = undefined;
 var app = express();
+
 
 // We create the JWT authentication middleware
 // provided by the express-jwt library.  
@@ -300,7 +300,7 @@ app.get("/private_chat", generalOperations.auth, (req,res,next)=> {
 */
 
 
-app.put("/private_chats/:id", generalOperations.auth, privateChatOperations.putPrivateChat)
+app.put("/private_chats/:id/message", generalOperations.auth, privateChatOperations.putPrivateChatMessage)
 
 
 app.put("/private_chats/:id/read", generalOperations.auth, privateChatOperations.putPrivateChatRead)
@@ -371,7 +371,7 @@ app.post('/users/students', generalOperations.addTokenUserInfoIfExists, userOper
 
 });*/
 
-app.get('/users', userOperations.getUsers);
+app.get('/users', generalOperations.auth, userOperations.getUsers);
 
 
 app.put('/users', generalOperations.auth, userOperations.putUser);

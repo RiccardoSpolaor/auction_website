@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUnreadChatsCount = exports.getPrivateChatById = exports.putPrivateChatRead = exports.putPrivateChat = exports.getPrivateChat = exports.postPrivateChat = void 0;
+exports.getUnreadChatsCount = exports.getPrivateChatById = exports.putPrivateChatRead = exports.putPrivateChatMessage = exports.getPrivateChat = exports.postPrivateChat = void 0;
 const insertion = require("../Insertion");
 const message = require("../Message");
 const private_chat = require("../PrivateChat");
@@ -18,7 +18,7 @@ function postPrivateChat(req, res, next) {
         if (data.length) { // UTILIZZARE app.put("/private_chat/:id")
             req.params.id = data[0]._id;
             req.body = { content: req.body.message };
-            putPrivateChat(req, res, next);
+            putPrivateChatMessage(req, res, next);
         }
         else {
             insertion.getModel().findById(body.insertion_id).then((data) => {
@@ -61,7 +61,7 @@ function getPrivateChat(req, res, next) {
     });
 }
 exports.getPrivateChat = getPrivateChat;
-function putPrivateChat(req, res, next) {
+function putPrivateChatMessage(req, res, next) {
     var body = req.body;
     private_chat.getModel().findById(req.params.id).then((data) => {
         if (!data)
@@ -92,7 +92,7 @@ function putPrivateChat(req, res, next) {
         return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
     });
 }
-exports.putPrivateChat = putPrivateChat;
+exports.putPrivateChatMessage = putPrivateChatMessage;
 function putPrivateChatRead(req, res, next) {
     private_chat.getModel().findById(req.params.id).then((data) => {
         if (!data)

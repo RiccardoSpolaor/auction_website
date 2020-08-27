@@ -6,13 +6,13 @@
             <textarea class="form-control" [(ngModel)]="message" #messagetx id="messagetext" 
             rows="3" placeholder="Enter your message here"></textarea>
         </div>
-        <div *ngIf="isAnswer=='false'">
+        <div *ngIf="!isAnswer && !isInsertionist">
             <div class="checkbox ml-1">
               <input #check type="checkbox">
               <label for="checkbox"> &nbsp; Post as private message</label>
             </div>
             <button type="submit" class="btn btn-primary" (click)="post_message(check.checked)" >Post <i class="fas fa-paper-plane"></i></button>
         </div>
-        <button *ngIf="isAnswer=='true'" type="submit" class="btn btn-primary" (click)="post_message()" >Post <i class="fas fa-paper-plane"></i></button>
+        <button *ngIf="isAnswer || isInsertionist" type="submit" class="btn btn-primary" (click)="post_message()" >Post <i class="fas fa-paper-plane"></i></button>
     </div>
 </div>

@@ -16,7 +16,8 @@ export class MessagePostComponent implements OnInit {
 
   public message : string;
   public error = undefined;
-  @Input() public isAnswer : string;
+  @Input() public isAnswer : boolean;
+  @Input() public isInsertionist : boolean;
 
   @Output() posted = new EventEmitter<Message>();
 

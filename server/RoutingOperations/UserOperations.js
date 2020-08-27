@@ -66,6 +66,8 @@ function postStudent(req, res, next) {
 }
 exports.postStudent = postStudent;
 function getUsers(req, res, next) {
+    if (!req.user.mod || !req.user.validated)
+        return next({ statusCode: 404, error: true, errormessage: "Unauthorized: user is not an moderator" });
     // req.params.mail contains the :mail URL component
     user.getModel().find({}, { digest: 0, salt: 0 }).then((user) => {
         return res.status(200).json(user);
@@ -202,7 +204,7 @@ function changeCurrentWinnersAndCurrentPrice(data) {
 }
 function deleteUserById(req, res, next) {
     // Check mod role
-    if (!user.newUser(req.user).hasModRole()) {
+    if (!req.user.mod || !req.user.validated) {
         return next({ statusCode: 404, error: true, errormessage: "Unauthorized: user is not an moderator" });
     }
     // req.params.id contains the :id URL component

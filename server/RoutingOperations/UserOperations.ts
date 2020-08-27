@@ -92,12 +92,15 @@ export function postStudent ( req : express.Request,res : express.Response, next
 
 export function getUsers ( req : express.Request,res : express.Response, next : express.NextFunction ) {
 
-    // req.params.mail contains the :mail URL component
-    user.getModel().find({},{digest: 0, salt:0 }).then( (user)=> {
-      return res.status(200).json( user );
-    }).catch( (reason) => {
-      return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-    })
+  if(!req.user.mod || !req.user.validated)
+    return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not an moderator"});
+  
+  // req.params.mail contains the :mail URL component
+  user.getModel().find({},{digest: 0, salt:0 }).then( (user)=> {
+    return res.status(200).json( user );
+  }).catch( (reason) => {
+    return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
+  })
   
 }
 
@@ -260,7 +263,7 @@ function changeCurrentWinnersAndCurrentPrice(data: User)  {
 export function deleteUserById ( req : express.Request,res : express.Response, next : express.NextFunction ) {
 
     // Check mod role
-    if( !user.newUser(req.user).hasModRole() ) {
+    if(!req.user.mod || !req.user.validated) {
       return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not an moderator"} );
     }
     

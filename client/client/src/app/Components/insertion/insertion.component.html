@@ -54,7 +54,7 @@
 
 <div *ngIf = 'insertion'>
 
-    <app-message-post *ngIf = 'hasToken()' isAnswer="false" (posted)="get_insertion()"></app-message-post>
+    <app-message-post *ngIf = 'hasToken()' [isAnswer]="false" [isInsertionist]="checkIsInsertionist()" (posted)="get_insertion()"></app-message-post>
     <h4 *ngIf = 'insertion.messages.length' class="font-weight-bold mb-3" style="margin: 3px;">Questions and Answers:</h4>
 
     <div *ngFor = "let message of insertion.messages" class = "card mb-3 border-dark" style="margin: 3px; background-color: rgb(246, 241, 190)" >

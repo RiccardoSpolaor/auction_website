@@ -4,6 +4,7 @@ exports.putInsertionPriceById = exports.putInsertionAnswerToPublicMessageById = 
 const insertion = require("../Insertion");
 const message = require("../Message");
 const user = require("../User");
+const iosObject = require("../IosObject");
 function isInsertion(arg) {
     return arg && arg.title && typeof (arg.title) == 'string'
         && arg.authors && Array.isArray(arg.authors) && arg.authors.length
@@ -74,7 +75,7 @@ exports.getInsertions = getInsertions;
 function postInsertion(req, res, next) {
     console.log("Received: " + JSON.stringify(req.body));
     // Checks if user is not a Mod
-    if (user.newUser(req.user).hasModRole()) {
+    if (req.user.mod) {
         return next({ statusCode: 404, error: true, errormessage: "Unauthorized: Mods can't create new Insertions" });
     }
     var recinsertion = req.body;
@@ -84,7 +85,7 @@ function postInsertion(req, res, next) {
     if (isInsertion(recinsertion)) {
         insertion.getModel().create(recinsertion).then((data) => {
             // Notify all socket.io clients
-            /*ios.emit('broadcast', data );*/
+            ios.emit('broadcast', iosObject.createIosInsertion(data.id));
             return res.status(200).json({ error: false, errormessage: "", id: data._id });
         }).catch((reason) => {
             return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
@@ -134,7 +135,7 @@ function getInsertionById(req, res, next) {
 exports.getInsertionById = getInsertionById;
 function deleteInsertionById(req, res, next) {
     // Check mod role
-    if (!user.newUser(req.user).hasModRole()) {
+    if (!req.user.mod || !req.user.validated) {
         return next({ statusCode: 404, error: true, errormessage: "Unauthorized: user is not a moderator" });
     }
     // req.params.id contains the :id URL component
@@ -223,7 +224,7 @@ exports.updateInsertionContent = updateInsertionContent;
 function putInsertionContentById(req, res, next) {
     var body = req.body;
     insertion.getModel().findById(req.params.id).then((data) => {
-        if (!user.newUser(req.user).hasModRole() && req.user.id != data.insertionist)
+        if ((!req.user.mod || !req.user.validated) && req.user.id != data.insertionist)
             return next({ statusCode: 404, error: true, errormessage: "Unauthorized: user is not a moderator or the insertionist." });
         if (data.closed)
             return next({ statusCode: 404, error: true, errormessage: "Unauthorized: closed auctions can't be edited." });

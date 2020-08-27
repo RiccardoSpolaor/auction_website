@@ -29,7 +29,7 @@ export function postPrivateChat ( req : express.Request,res : express.Response, 
         if(data.length) { // UTILIZZARE app.put("/private_chat/:id")
             req.params.id = data[0]._id;
             req.body = {content: req.body.message}
-            putPrivateChat(req, res, next);
+            putPrivateChatMessage(req, res, next);
         } else{
             insertion.getModel().findById(body.insertion_id).then((data)=>{
                 if (data.insertionist == req.user.id)
@@ -74,7 +74,7 @@ export function getPrivateChat ( req : express.Request,res : express.Response, n
 
 
 
-export function putPrivateChat ( req : express.Request,res : express.Response, next : express.NextFunction ) {
+export function putPrivateChatMessage ( req : express.Request,res : express.Response, next : express.NextFunction ) {
     var body = req.body;
     private_chat.getModel().findById(req.params.id).then((data)=>{
       if (!data)

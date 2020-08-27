@@ -16,7 +16,7 @@ const mongoose = require("mongoose");
 // Mongoose Schema
 var messageSchema = new mongoose.Schema({
     content: {
-        type: [mongoose.SchemaTypes.String],
+        type: mongoose.SchemaTypes.String,
         required: true
     },
     author: {
@@ -30,7 +30,7 @@ var messageSchema = new mongoose.Schema({
     },
     responses: [{
             content: {
-                type: [mongoose.SchemaTypes.String],
+                type: mongoose.SchemaTypes.String,
                 required: true
             },
             author: {

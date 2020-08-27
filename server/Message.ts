@@ -28,7 +28,7 @@ export interface Message extends mongoose.Document {
 
 var messageSchema = new mongoose.Schema( {
     content: {
-        type: [mongoose.SchemaTypes.String],
+        type: mongoose.SchemaTypes.String,
         required: true
     },
     author: {
@@ -42,7 +42,7 @@ var messageSchema = new mongoose.Schema( {
     },
     responses: [{
         content: {
-            type: [mongoose.SchemaTypes.String],
+            type: mongoose.SchemaTypes.String,
             required: true
         },
         author: {

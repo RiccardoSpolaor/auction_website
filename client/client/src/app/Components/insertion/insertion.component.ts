@@ -123,4 +123,8 @@ export class InsertionComponent implements OnInit, OnDestroy {
     }
   }
    
+
+  checkIsInsertionist(){
+    return this.hasToken() && this.insertion && this.insertion.insertionist && (this.getToken().id == this.insertion.insertionist._id);
+  }
 }
