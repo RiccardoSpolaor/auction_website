@@ -116,7 +116,7 @@ export function postInsertion ( req : express.Request,res : express.Response, ne
   if( isInsertion( recinsertion )) {
     insertion.getModel().create( recinsertion ).then( ( data ) => {
       // Notify all socket.io clients
-      //ios.emit('broadcast', iosObject.createIosInsertion(data.id));
+      req.ios.emit('broadcast', iosObject.createIosInsertion(data.id));
       return res.status(200).json({ error: false, errormessage: "", id: data._id });
     }).catch((reason) => {
       return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });

@@ -126,8 +126,7 @@ const cors = require("cors"); // Enable CORS middleware
 const io = require("socket.io"); // Socket.io websocket library
 // import { AuctionEnded, IosObject } from './IosObject';
 const iosObject = require("./IosObject");
-exports.default = global;
-//var ios = undefined;
+var ios = undefined;
 var app = express();
 // We create the JWT authentication middleware
 // provided by the express-jwt library.  
@@ -144,6 +143,10 @@ app.use(cors());
 // body-parser extracts the entire body portion of an incoming request stream 
 // and exposes it on req.body
 app.use(bodyparser.json());
+app.use((req, res, next) => {
+    req.ios = ios;
+    next();
+});
 // Add API routes to express application
 //
 app.get("/", (req, res) => {

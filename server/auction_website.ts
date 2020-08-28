@@ -179,8 +179,11 @@ declare global {
         mod: boolean,
         id: string,
         validated: boolean
+      }  
+      interface Request {
+        ios: any
       }
-    }
+  }
 }
 
 var ios = undefined;
@@ -205,6 +208,11 @@ app.use( cors() );
 // body-parser extracts the entire body portion of an incoming request stream 
 // and exposes it on req.body
 app.use( bodyparser.json() );
+
+app.use ( (req,res,next) => {
+  req.ios = ios
+  next()
+})
 
 
 // Add API routes to express application
