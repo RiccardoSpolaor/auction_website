@@ -232,13 +232,30 @@ function getUserStats(req, res, next) {
         if (!req.user.validated)
             return next({ statusCode: 404, error: true, errormessage: "Unauthorized: moderator is not validated" });
         var active_insertion_list = insertion.getModel().countDocuments({ closed: { $ne: true } });
-        var completed_insertion_list = insertion.getModel().countDocuments({ closed: { $eq: true } }).where('current_price').gte('reserve_price');
-        var active_insertion_list = insertion.getModel().countDocuments({ closed: { $eq: true } }).where('current_price').lt('reserve_price');
+        var completed_insertion_list = insertion.getModel().countDocuments({ $and: [
+                { closed: { $eq: true } },
+                { $expr: { $gte: ["$current_price", "$reserve_price"] } }
+            ] });
+        var unsuccesfully_completed_insertion_list = insertion.getModel().countDocuments({ $and: [
+                { closed: { $eq: true } },
+                { $expr: { $lt: ["$current_price", "$reserve_price"] } }
+            ] });
+        Promise.all([active_insertion_list, completed_insertion_list, unsuccesfully_completed_insertion_list]).then(function (result) {
+            var obj = {
+                active_insertion_list: result[0],
+                completed_insertion_list: result[1],
+                unsuccesfully_completed_insertion_list: result[2]
+            };
+            return res.status(200).json(obj);
+        })
+            .catch(function (reason) {
+            return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
+        });
     }
     else {
-        var user_insertion_list = insertion.getModel().find({ insertionist: { $eq: req.user.id } });
-        var user_participation_list = insertion.getModel().find({ 'history.user': req.user.id });
-        var user_winner_list = insertion.getModel().find({ $and: [{ insertionist: { $eq: req.user.id } }, { closed: { $eq: true } }] });
+        var user_insertion_list = insertion.getModel().find({ insertionist: { $eq: req.user.id } }).select('_id title');
+        var user_participation_list = insertion.getModel().find({ 'history.user': req.user.id }).select('_id title');
+        var user_winner_list = insertion.getModel().find({ $and: [{ current_winner: { $eq: req.user.id } }, { closed: { $eq: true } }] }).select('_id title');
         Promise.all([user_insertion_list, user_participation_list, user_winner_list]).then(function (result) {
             var obj = {
                 insertion_list: result[0],

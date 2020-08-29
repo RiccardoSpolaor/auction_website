@@ -4,10 +4,11 @@ import mongoose = require('mongoose');
 
 import { Notification } from '../Notification';
 import * as notification from '../Notification';
+import * as iosObject from '../IosObject'
 
 export function getNotifications ( req : express.Request,res : express.Response, next : express.NextFunction ) {
 
-    notification.getModel().find( {to: req.user.id}).then( (documents) => {
+    notification.getModel().find( {to: req.user.id}).populate('insertion', ['_id', 'title']).sort({"timestamp" : -1}).then( (documents) => {
         return res.status(200).json( documents );
     }).catch( (reason) => {
         return next({ statusCode:404, error: true, errormessage: "DB error: " + reason });
@@ -30,6 +31,7 @@ export function putNotificationAsRead ( req : express.Request,res : express.Resp
         }
         data.read = true;
         data.save().then( (data) =>  {
+            req.ios.emit('broadcast', iosObject.createIosNotification(req.user.id));
             return res.status(200).json({ error: false, errormessage: "", id: data._id });
         }).catch( (reason) => {
             return next({ statusCode:404, error: true, errormessage: "DB error: " + reason.errmsg });

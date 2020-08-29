@@ -296,7 +296,7 @@ mongoose.connect('mongodb://localhost:27017/auction_website').then(function onco
         });
         server.listen(8080, () => console.log("HTTP Server started on port 8080"));
         setInterval(function () {
-            insertion.getModel().find({ $and: [{ expire_date: { $lte: new Date() } }, { closed: { $ne: true } }] }, { messages: 0, reserve_price: 0 }).sort({ insertion_timestamp: -1 }).then((documents) => {
+            insertion.getModel().find({ $and: [{ expire_date: { $lte: new Date() } }, { closed: { $ne: true } }] }, { messages: 0 }).sort({ insertion_timestamp: -1 }).then((documents) => {
                 if (documents.length) {
                     var notifications = [];
                     var iosMessages = [];
@@ -304,24 +304,25 @@ mongoose.connect('mongodb://localhost:27017/auction_website').then(function onco
                         doc.closed = true;
                         doc.save();
                         if (doc.current_winner) {
+                            console.log(doc.current_price);
+                            console.log(doc.reserve_price);
                             var notifWinner = notification
                                 .getModel()
                                 .create({
                                 timestamp: new Date(),
-                                content: 'You won the insertion: ' + doc.title + (doc.current_price > doc.reserve_price ? '!' : ", but you didn't reach the reserve price!"),
+                                content: (doc.current_price >= doc.reserve_price) ? 'You won the insertion!' : "You won the insertion, but you didn't reach the reserve price!",
                                 read: false,
                                 insertion: doc.id,
                                 to: doc.current_winner
                             });
                             notifications.push(notifWinner);
                             iosMessages.push(iosObject.createIosNotification(doc.current_winner));
-                            //iosMessages.push({type: 'notification', user: doc.current_winner})
                         }
                         var notifInsertionist = notification
                             .getModel()
                             .create({
                             timestamp: new Date(),
-                            content: (doc.current_winner && doc.current_price > doc.reserve_price ? 'Somebody won ' : 'No one won ') + 'your insertion: ' + doc.title + '!',
+                            content: (doc.current_winner && doc.current_price >= doc.reserve_price) ? 'Somebody won your insertion!' : 'No one won your insertion!',
                             read: false,
                             insertion: doc.id,
                             to: doc.insertionist

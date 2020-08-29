@@ -1,0 +1,25 @@
+<div class="container" style="width: 800px; margin-top: 20px;" >
+
+    <div>  
+        <h1 class="h3 mb-3 font-weight-normal">Notifications</h1>
+    </div>
+
+    <div *ngIf="notifications && !notifications.length" class="container text-center my-4">
+        <h3>No notifications to show</h3>
+    </div>
+
+    <div *ngFor="let notif of notifications" (click)="goToInsertion(notif)" class="card" style="margin: 5px; cursor:pointer;" [ngStyle]="{'background-color': !isRead(notif) ? 'rgb(241, 234, 148)' : ''}"> 
+        <div class="card-body">
+            <h4 class="card-subtitle mb-2">
+                <span *ngIf = '!get_insertion(notif)'  style="color: tomato">Insertion Deleted</span>
+                <span *ngIf = 'get_insertion(notif)' class="text-muted">{{notif.insertion.title}}</span>
+                <small class="float-right text-align-right text-muted my-2" style= "font-size: 60%;">
+                    <i class="far fa-clock"></i>&nbsp;
+                    {{notif.timestamp  | date}} / {{notif.timestamp  | date:'shortTime'}} 
+                </small>
+            </h4>
+            <p>{{notif.content}}</p>
+        </div>
+    </div>
+
+</div>
