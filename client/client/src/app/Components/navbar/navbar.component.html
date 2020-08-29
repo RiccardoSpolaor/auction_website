@@ -17,6 +17,8 @@
           <li class="nav-item my-2" style="color: #FFFF;">
           Welcome {{getToken().username}}! &nbsp;
         </li>
+
+
         <li class="nav-item my-2 mr-3" style="color: #FFFF;">
           <a href="#" class="waves-light">
             <span class = "fa-layers fa-fw">
@@ -26,11 +28,25 @@
               </span>
             </span>
           </a>
-          <!--<a href="#" class="waves-light"><i class="fa fa-envelope" aria-hidden="true" style="color: #FFFF;"></i></a>-->
         </li>
+<!--
         <li class="nav-item my-2 mr-2" style="color: #FFFF;">
-          <a routerLink="/private_chats" class="waves-light"><i class="fa fa-comments" aria-hidden="true" style="color: #FFFF;"></i></a>
+          <a routerLink = '/private_chats' class="waves-light">
+            <span class = "fa-layers fa-fw">
+              <i class="fa fa-comments"  style="color: #FFFF;"></i>
+              <span *ngIf='getChatsCount()' class="fa-layers-text rounded-circle font-weight-bold pl-1 pr-1" style="background: red; color:white;">
+                {{getChatsCount()}}
+              </span>
+            </span>
+          </a>
         </li>
+-->
+
+        <li class="nav-item my-2 mr-2">
+          <a *ngIf = '!chatsCount' routerLink="/private_chats" class="waves-light"><i class="fa fa-comments" aria-hidden="true" style="color: white;"></i></a>
+          <a *ngIf = 'chatsCount' routerLink="/private_chats" class="waves-light"><i class="fa fa-comments" aria-hidden="true" style="color: tomato;"></i></a>
+        </li>
+
         <li class="nav-item dropdown" dropdown>
           <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light">
             <i class="fa fa-user"></i><span class="caret"></span></a>

@@ -59,7 +59,7 @@ export function isIosInsertion (iosObject : any) : iosObject is IosInsertion {
 }
 
 export function isIosPrivateChatList (iosObject : any) : iosObject is IosPrivateChatList {
-    return iosObject.type && iosObject.type == Kind.private_chat_list && iosObject.user && Array.isArray(iosObject.user) && iosObject.user.every(user => typeof(user) === 'string')
+    return iosObject.type && iosObject.type == Kind.private_chat_list && iosObject.users && Array.isArray(iosObject.users) && iosObject.users.every(user => typeof(user) === 'string')
 }
 
 export function isIosPrivateChat (iosObject : any) : iosObject is IosPrivateChat {

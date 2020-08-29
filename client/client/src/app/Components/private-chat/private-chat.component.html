@@ -5,7 +5,16 @@
                     <!-- Row start -->
                         <div class="">
                             <div class="selected-user">
-                                <span>To: <span class="name">{{get_other_user()}} </span></span>
+                                <h4 class="name my-4" style="text-align : center;">
+                                    <a *ngIf = "chat.insertion_id" [routerLink]="['/insertions', chat.insertion_id._id]" >
+                                        {{chat.insertion_id.title}}
+                                    </a>
+                                    <p *ngIf = "!chat.insertion_id">
+                                        Insertion Deleted
+                                    </p>
+                                </h4>
+                                To: <span class="name">{{get_other_user()}} </span> &nbsp;
+        
                             </div>
                             <div class="chat-container">
                                 <ul class="chat-box chatContainerScroll">
@@ -33,8 +42,14 @@
                                     </span>
                                     
                                 </ul>
-                                <div class="form-group mt-3 mb-0">
-                                    <textarea class="form-control" rows="3" placeholder="Type your message here..."></textarea>
+                                <div class="jumbotron mb-3 py-4">
+                                    <div class="container">
+                                        <div class="form-group my-3">
+                                            <textarea class="form-control" [(ngModel)]="message" #messagetx id="messagetext" 
+                                            rows="3" placeholder="Enter your message here"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary" (click)="post_chat()" >Post <i class="fas fa-paper-plane"></i></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

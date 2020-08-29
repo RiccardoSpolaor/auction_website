@@ -6,6 +6,8 @@ import { UserHttpService } from '../../Services/user-http.service';
 import { PrivateChatHttpService } from '../../Services/private-chat-http.service';
 import { PrivateChat } from '../../Objects/PrivateChat';
 
+import { isIosPrivateChatList } from '../../Objects/IosObject' 
+
 @Component({
   selector: 'app-private-chat-list',
   templateUrl: './private-chat-list.component.html',
@@ -21,7 +23,9 @@ export class PrivateChatListComponent implements OnInit {
   ngOnInit() {
     this.get_chats();
     this.sio.connect().subscribe( (m) => {
-      //this.get_insertions();
+      if ((isIosPrivateChatList(m) && this.uhs.get_token() && m.users.includes(this.uhs.get_id() ))){
+        this.get_chats();
+      }
     });
   }
 
@@ -72,12 +76,12 @@ export class PrivateChatListComponent implements OnInit {
   }
 
   public goToChat(chat:PrivateChat){
-    this.router.navigate(['/private_chats/' + chat._id]).then(()=>{
+    this.router.navigate(['/private_chats/' + chat._id])/*.then(()=>{
       this.pchs.put_chat_read(chat._id).subscribe(
         (err) => {
           console.log(err)
         }
       );
-    });
+    });*/
   }
 }

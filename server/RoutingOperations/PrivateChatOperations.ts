@@ -10,6 +10,7 @@ import * as message from '../Message';
 
 import {PrivateChat} from '../PrivateChat';
 import * as private_chat from '../PrivateChat';
+import * as iosObject from '../IosObject'
 
 import { User } from '../User';
 import * as user from '../User';
@@ -42,9 +43,7 @@ export function postPrivateChat ( req : express.Request,res : express.Response, 
         
                     if(isPrivateChat(chat)){
                     private_chat.getModel().create( chat ).then( ( data ) => {
-                        // Notify all socket.io clients
-                        /*ios.emit('broadcast', data );*/
-                
+                        req.ios.emit('broadcast', iosObject.createiosPrivateChatList([data.insertionist, data.sender]));
                         return res.status(200).json({ error: false, errormessage: "", id: data._id });
                     }).catch((reason) => {
                         return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
@@ -94,6 +93,8 @@ export function putPrivateChatMessage ( req : express.Request,res : express.Resp
             data.insertionistRead = false
   
           data.save().then( (data) =>  {
+            req.ios.emit('broadcast', iosObject.createiosPrivateChat(data.id));
+            req.ios.emit('broadcast', iosObject.createiosPrivateChatList([data.insertionist, data.sender]));
             return res.status(200).json({ error: false, errormessage: "", id: data._id });
           }).catch( (reason) => {
             return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
@@ -123,6 +124,7 @@ export function putPrivateChatRead ( req : express.Request,res : express.Respons
       return next({ statusCode:404, error: true, errormessage: "You can't post in this chat" });
 
     data.save().then( (data) =>  {
+      req.ios.emit('broadcast', iosObject.createiosPrivateChatList([data.insertionist, data.sender]));
       return res.status(200).json({ error: false, errormessage: "", id: data._id });
     }).catch( (reason) => {
       return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });

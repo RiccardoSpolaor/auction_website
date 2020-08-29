@@ -4,6 +4,7 @@ exports.getUnreadChatsCount = exports.getPrivateChatById = exports.putPrivateCha
 const insertion = require("../Insertion");
 const message = require("../Message");
 const private_chat = require("../PrivateChat");
+const iosObject = require("../IosObject");
 function isPrivateChat(arg) {
     return arg && arg.insertion_id && typeof (arg.insertion_id) == 'string'
         && arg.insertionist && typeof (arg.insertionist) == 'string'
@@ -30,8 +31,7 @@ function postPrivateChat(req, res, next) {
                     var chat = { insertion_id: data.id, insertionist: data.insertionist.toString(), sender: req.user.id, messages: messages };
                     if (isPrivateChat(chat)) {
                         private_chat.getModel().create(chat).then((data) => {
-                            // Notify all socket.io clients
-                            /*ios.emit('broadcast', data );*/
+                            req.ios.emit('broadcast', iosObject.createiosPrivateChatList([data.insertionist, data.sender]));
                             return res.status(200).json({ error: false, errormessage: "", id: data._id });
                         }).catch((reason) => {
                             return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
@@ -78,6 +78,8 @@ function putPrivateChatMessage(req, res, next) {
                 else
                     data.insertionistRead = false;
                 data.save().then((data) => {
+                    req.ios.emit('broadcast', iosObject.createiosPrivateChat(data.id));
+                    req.ios.emit('broadcast', iosObject.createiosPrivateChatList([data.insertionist, data.sender]));
                     return res.status(200).json({ error: false, errormessage: "", id: data._id });
                 }).catch((reason) => {
                     return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason.errmsg });
@@ -104,6 +106,7 @@ function putPrivateChatRead(req, res, next) {
         else
             return next({ statusCode: 404, error: true, errormessage: "You can't post in this chat" });
         data.save().then((data) => {
+            req.ios.emit('broadcast', iosObject.createiosPrivateChatList([data.insertionist, data.sender]));
             return res.status(200).json({ error: false, errormessage: "", id: data._id });
         }).catch((reason) => {
             return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason.errmsg });

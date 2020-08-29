@@ -37,7 +37,7 @@ export class MessagePostComponent implements OnInit {
         console.log('Message posted');
         this.error = undefined
         this.set_empty();
-        this.router.navigate(['/private_chats'])
+        this.router.navigate(['/private_chats/' + m.id])
       }, (error) => {
         console.log('Error occurred while posting: ' + error);
         this.error = 'Error occurred while posting: ' + error

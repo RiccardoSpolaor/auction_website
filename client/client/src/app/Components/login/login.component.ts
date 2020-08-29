@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UserHttpService } from '../../Services/user-http.service';
 import { NotificationHttpService } from '../../Services/notification-http.service';
+import { PrivateChatHttpService } from '../../Services/private-chat-http.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -11,7 +12,7 @@ import { Router } from '@angular/router';
 export class LoginComponent implements OnInit {
 
   public errmessage = undefined;
-  constructor( private uhs: UserHttpService, private router: Router, private nhs : NotificationHttpService  ) { }
+  constructor( private uhs: UserHttpService, private router: Router, private nhs : NotificationHttpService, private pchs : PrivateChatHttpService  ) { }
 
   ngOnInit(): void { }
 
@@ -21,6 +22,7 @@ export class LoginComponent implements OnInit {
       console.log('User service token: ' + this.uhs.get_token() );
       this.errmessage = undefined;
       this.nhs.set_notifications_state_after_login()
+      this.pchs.set_chats_state_after_login()
       if(this.uhs.is_moderator() && !this.uhs.is_validated())
         this.router.navigate(['/editprofile'])
       else 
