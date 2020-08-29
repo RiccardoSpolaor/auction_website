@@ -5,6 +5,7 @@ import { SocketioService } from '../../Services/socketio.service';
 import { UserHttpService } from '../../Services/user-http.service';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
 import { Insertion } from '../../Objects/Insertion';
+import { isIosInsertion } from '../../Objects/IosObject' 
 
 
 
@@ -24,7 +25,7 @@ export class InsertionListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.get_insertions(this.route.snapshot.queryParams);
     this.sio.connect().subscribe( (m) => {
-      //this.get_insertions();
+      this.get_insertions(this.route.snapshot.queryParams)
     });
   }
 
@@ -35,6 +36,7 @@ export class InsertionListComponent implements OnInit, OnDestroy {
   public get_insertions(params? : any) {
     this.ihs.get_insertions(params).subscribe(
       ( insertions ) => {
+        clearInterval(this.interval)
         this.insertions = insertions;
 
 

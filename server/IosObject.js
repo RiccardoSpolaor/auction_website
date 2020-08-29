@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createIosUser = exports.createiosPrivateChat = exports.createiosPrivateChatList = exports.createIosInsertion = exports.createIosMessage = exports.createIosNotification = void 0;
+exports.createIosUserDeleted = exports.createIosUser = exports.createiosPrivateChat = exports.createiosPrivateChatList = exports.createIosInsertion = exports.createIosMessage = exports.createIosNotification = void 0;
 var Kind;
 (function (Kind) {
     Kind["notification"] = "notification";
@@ -9,6 +9,7 @@ var Kind;
     Kind["private_chat_list"] = "private_chat_list";
     Kind["private_chat"] = "private_chat";
     Kind["user"] = "user";
+    Kind["user_deleted"] = "user_deleted";
 })(Kind || (Kind = {}));
 function createIosNotification(user) {
     return { type: Kind.notification, user: user };
@@ -34,6 +35,10 @@ function createIosUser() {
     return { type: Kind.user };
 }
 exports.createIosUser = createIosUser;
+function createIosUserDeleted(id) {
+    return { type: Kind.user_deleted, id: id };
+}
+exports.createIosUserDeleted = createIosUserDeleted;
 /*
 enum Kinds{
     auctionEnded = "auctionEnded"

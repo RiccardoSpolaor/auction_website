@@ -176,6 +176,7 @@ export function deleteInsertionById  ( req : express.Request,res : express.Respo
   // req.params.id contains the :id URL component
 
   insertion.getModel().findByIdAndDelete(req.params.id).then( ()=> {
+      req.ios.emit('broadcast', iosObject.createIosInsertion(req.params.id));
       return res.status(200).json( {error:false, errormessage:""} );
   }).catch( (reason)=> {
       return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
@@ -268,6 +269,7 @@ export function updateInsertionContent (req : express.Request,res : express.Resp
     
   data.save().then( (data) => {
     console.log("Database Update");
+    req.ios.emit('broadcast', iosObject.createIosInsertion(data.id));
     return res.status(200).json({ error: false, errormessage: "", id: data._id });
 
   }).catch( (reason) => {
@@ -307,6 +309,7 @@ export function putInsertionPublicMessageById ( req : express.Request,res : expr
       data.messages.unshift(m);
 
       data.save().then( (data) =>  {
+        req.ios.emit('broadcast', iosObject.createIosMessage(data.id));
         return res.status(200).json({ error: false, errormessage: "", id: data._id });
       }).catch( (reason) => {
         return next({ statusCode:404, error: true, errormessage: "DB error: " + reason.errmsg });
@@ -336,6 +339,7 @@ export function putInsertionAnswerToPublicMessageById ( req : express.Request,re
         }).responses.push(m)
 
         data.save().then( (data) =>  {
+          req.ios.emit('broadcast', iosObject.createIosMessage(data.id));
           return res.status(200).json({ error: false, errormessage: "", id: data._id });
         }).catch( (reason) => {
           return next({ statusCode:404, error: true, errormessage: "DB error: "+reason.errmsg });
@@ -369,6 +373,7 @@ export function putInsertionPriceById ( req : express.Request,res : express.Resp
       data.current_price = body.current_price;
       data.current_winner = req.user.id;
       data.save().then( (data) =>  {
+        req.ios.emit('broadcast', iosObject.createIosInsertion(data.id));
         return res.status(200).json({ error: false, errormessage: "", id: data._id });
       }).catch( (reason) => {
         return next({ statusCode:404, error: true, errormessage: "DB error: " + reason.errmsg });

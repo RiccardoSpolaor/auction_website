@@ -15,20 +15,17 @@ export class PrivateChatListComponent implements OnInit {
 
 
   public chats: PrivateChat[]
-  public active_chat: PrivateChat
 
   constructor( private sio: SocketioService , public pchs: PrivateChatHttpService, public uhs: UserHttpService, private router: Router , private route: ActivatedRoute) { }
 
-  async ngOnInit() {
-    await this.get_chats();
-    this.active_chat = this.chats[0];
-    alert(JSON.stringify(this.active_chat))
+  ngOnInit() {
+    this.get_chats();
     this.sio.connect().subscribe( (m) => {
       //this.get_insertions();
     });
   }
 
-  public async get_chats() {
+  public get_chats() {
     this.pchs.get_chats().subscribe(
       ( chats ) => {
         this.chats = chats;
@@ -39,7 +36,7 @@ export class PrivateChatListComponent implements OnInit {
   }
 
   public get_other_user(chat:PrivateChat){
-    var token_info = this.uhs.get_token()._id;
+    var token_info = this.uhs.get_id()
     if(chat.sender && chat.sender._id!=token_info)
       return chat.sender.username;
     
@@ -51,5 +48,36 @@ export class PrivateChatListComponent implements OnInit {
 
   public get_insertion(chat:PrivateChat) {
     return chat.insertion_id?chat.insertion_id.title:'Insertion deleted'
+  }
+
+  public get_last_message(chat:PrivateChat){
+    if(!chat.messages.length)
+      return ''
+    
+    var last_message = chat.messages[chat.messages.length-1];
+    
+    return last_message.content.length>60?last_message.content.slice(0,59) + "...":last_message.content;
+    
+  }
+
+  public isRead(chat:PrivateChat){
+    var token_info = this.uhs.get_id()
+    if(chat.sender && chat.sender._id==token_info)
+      return chat.senderRead;
+    
+    if(chat.insertionist && chat.insertionist._id==token_info)
+      return chat.insertionistRead;
+
+    return false;
+  }
+
+  public goToChat(chat:PrivateChat){
+    this.router.navigate(['/private_chats/' + chat._id]).then(()=>{
+      this.pchs.put_chat_read(chat._id).subscribe(
+        (err) => {
+          console.log(err)
+        }
+      );
+    });
   }
 }

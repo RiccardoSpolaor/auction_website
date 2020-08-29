@@ -33,19 +33,19 @@ export class PrivateChatHttpService {
   }
   
 
-  /*get_insertion(params: any): Observable<Insertion> {
+  get_chat(params: any): Observable<PrivateChat> {
       const options = {
         headers: new HttpHeaders({
-          authorization: 'Bearer ' + this.us.get_token(),
+          authorization: 'Bearer ' + this.uhs.get_token(),
           'cache-control': 'no-cache',
           'Content-Type':  'application/json',
         })
       };
-      return this.http.get<Insertion>( this.us.url + '/insertions/'+ params.id, options).pipe(
+      return this.http.get<PrivateChat>( this.uhs.url + '/private_chats/'+ params.id, options).pipe(
           tap( (data) => console.log(JSON.stringify(data))) ,
           catchError( this.handleError )
         );
-  }*/
+  }
 
   get_chats(): Observable<PrivateChat[]> {
     const options = {
@@ -59,6 +59,42 @@ export class PrivateChatHttpService {
         tap( (data) => console.log(JSON.stringify(data))) ,
         catchError( this.handleError )
       );
+  }
+
+  post_chat(message : string, insertion_id: string) : Observable <any> {
+    const options = {
+      headers: new HttpHeaders({
+        authorization: 'Bearer ' + this.uhs.get_token(),
+        'cache-control': 'no-cache',
+        'Content-Type':  'application/json',
+      })
+    };
+
+    var body = {
+      insertion_id: insertion_id,
+      message: message
+    }
+
+    return this.http.post( this.uhs.url + '/private_chats', body, options ).pipe(
+      tap( (data) => {
+        console.log(JSON.stringify(data) );
+      })
+    );
+  }
+
+  put_chat_read(id: string) : Observable <any> {
+    const options = {
+      headers: new HttpHeaders({
+        authorization: 'Bearer ' + this.uhs.get_token(),
+        'cache-control': 'no-cache',
+        'Content-Type':  'application/json',
+      })
+    };
+    return this.http.put( this.uhs.url + '/private_chats/' + id + '/read', {}, options ).pipe(
+      tap( (data) => {
+        console.log(JSON.stringify(data) );
+      })
+    );
   }
 
 }

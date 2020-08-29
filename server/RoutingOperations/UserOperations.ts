@@ -13,6 +13,7 @@ import * as private_chat from '../PrivateChat';
 
 import { User } from '../User';
 import * as user from '../User';
+import * as iosObject from '../IosObject'
 
 
 import jsonwebtoken = require('jsonwebtoken');
@@ -199,6 +200,7 @@ export function putUser ( req : express.Request,res : express.Response, next : e
         
       /****REGENERATING TOKEN ****/  
       data.save().then( (data) => {
+        req.ios.emit('broadcast', iosObject.createIosUser());
         
         var tokendata = {
           username: data.username,
@@ -250,14 +252,6 @@ function changeCurrentWinnersAndCurrentPrice(data: User)  {
     });
     return Promise.all(documents)
   })
-
- /*var u = this.insertion.history.length?this.insertion.history[this.insertion.history.length-1].user:null;
-    var i = this.insertion.history.length-2;
-    while(u==null && i>=0){
-      u=this.insertion.history[i].user;
-      i--;
-    }
-    return u?u.username:'None';*/
 }
 
 export function deleteUserById ( req : express.Request,res : express.Response, next : express.NextFunction ) {
@@ -266,8 +260,6 @@ export function deleteUserById ( req : express.Request,res : express.Response, n
     if(!req.user.mod || !req.user.validated) {
       return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not an moderator"} );
     }
-    
-    // req.params.id contains the :id URL component
   
     user.getModel().findById(req.params.id).then( (data)=> {
       if(!data.hasModRole()){
@@ -275,6 +267,7 @@ export function deleteUserById ( req : express.Request,res : express.Response, n
         deleteUserOpenInsertions(data).then(() => {
           changeCurrentWinnersAndCurrentPrice(data).then (() => {
             data.remove().then(()=>{
+              req.ios.emit('broadcast', iosObject.createIosUserDeleted(req.params.id));
               return res.status(200).json( {error:false, errormessage:""} );
             }).catch( (reason)=> {
               return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
@@ -285,12 +278,6 @@ export function deleteUserById ( req : express.Request,res : express.Response, n
         }).catch( (reason)=> {
           return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
         });
-        /*
-        data.remove().then(()=>{
-          return res.status(200).json( {error:false, errormessage:""} );
-        }).catch( (reason)=> {
-          return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
-        });*/
       }else
         return next({ statusCode:404, error: true, errormessage: "Unauthorized: moderator can't be deleted"} )
     }).catch( (reason)=> {

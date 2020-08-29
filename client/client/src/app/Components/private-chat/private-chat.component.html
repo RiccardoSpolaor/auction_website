@@ -1,0 +1,42 @@
+
+
+                <div *ngIf="chat" class="card m-0">
+
+                    <!-- Row start -->
+                        <div class="">
+                            <div class="selected-user">
+                                <span>To: <span class="name">{{get_other_user()}} </span></span>
+                            </div>
+                            <div class="chat-container">
+                                <ul class="chat-box chatContainerScroll">
+                                    <span *ngFor="let message of chat.messages">
+                                        <li *ngIf="!isCurrentUser(message)" class="chat-left">
+                                            <div class="chat-avatar">
+                                                <i class="fa fa-user-circle"></i>
+                                                <div class="chat-name">{{message.author?message.author.username:'Deleted User'}}</div>
+                                            </div>
+                                            <div class="chat-text">{{message.content}}</div>
+                                            <div class="chat-hour">{{message.timestamp | date}} / <br> {{message.timestamp | date:'shortTime'}} 
+                                            </div>
+                                        </li>
+
+                                        <li *ngIf="isCurrentUser(message)" class="chat-right">
+                                            <div class="chat-hour">{{message.timestamp | date}} / <br> {{message.timestamp | date:'shortTime'}} 
+                                            </div>
+                                            <div class="chat-text">{{message.content}}</div>
+                                            <div class="chat-avatar">
+                                                <i class="fa fa-user-circle"></i>
+                                                <div class="chat-name">{{message.author?message.author.username:'Deleted User'}}</div>
+                                            </div>
+                                        </li>
+
+                                    </span>
+                                    
+                                </ul>
+                                <div class="form-group mt-3 mb-0">
+                                    <textarea class="form-control" rows="3" placeholder="Type your message here..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    <!-- Row end -->
+                </div>

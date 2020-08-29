@@ -3,6 +3,7 @@ import { Router } from '@angular/router'
 import { SocketioService } from '../../Services/socketio.service';
 import { UserHttpService } from '../../Services/user-http.service';
 import { User } from '../../Objects/User'
+import { isIosUser, isIosUserDeleted } from 'src/app/Objects/IosObject';
 
 @Component({
   selector: 'app-user-list',
@@ -13,12 +14,16 @@ export class UserListComponent implements OnInit {
 
   public users : User[]
 
-  constructor( private uhs : UserHttpService, private router: Router) { }
+  constructor( private uhs : UserHttpService, private router: Router, private sio: SocketioService) { }
 
   ngOnInit(): void {
-    if (this.uhs.get_token() && this.uhs.is_moderator() && this.uhs.is_validated())
+    if (this.uhs.get_token() && this.uhs.is_moderator() && this.uhs.is_validated()){
       this.get_users()
-    else 
+      this.sio.connect().subscribe( (m) => {
+        if(isIosUser(m) || isIosUserDeleted(m))
+          this.get_users()
+      });
+    }else 
       this.router.navigate(['**'])
   }
 

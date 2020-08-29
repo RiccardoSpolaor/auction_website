@@ -12,6 +12,7 @@ import { PostInsertionComponent } from './Components/post-insertion/post-inserti
 import { EditInsertionComponent } from './Components/edit-insertion/edit-insertion.component'
 import { PageNotFoundComponent } from './Components/page-not-found/page-not-found.component'
 import { UserListComponent } from './Components/user-list/user-list.component'
+import { PrivateChatComponent } from './Components/private-chat/private-chat.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/insertions', pathMatch: 'full' },
@@ -26,7 +27,9 @@ const routes: Routes = [
   { path: 'postinsertion', component : PostInsertionComponent},
   { path: 'editinsertion/:id', component : EditInsertionComponent},
   { path: 'userlist', component: UserListComponent},
+  { path: 'private_chats/:id', component : PrivateChatComponent},
   { path: '**',component: PageNotFoundComponent }
+
 ];
 
 @NgModule({

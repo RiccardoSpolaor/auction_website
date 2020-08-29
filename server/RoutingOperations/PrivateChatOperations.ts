@@ -147,6 +147,10 @@ export function getPrivateChatById ( req : express.Request,res : express.Respons
               {
                 path: 'insertion_id', 
                 select: '_id title'
+              },
+              {
+                path: 'messages.author', 
+                select: '_id mail username'
               }
               ]).execPopulate().then((data) => { 
                 return res.status(200).json( data )

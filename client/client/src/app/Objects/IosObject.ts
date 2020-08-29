@@ -4,7 +4,8 @@ enum Kind {
     insertion = 'insertion',
     private_chat_list = 'private_chat_list',
     private_chat = 'private_chat',
-    user = 'user'
+    user = 'user',
+    user_deleted = 'user_deleted'
 }
 
 interface IosObject {
@@ -40,6 +41,11 @@ export interface IosUser extends IosObject {
     readonly type: Kind.user
 }
 
+export interface IosUserDeleted extends IosObject {
+    readonly type: Kind.user_deleted
+    readonly id: string
+}
+
 export function isIosNotification (iosObject : any) : iosObject is IosNotification {
     return iosObject.type && iosObject.type == Kind.notification && iosObject.user && typeof(iosObject.user) === 'string'
 }
@@ -62,4 +68,8 @@ export function isIosPrivateChat (iosObject : any) : iosObject is IosPrivateChat
 
 export function isIosUser (iosObject : any) : iosObject is IosUser {
     return iosObject.type && iosObject.type == Kind.user
+}
+
+export function isIosUserDeleted (iosObject : any) : iosObject is IosUserDeleted {
+    return iosObject.type && iosObject.type == Kind.user_deleted && iosObject.id && typeof(iosObject.id) === 'string'
 }

@@ -33,6 +33,7 @@ import { PostInsertionComponent } from './Components/post-insertion/post-inserti
 import { EditInsertionComponent } from './Components/edit-insertion/edit-insertion.component';
 import { PageNotFoundComponent } from './Components/page-not-found/page-not-found.component';
 import { UserListComponent } from './Components/user-list/user-list.component';
+import { PrivateChatComponent } from './Components/private-chat/private-chat.component';
 
 @NgModule({
   declarations: [
@@ -50,7 +51,8 @@ import { UserListComponent } from './Components/user-list/user-list.component';
     PostInsertionComponent,
     EditInsertionComponent,
     PageNotFoundComponent,
-    UserListComponent
+    UserListComponent,
+    PrivateChatComponent
   ],
   imports: [
     MDBBootstrapModule.forRoot(),

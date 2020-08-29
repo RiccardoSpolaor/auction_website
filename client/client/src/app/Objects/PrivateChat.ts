@@ -7,7 +7,7 @@ export interface PrivateChat {
     insertion_id: {
         _id: string,
         title: string
-    }
+    },
     insertionist: {
         _id: string,
         username: string,
@@ -19,4 +19,7 @@ export interface PrivateChat {
         mail: string
     },
     messages: [Message]
+    insertionistRead :boolean,
+    senderRead: boolean
+
 }

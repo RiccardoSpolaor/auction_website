@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { UserHttpService } from '../../Services/user-http.service';
 import { NotificationHttpService } from '../../Services/notification-http.service';
 import { SocketioService } from '../../Services/socketio.service';
-import { isIosNotification } from '../../Objects/IosObject' 
+import { isIosNotification, isIosUserDeleted } from '../../Objects/IosObject' 
 
 @Component({
   selector: 'app-navbar',
@@ -18,7 +18,6 @@ export class NavbarComponent implements OnInit {
 
   ngOnInit(): void {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false //ricarica nuovamente la pagina
-    
     if(this.uhs.get_token())
       this.getUnreadNotificationsCount()
       
@@ -27,6 +26,8 @@ export class NavbarComponent implements OnInit {
     this.sio.connect().subscribe( (m) => {
       if (this.hasToken() && isIosNotification(m) && m.user == this.getToken().id )
         this.getUnreadNotificationsCount()
+      else if( this.hasToken() && isIosUserDeleted(m) && m.id == this.getToken().id)
+        this.logout()
     });
   }
 

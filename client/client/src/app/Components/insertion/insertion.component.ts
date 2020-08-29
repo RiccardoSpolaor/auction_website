@@ -5,6 +5,7 @@ import { SocketioService } from '../../Services/socketio.service';
 import { UserHttpService } from '../../Services/user-http.service';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
 import { Insertion } from '../../Objects/Insertion';
+import { isIosInsertion, isIosMessage } from '../../Objects/IosObject' 
 
 @Component({
   selector: 'app-insertion',
@@ -22,7 +23,9 @@ export class InsertionComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.get_insertion();
     this.sio.connect().subscribe( (m) => {
-      //this.get_insertions();
+      if ((isIosInsertion(m) && m.id == this.insertion._id) || (isIosMessage(m) && m.insertion==this.insertion._id)){
+        this.get_insertion();
+      }
     });
   }
 
@@ -33,6 +36,7 @@ export class InsertionComponent implements OnInit, OnDestroy {
   public get_insertion() {
     this.ihs.get_insertion(this.route.snapshot.params).subscribe(
       ( insertion ) => {
+        clearInterval(this.interval)
         if (!insertion)
           this.router.navigate(['**'])
         else {

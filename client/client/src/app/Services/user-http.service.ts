@@ -139,9 +139,6 @@ export class UserHttpService {
   }
 
   get_token() {
-    /*if(!this.token){
-      this.token=localStorage.getItem("auction_website_token")
-    }*/
     return this.token;
   }
 

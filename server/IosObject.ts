@@ -7,7 +7,8 @@ enum Kind {
     insertion = 'insertion',
     private_chat_list = 'private_chat_list',
     private_chat = 'private_chat',
-    user = 'user'
+    user = 'user',
+    user_deleted = 'user_deleted'
 }
 
 
@@ -33,6 +34,10 @@ export function createiosPrivateChat (id : string) {
 
 export function createIosUser () {
     return {type: Kind.user}
+}
+
+export function createIosUserDeleted (id : string) {
+    return {type: Kind.user_deleted, id: id}
 }
 
 /*

@@ -140,6 +140,7 @@ function deleteInsertionById(req, res, next) {
     }
     // req.params.id contains the :id URL component
     insertion.getModel().findByIdAndDelete(req.params.id).then(() => {
+        req.ios.emit('broadcast', iosObject.createIosInsertion(req.params.id));
         return res.status(200).json({ error: false, errormessage: "" });
     }).catch((reason) => {
         return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason });
@@ -215,6 +216,7 @@ function updateInsertionContent(req, res, next, body, data) {
         return next({ statusCode: 404, error: true, errormessage: "Errors: " + errors });
     data.save().then((data) => {
         console.log("Database Update");
+        req.ios.emit('broadcast', iosObject.createIosInsertion(data.id));
         return res.status(200).json({ error: false, errormessage: "", id: data._id });
     }).catch((reason) => {
         return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason.errmsg });
@@ -243,6 +245,7 @@ function putInsertionPublicMessageById(req, res, next) {
             var m = message.newMessage(body);
             data.messages.unshift(m);
             data.save().then((data) => {
+                req.ios.emit('broadcast', iosObject.createIosMessage(data.id));
                 return res.status(200).json({ error: false, errormessage: "", id: data._id });
             }).catch((reason) => {
                 return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason.errmsg });
@@ -266,6 +269,7 @@ function putInsertionAnswerToPublicMessageById(req, res, next) {
                 return info._id == req.params.m_id;
             }).responses.push(m);
             data.save().then((data) => {
+                req.ios.emit('broadcast', iosObject.createIosMessage(data.id));
                 return res.status(200).json({ error: false, errormessage: "", id: data._id });
             }).catch((reason) => {
                 return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason.errmsg });
@@ -298,6 +302,7 @@ function putInsertionPriceById(req, res, next) {
             data.current_price = body.current_price;
             data.current_winner = req.user.id;
             data.save().then((data) => {
+                req.ios.emit('broadcast', iosObject.createIosInsertion(data.id));
                 return res.status(200).json({ error: false, errormessage: "", id: data._id });
             }).catch((reason) => {
                 return next({ statusCode: 404, error: true, errormessage: "DB error: " + reason.errmsg });
