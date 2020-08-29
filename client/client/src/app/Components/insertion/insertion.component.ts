@@ -6,6 +6,7 @@ import { UserHttpService } from '../../Services/user-http.service';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
 import { Insertion } from '../../Objects/Insertion';
 import { isIosInsertion, isIosMessage } from '../../Objects/IosObject' 
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-insertion',
@@ -17,20 +18,22 @@ export class InsertionComponent implements OnInit, OnDestroy {
   public insertion: Insertion;
   public errmessage = undefined;
   private interval
+  private subscriptions : Subscription = new Subscription()
 
   constructor( private sio: SocketioService , public ihs: InsertionHttpService, public uhs: UserHttpService, private router: Router , private route: ActivatedRoute) {}
 
   ngOnInit() {
     this.get_insertion();
-    this.sio.connect().subscribe( (m) => {
+    this.subscriptions.add(this.sio.connect().subscribe( (m) => {
       if ((isIosInsertion(m) && m.id == this.insertion._id) || (isIosMessage(m) && m.insertion==this.insertion._id)){
         this.get_insertion();
       }
-    });
+    }));
   }
 
   ngOnDestroy() {
     clearInterval(this.interval)
+    this.subscriptions.unsubscribe()
   }
 
   public get_insertion() {

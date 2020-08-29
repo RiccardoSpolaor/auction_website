@@ -1,30 +1,37 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router'
 import { SocketioService } from '../../Services/socketio.service';
 import { UserHttpService } from '../../Services/user-http.service';
 import { User } from '../../Objects/User'
 import { isIosUser, isIosUserDeleted } from 'src/app/Objects/IosObject';
+import { Subscription } from 'rxjs';
+
 
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.css']
 })
-export class UserListComponent implements OnInit {
+export class UserListComponent implements OnInit, OnDestroy {
 
   public users : User[]
+  private subscriptions : Subscription = new Subscription()
 
   constructor( private uhs : UserHttpService, private router: Router, private sio: SocketioService) { }
 
   ngOnInit(): void {
     if (this.uhs.get_token() && this.uhs.is_moderator() && this.uhs.is_validated()){
       this.get_users()
-      this.sio.connect().subscribe( (m) => {
+      this.subscriptions.add(this.sio.connect().subscribe( (m) => {
         if(isIosUser(m) || isIosUserDeleted(m))
           this.get_users()
-      });
+      }));
     }else 
       this.router.navigate(['**'])
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe()
   }
 
   public get_users() {

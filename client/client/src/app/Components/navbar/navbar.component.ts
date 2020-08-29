@@ -66,11 +66,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   public getUnreadChatsCount() {
     this.pchs.get_unread_chats_count().subscribe(
       ( chatsCount ) => {
-        if (chatsCount == 0)
-          this.chatsCount = undefined 
-        else
-          this.chatsCount = chatsCount;
-        alert(this.chatsCount)
+        this.chatsCount = chatsCount;
       } , (err) => {
         console.log(err)
         this.chatsCount = 0;

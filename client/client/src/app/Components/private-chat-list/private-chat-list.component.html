@@ -9,7 +9,8 @@
             <h4 class="card-subtitle mb-2">
                 <i class = 'fa fa-user-circle'></i> 
                 {{get_other_user(chat)}} 
-                <span class="text-muted">{{get_insertion(chat)}}</span>
+                <span *ngIf = '!get_insertion(chat)'  style="color: tomato">Insertion Deleted</span>
+                <span *ngIf = 'get_insertion(chat)' class="text-muted">{{chat.insertion_id.title}}</span>
                 <small *ngIf = "chat.messages.length" class="float-right text-align-right text-muted my-2" style= "font-size: 60%;">
                     <i class="far fa-clock"></i>&nbsp;
                     {{chat.messages[chat.messages.length-1].timestamp  | date}} / {{chat.messages[chat.messages.length-1].timestamp  | date:'shortTime'}} 

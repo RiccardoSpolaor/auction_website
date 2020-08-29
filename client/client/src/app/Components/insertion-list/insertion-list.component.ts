@@ -6,6 +6,8 @@ import { UserHttpService } from '../../Services/user-http.service';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
 import { Insertion } from '../../Objects/Insertion';
 import { isIosInsertion } from '../../Objects/IosObject' 
+import { Subscription } from 'rxjs';
+
 
 
 
@@ -19,18 +21,21 @@ export class InsertionListComponent implements OnInit, OnDestroy {
 
   public insertions: Insertion[]
   private interval
+  private subscriptions : Subscription = new Subscription()
+
 
   constructor( private sio: SocketioService , public ihs: InsertionHttpService, private router: Router , private route: ActivatedRoute) { }
 
   ngOnInit() {
     this.get_insertions(this.route.snapshot.queryParams);
-    this.sio.connect().subscribe( (m) => {
+    this.subscriptions.add(this.sio.connect().subscribe( (m) => {
       this.get_insertions(this.route.snapshot.queryParams)
-    });
+    }));
   }
 
   ngOnDestroy() {
     clearInterval(this.interval)
+    this.subscriptions.unsubscribe()
   }
 
   public get_insertions(params? : any) {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { SocketioService } from '../../Services/socketio.service';
@@ -8,25 +8,37 @@ import { PrivateChat } from '../../Objects/PrivateChat';
 
 import { isIosPrivateChatList } from '../../Objects/IosObject' 
 
+import { Subscription } from 'rxjs'
+
+
 @Component({
   selector: 'app-private-chat-list',
   templateUrl: './private-chat-list.component.html',
   styleUrls: ['./private-chat-list.component.css']
 })
-export class PrivateChatListComponent implements OnInit {
+export class PrivateChatListComponent implements OnInit, OnDestroy {
 
 
   public chats: PrivateChat[]
+  private subscriptions : Subscription = new Subscription()
 
   constructor( private sio: SocketioService , public pchs: PrivateChatHttpService, public uhs: UserHttpService, private router: Router , private route: ActivatedRoute) { }
 
   ngOnInit() {
-    this.get_chats();
-    this.sio.connect().subscribe( (m) => {
-      if ((isIosPrivateChatList(m) && this.uhs.get_token() && m.users.includes(this.uhs.get_id() ))){
-        this.get_chats();
-      }
-    });
+    if (!this.uhs.get_token())
+      this.router.navigate(['**'])
+    else {
+      this.get_chats();
+      this.subscriptions.add(this.sio.connect().subscribe( (m) => {
+        if ((isIosPrivateChatList(m) && this.uhs.get_token() && m.users.includes(this.uhs.get_id() ))){
+          this.get_chats();
+        }
+      }));
+    }
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe()
   }
 
   public get_chats() {
@@ -51,7 +63,7 @@ export class PrivateChatListComponent implements OnInit {
   }
 
   public get_insertion(chat:PrivateChat) {
-    return chat.insertion_id?chat.insertion_id.title:'Insertion deleted'
+    return chat.insertion_id
   }
 
   public get_last_message(chat:PrivateChat){

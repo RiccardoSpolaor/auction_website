@@ -31,9 +31,9 @@ export class SocketioService {
       });
 
       // When the consumer unsubscribes, clean up data ready for next subscription.
-      return { unsubscribe() {
+      /*return { unsubscribe() {
         this.socket.disconnect();
-      } };
+      } };*/
 
     });
 

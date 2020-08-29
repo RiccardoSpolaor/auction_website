@@ -23,29 +23,21 @@
           <a href="#" class="waves-light">
             <span class = "fa-layers fa-fw">
               <i class="fas fa-envelope"  style="color: #FFFF;"></i>
-              <span *ngIf='notificationsCount' class="fa-layers-text rounded-circle font-weight-bold pl-1 pr-1" style="background: red; color:white;" data-fa-transform = 'shrink-6 up-6 right-6'>
-                {{notificationsCount}}
-              </span>
+              <span *ngIf = 'notificationsCount' class="fa-layers-counter" style="background:Tomato; font-size: 25px;"></span>
             </span>
           </a>
         </li>
-<!--
+
+
         <li class="nav-item my-2 mr-2" style="color: #FFFF;">
           <a routerLink = '/private_chats' class="waves-light">
             <span class = "fa-layers fa-fw">
               <i class="fa fa-comments"  style="color: #FFFF;"></i>
-              <span *ngIf='getChatsCount()' class="fa-layers-text rounded-circle font-weight-bold pl-1 pr-1" style="background: red; color:white;">
-                {{getChatsCount()}}
-              </span>
+              <span *ngIf = 'chatsCount' class="fa-layers-counter" style="background:Tomato; font-size: 25px;"></span>
             </span>
           </a>
         </li>
--->
 
-        <li class="nav-item my-2 mr-2">
-          <a *ngIf = '!chatsCount' routerLink="/private_chats" class="waves-light"><i class="fa fa-comments" aria-hidden="true" style="color: white;"></i></a>
-          <a *ngIf = 'chatsCount' routerLink="/private_chats" class="waves-light"><i class="fa fa-comments" aria-hidden="true" style="color: tomato;"></i></a>
-        </li>
 
         <li class="nav-item dropdown" dropdown>
           <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light">
