@@ -10,7 +10,7 @@
     <div class="card-body">
 
         <div class = "card-block float-right text-align-right">    
-            <p class="card-text">by: &nbsp; {{insertion.insertionist ? insertion.insertionist.username : 'deleted user'}}&nbsp;<i class="far fa-user-circle"></i></p> 
+            <p class="card-text">by: &nbsp; {{insertion.insertionist ? insertion.insertionist.username : 'Deleted user'}}&nbsp;<i class="far fa-user-circle"></i></p> 
             <p *ngIf = 'insertion.insertionist' class="card-text mb-2">from: &nbsp;{{insertion.insertionist.location}}</p> 
             <p class="card-text text-muted mb-2"><i class="far fa-clock"></i>&nbsp;{{insertion.insertion_timestamp | date}} / {{insertion.insertion_timestamp | date:'shortTime'}}</p>
         </div>
@@ -63,13 +63,13 @@
                 <button *ngIf = 'hasToken()' type="submit" class="btn btn-outline-dark float-right text-align-right" routerLink="/insertions/{{insertion._id}}/public_message/{{message._id}}">
                     Reply <i class="fa fa-reply"></i>
                 </button>  
-                <h5 class="card-title"><i class="fa fa-user"></i>&nbsp;{{message.author ? message.author.username : 'deleted user'}}</h5>      
+                <h5 class="card-title"><i class="fa fa-user"></i>&nbsp;{{message.author ? message.author.username : 'Deleted user'}}</h5>      
                 <h6 class="card-subtitle mb-2 text-muted">{{message.timestamp | date}} / {{message.timestamp | date:'shortTime'}}</h6>
                 <p class="card-text">{{ message.content }}</p>
                 <h6 *ngIf = 'message.responses.length' class="font-weight-bold" style="margin-left: 50px; margin-right: 50px;">Answers:</h6>
                 <span *ngFor="let response of message.responses" class="card mb-3 border-dark" style="margin-left: 50px; margin-right: 50px;">
                     <div class="card-body">
-                        <h5 class="card-title"><i class="fa fa-user"></i>&nbsp;{{response.author ? response.author.username : 'deleted user'}}</h5>        
+                        <h5 class="card-title"><i class="fa fa-user"></i>&nbsp;{{response.author ? response.author.username : 'Deleted user'}}</h5>        
                         <h6 class="card-subtitle mb-2 text-muted">{{response.timestamp | date}} / {{response.timestamp | date:'shortTime'}}</h6>
                         <p class="card-text">{{ response.content }}</p>
                     </div>

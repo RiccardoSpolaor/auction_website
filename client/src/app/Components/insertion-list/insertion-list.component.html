@@ -5,7 +5,7 @@
 <div *ngFor="let insertion of insertions" [ngClass]="{'border-success': !insertion.closed, 'border-danger': insertion.closed}" class="card" style="margin: 5px;" > 
     <div class="card-body">
         <div class = "card-block float-right text-align-right">    
-          <p class="card-text">by: &nbsp;{{insertion.insertionist ? insertion.insertionist.username : 'deleted user'}}&nbsp;<i class="far fa-user-circle"></i></p> 
+          <p class="card-text">by: &nbsp;{{insertion.insertionist ? insertion.insertionist.username : 'Deleted user'}}&nbsp;<i class="far fa-user-circle"></i></p> 
           <p *ngIf = 'insertion.insertionist' class="card-text mb-2">from: &nbsp;{{insertion.insertionist.location}}</p> 
           <p class="card-text text-muted mb-2"><i class="far fa-clock"></i>&nbsp;{{insertion.insertion_timestamp | date}} / {{insertion.insertion_timestamp | date:'shortTime'}}</p>
         </div>

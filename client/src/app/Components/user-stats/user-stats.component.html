@@ -1,26 +1,67 @@
-<!--<div class="container" style="width: 800px; margin-top: 20px;" >
+<div class="container" style="width: 800px; margin-top: 20px;" >
 
     <div>  
-        <h1 class="h3 mb-3 font-weight-normal">Notifications</h1>
+        <h1 class="h3 mb-3 font-weight-normal">Statistics</h1>
     </div>
 
-    <div *ngIf="notifications && !notifications.length" class="container text-center my-4">
-        <h3>No notifications to show</h3>
-    </div>
-
-    <div *ngFor="let notif of notifications" (click)="goToInsertion(notif)" class="card" style="margin: 5px; cursor:pointer;" [ngStyle]="{'background-color': !isRead(notif) ? 'rgb(241, 234, 148)' : ''}"> 
-        <div class="card-body">
-            <h4 class="card-subtitle mb-2">
-                <span *ngIf = '!get_insertion(notif)'  style="color: tomato">Insertion Deleted</span>
-                <span *ngIf = 'get_insertion(notif)' class="text-muted">{{notif.insertion.title}}</span>
-                <small class="float-right text-align-right text-muted my-2" style= "font-size: 60%;">
-                    <i class="far fa-clock"></i>&nbsp;
-                    {{notif.timestamp  | date}} / {{notif.timestamp  | date:'shortTime'}} 
-                </small>
-            </h4>
-            <p>{{notif.content}}</p>
+        <div *ngIf='mod_stats'>
+            <div class='card' style="margin: 5px;">
+                <div class="card-body">
+                    <p>Active Insertions:&nbsp;<span style="color: dodgerblue">{{mod_stats.active_insertion_list}}</span></p>
+                </div>
+            </div>
+            <div class='card' style="margin: 5px;">
+                <div class="card-body">
+                    <p>Insertions concluded successfully:&nbsp;<span style="color: dodgerblue">{{mod_stats.completed_insertion_list}}</span></p>
+                </div>
+            </div>
+            <div class='card' style="margin: 5px;">
+                <div class="card-body">
+                    <p>Insertions concluded unsuccessfully:&nbsp;<span style="color: dodgerblue">{{mod_stats.unsuccesfully_completed_insertion_list}}</span></p>
+                </div>
+            </div>
         </div>
-    </div>
 
-</div>-->
+        <div *ngIf='student_stats'>
+            <div class='card' style="margin: 5px;">
+                <div class="card-body">
+                    <p>Created Insertions:</p>
+                    <div *ngIf="!student_stats.insertion_list.length" class="container text-center my-4">
+                        <h5>No insertions to show</h5>
+                    </div>
+                    <div *ngFor='let ins of student_stats.insertion_list' class='card' style="margin: 5px;">
+                        <div class="card-body">
+                            <a [routerLink]="['/insertions', ins._id]">{{ins.title}}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class='card' style="margin: 5px;">
+                <div class="card-body">
+                    <p>Insertions you have partecipated:</p>
+                    <div *ngIf="!student_stats.participation_list.length" class="container text-center my-4">
+                        <h5>No insertions to show</h5>
+                    </div>
+                    <div *ngFor='let ins of student_stats.participation_list' class='card' style="margin: 5px;">
+                        <div class="card-body">
+                            <a [routerLink]="['/insertions', ins._id]">{{ins.title}}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class='card' style="margin: 5px;">
+                <div class="card-body">
+                    <p>Won Insertions:</p>
+                    <div *ngIf="!student_stats.winner_list.length" class="container text-center my-4">
+                        <h5>No insertions to show</h5>
+                    </div>
+                    <div *ngFor='let ins of student_stats.winner_list' class='card' style="margin: 5px;">
+                        <div class="card-body">
+                            <a [routerLink]="['/insertions', ins._id]">{{ins.title}}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
 
