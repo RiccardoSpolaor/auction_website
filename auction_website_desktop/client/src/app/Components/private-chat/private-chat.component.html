@@ -1,0 +1,57 @@
+
+
+                <div *ngIf="chat" class="card m-0">
+
+                    <!-- Row start -->
+                        <div class="">
+                            <div class="selected-user">
+                                <h4 class="name my-4" style="text-align : center;">
+                                    <a *ngIf = "chat.insertion_id" [routerLink]="['/insertions', chat.insertion_id._id]" >
+                                        {{chat.insertion_id.title}}
+                                    </a>
+                                    <p *ngIf = "!chat.insertion_id">
+                                        Insertion Deleted
+                                    </p>
+                                </h4>
+                                To: <span class="name">{{get_other_user()}} </span> &nbsp;
+        
+                            </div>
+                            <div class="chat-container">
+                                <ul class="chat-box chatContainerScroll">
+                                    <span *ngFor="let message of chat.messages">
+                                        <li *ngIf="!isCurrentUser(message)" class="chat-left">
+                                            <div class="chat-avatar">
+                                                <i class="fa fa-user-circle"></i>
+                                                <div class="chat-name">{{message.author?message.author.username:'Deleted User'}}</div>
+                                            </div>
+                                            <div class="chat-text">{{message.content}}</div>
+                                            <div class="chat-hour">{{message.timestamp | date}} / <br> {{message.timestamp | date:'shortTime'}} 
+                                            </div>
+                                        </li>
+
+                                        <li *ngIf="isCurrentUser(message)" class="chat-right">
+                                            <div class="chat-hour">{{message.timestamp | date}} / <br> {{message.timestamp | date:'shortTime'}} 
+                                            </div>
+                                            <div class="chat-text">{{message.content}}</div>
+                                            <div class="chat-avatar">
+                                                <i class="fa fa-user-circle"></i>
+                                                <div class="chat-name">{{message.author?message.author.username:'Deleted User'}}</div>
+                                            </div>
+                                        </li>
+
+                                    </span>
+                                    
+                                </ul>
+                                <div class="jumbotron mb-3 py-4">
+                                    <div class="container">
+                                        <div class="form-group my-3">
+                                            <textarea class="form-control" [(ngModel)]="message" #messagetx id="messagetext" 
+                                            rows="3" placeholder="Enter your message here"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary" (click)="post_chat()" >Post <i class="fas fa-paper-plane"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <!-- Row end -->
+                </div>

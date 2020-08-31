@@ -361,66 +361,101 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
 
         console.log("Connected to MongoDB");
 
-        var u = user.newUser( {
+        var m = user.newUser( {
           username: "mod",
-          mail: "mod@postmessages.it",
+          mail: "mod@auction_website.it",
+          name: "Mode",
+          surname: "Rator",
           location: "Italy"
         } );
-        u.setMod();
-        u.setPassword("mod");
-        u.validateUser();
-        u.save().then( ()=> {
-          console.log("Moderator user created");
-        
-          insertion.getModel().countDocuments({}).then(
-              ( count ) => {
-                  if( count == 0 ) {
-                      console.log("Adding some test data into the database");
-                      var ins1 = insertion
-                        .getModel()
-                        .create({
-                          title: "Asd",
-                          authors: ["Raffaeta", "Pelillo"],
-                          edition: 3,
-                          faculty: "informatica",
-                          university: "Ca Foscari",
-                          messages: [],
-                          history: [],
-                          insertion_timestamp: new Date(),
-                          insertionist: u.id,
-                          reserve_price: 10,
-                          start_price: 0,
-                          current_price: null,
-                          expire_date: new Date(),
-                          current_winner: null,
-                          closed: false
-                        });
-                      /*var m2 = message
-                        .getModel()
-                        .create({
-                          tags: ["Tag1", "Tag5"],
-                          content: "Post 2",
-                          timestamp: new Date(),
-                          authormail: u.mail
-                        });
-                      var m3 = message
-                        .getModel()
-                        .create({
-                          tags: ["Tag6", "Tag10"],
-                          content: "Post 3",
-                          timestamp: new Date(),
-                          authormail: u.mail
-                        });*/
+        m.setMod();
+        m.setPassword("mod");
+        m.validateUser();
 
-                      Promise.all([ins1]).then(function() {
-                          console.log("Messages saved");
-                        }).catch(function(reason) {
-                          console.log("Unable to save: " + reason);
-                        });
+        var s1 = user.newUser( {
+          username: "student1",
+          mail: "student1@auction_website.it",
+          name: "Silvia",
+          surname: "Zilio",
+          location: "Italy"
+        } );
+        s1.setPassword("student1");
+        s1.validateUser();
 
-                  }
-              })
-        }).catch( (err)=> {
+        var s2 = user.newUser( {
+          username: "student2",
+          mail: "student2@auction_website.it",
+          name: "Riccardo",
+          surname: "Spolaor",
+          location: "Italy"
+        } );
+        s2.setPassword("student2");
+        s2.validateUser();
+
+        m.save().then(()=>{
+          s1.save().then(()=>{
+            s2.save().then(()=> {
+              insertion.getModel().countDocuments({}).then(
+                  ( count ) => {
+                      if( count == 0 ) {
+                          var todayDate= new Date();
+                          console.log("Adding some test data into the database");
+                          var ins1 = insertion
+                          .getModel()
+                          .create({
+                            title: "Tecnologie e Applicazioni Web",
+                            authors: ["Filippo Bergamasco"],
+                            edition: 1,
+                            faculty: "Informatica",
+                            university: "Ca Foscari Venezia",
+                            messages: [],
+                            history: [],
+                            insertion_timestamp: todayDate,
+                            insertionist: s1.id,
+                            reserve_price: 50,
+                            start_price: 0,
+                            current_price: null,
+                            expire_date: todayDate.setHours(todayDate.getHours()+24),
+                            current_winner: null,
+                            closed: false
+                          });
+                          todayDate = new Date();
+                          var ins2 = insertion
+                            .getModel()
+                            .create({
+                              title: "Algoritmi e Strutture Dati",
+                              authors: ["Alessandra Raffaetà", "Marcelllo Pelillo"],
+                              edition: 3,
+                              faculty: "Informatica",
+                              university: "Ca Foscari Venezia",
+                              messages: [],
+                              history: [],
+                              insertion_timestamp: new Date(),
+                              insertionist: s2.id,
+                              reserve_price: 40,
+                              start_price: 0,
+                              current_price: null,
+                              expire_date: todayDate.setMinutes(todayDate.getMinutes()+5),
+                              current_winner: null,
+                              closed: false
+                            });
+    
+    
+                          Promise.all([ins1,ins2]).then(function() {
+                              console.log("Insertions saved");
+                            }).catch(function(reason) {
+                              console.log("Unable to save: " + reason);
+                            });
+    
+                      }
+                  })
+            }).catch( (err)=>{
+              console.log("Unable to create student2 user: " + err );
+            })
+          }).catch( (err)=>{
+            console.log("Unable to create student1 user: " + err );
+          })
+        }).catch( (err)=>{
           console.log("Unable to create moderator user: " + err );
         }).finally( ()=> {
 
