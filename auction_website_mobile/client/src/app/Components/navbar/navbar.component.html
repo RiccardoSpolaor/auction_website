@@ -1,0 +1,121 @@
+  <!--Navbar-->
+  <div class = 'sticky-top' data-toggle = 'affix'>
+    <mdb-navbar SideClass="navbar navbar-expand-lg navbar-dark bg-primary" > <!---fixed-top scrolling-navbar-->
+    
+    
+      <!-- Navbar brand -->
+      <mdb-navbar-brand><a class="navbar-brand" routerLink="/insertions" >Auction Website</a></mdb-navbar-brand>
+    
+      <!-- Search -->
+  
+      <links>     
+       <!-- <a dropdownToggle mdbWavesEffect type="button" data-toggle="collapse" class="nav-link dropdown-toggle waves-light" mdbWavesEffect data-target="#demo">
+          Search<span class="caret"></span>
+        </a>-->
+          
+        <ul *ngIf="hasToken()" class="navbar-nav ml-auto nav-flex-icons">    
+            <li class="nav-item my-2" style="color: #FFFF;">
+            Welcome {{getToken().username}}! &nbsp;
+          </li>
+  
+  
+          <li class="nav-item my-2 mr-3" style="color: #FFFF;">
+            <a routerLink = '/notifications' class="waves-light">
+              <span class = "fa-layers fa-fw">
+                <i class="fas fa-envelope"  style="color: #FFFF;"></i>
+                <span *ngIf = 'notificationsCount' class="fa-layers-counter" style="background:Tomato; font-size: 25px;"></span>
+              </span>
+            </a>
+          </li>
+  
+  
+          <li class="nav-item my-2 mr-2" style="color: #FFFF;">
+            <a routerLink = '/private_chats' class="waves-light">
+              <span class = "fa-layers fa-fw">
+                <i class="fa fa-comments"  style="color: #FFFF;"></i>
+                <span *ngIf = 'chatsCount' class="fa-layers-counter" style="background:Tomato; font-size: 25px;"></span>
+              </span>
+            </a>
+          </li>
+  
+  
+          <li class="nav-item dropdown" dropdown>
+            <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light">
+              <i class="fa fa-user"></i><span class="caret"></span></a>
+            <div *dropdownMenu class="dropdown-menu dropdown-menu-right dropdown-primary" role="menu">
+  
+              <div *ngIf="errmessage">
+                Login error: {{errmessage}}
+              </div>
+  
+              <a class="dropdown-item waves-light" mdbWavesEffect (click)="logout()">Logout</a>
+              <a class="dropdown-item waves-light" mdbWavesEffect routerLink="/editprofile">Edit profile</a>
+              <a *ngIf="!getToken().mod" class="dropdown-item waves-light" mdbWavesEffect routerLink="/postinsertion">Post a new Insertion</a>
+              <a *ngIf="getToken().mod && getToken().validated" class="dropdown-item waves-light" mdbWavesEffect routerLink="/userlist">Users List</a>
+              <a *ngIf="getToken().mod && getToken().validated" class="dropdown-item waves-light" mdbWavesEffect routerLink="/signupmod">Sign up new Mod</a>
+              <span *ngIf="!getToken().mod || getToken().validated">
+                <div class="divider dropdown-divider"></div>
+                <a class="dropdown-item waves-light" mdbWavesEffect routerLink="/userstats">Stats</a>
+              </span>
+            </div>
+          </li>
+        </ul>
+  
+  
+        <ul *ngIf="!hasToken()" class="navbar-nav ml-auto nav-flex-icons">    
+          <li class="nav-item my-2" style="color: #FFFF;">
+          <a routerLink="/login" style="color: #FFFF;">Login </a> &nbsp; | &nbsp;
+          <a routerLink="/signup" style="color: #FFFF;">Sign up</a>
+  
+        </li>
+      </ul>
+  
+      <a dropdownToggle mdbWavesEffect type="button" data-toggle="collapse" style="color: #FFFF;" class="nav-link dropdown-toggle waves-light" mdbWavesEffect data-target="#demo">
+        Search<span class="caret"></span>
+      </a>
+  
+      </links>
+    
+    </mdb-navbar>
+  
+    <!-- Filters -->
+  
+    <mdb-navbar class = 'collapse' SideClass="navbar navbar-expand-lg navbar-light blue lighten-5" id='demo'> <!---fixed-top scrolling-navbar-->      
+      <form class=" ml-auto mr-auto"> 
+        <div class="form-row">
+          <div class="col"> 
+            Filters: 
+          </div> 
+        </div> 
+          <div class="form-row"> 
+            <div class="col"> 
+              <input type="text" #title class="form-control" placeholder="Title"> 
+            </div> 
+            <div class="col"> 
+              <input type="text" #faculty class="form-control" placeholder="Faculty"> 
+            </div> 
+            <div class="col"> 
+              <input type="text" #university class="form-control" placeholder="University"> 
+            </div> 
+          </div>
+          <div class="form-row">
+            <div class="col"> 
+              <input type="text" #location class="form-control" placeholder="Location"> 
+            </div> 
+            <div class="col"> 
+              <input type="text" #user class="form-control" placeholder="User"> 
+            </div> 
+            <div class="col"> 
+              <input type="number" #price class="form-control" placeholder="Price"> 
+            </div>  
+          </div>
+          <div class="form-row">
+            <div class="col"> 
+              <button class="btn btn-outline-success my-2 my-sm-2" type="submit" (click) = "search(title.value, faculty.value, university.value, location.value, user.value, price.value); 
+              title.value=''; faculty.value=''; university.value=''; location.value=''; user.value=''; price.value='';">Search</button> 
+            </div> 
+          </div>
+        </form>
+    </mdb-navbar>
+  </div>
+    

@@ -1,0 +1,26 @@
+<div *ngIf="insertions && !insertions.length" class="container text-center my-4">
+  <h3>No results found</h3>
+</div>
+
+<div *ngFor="let insertion of insertions" [ngStyle]="{'background-color': insertion.closed ? 'rgb(245, 175, 158)' : 'rgb(191, 238, 191)'}"
+      [ngClass]="{'border-success': !insertion.closed, 'border-danger': insertion.closed}" class="card" style="margin: 5px;" > 
+      <div [ngClass]="{'bg-success': !insertion.closed, 'bg-danger': insertion.closed}" class="card-header p-3 mb-2 text-black"></div>
+      <div class="card-body">
+
+        <h2 class="card-title"><i class="fa fa-book"></i>&nbsp;{{insertion.title}}
+          <button class ="btn btn-outline-dark text-align-right" 
+          [routerLink]="['/insertions', insertion._id]" >
+          <span style="font-weight: bold;">Open</span>
+          </button>
+      </h2>
+
+        <h4 class="card-subtitle mb-2"> {{insertion.authors.join(', ')}}</h4>
+        <p class="card-subtitle mb-2 my-1"> <span style="font-weight: bold;">Edition:</span> &nbsp;{{insertion.edition}}</p> 
+        
+        <p class="card-subtitle">
+          <span style="font-weight: bold;">Current price:</span>
+          {{ (insertion.current_price ? insertion.current_price : 0) | currency}}
+        </p>
+        <p *ngIf='!insertion.closed' class="card-subtitle mb-2 my-1"> <span style="font-weight: bold;">Remaining time:</span> {{ insertion.remaining_time }}</p>
+    </div>
+</div>
