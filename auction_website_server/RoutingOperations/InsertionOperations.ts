@@ -1,19 +1,14 @@
 import express = require('express');
 
-import mongoose = require('mongoose');
+import {Insertion} from '../Objects/Insertion';
+import * as insertion from '../Objects/Insertion';
 
-import {Insertion} from '../Insertion';
-import * as insertion from '../Insertion';
+import {Message} from '../Objects/Message';
+import * as message from '../Objects/Message';
 
-import {Message} from '../Message';
-import * as message from '../Message';
-
-import {PrivateChat} from '../PrivateChat';
-import * as private_chat from '../PrivateChat';
-
-import { User } from '../User';
-import * as user from '../User';
-import * as iosObject from '../IosObject'
+import { User } from '../Objects/User';
+import * as user from '../Objects/User';
+import * as iosObject from '../Objects/IosObject'
 
 function isInsertion(arg: any): arg is Insertion {
   return arg && arg.title && typeof(arg.title) == 'string' 
@@ -52,7 +47,7 @@ function findFilteredInsertions( req : express.Request,res : express.Response, n
   
     console.log("Using filter: " + JSON.stringify(filter) );
     console.log(" Using query: " + JSON.stringify(req.query) );
-  //Slice ritorna con -1 ultimo elemento dell'array, populate aggrega gli oggetti degli schema.
+
     insertion.getModel().find( filter , {messages : 0, reserve_price : 0, history: {$slice: -1}} )
     .populate('history.user', ['_id', 'username', 'mail'])
     .populate('insertionist', ['_id', 'username', 'mail', 'location']).sort({insertion_timestamp:-1}).then( (documents) => {
@@ -96,7 +91,6 @@ export function postInsertion ( req : express.Request,res : express.Response, ne
 
   console.log("Received: " + JSON.stringify(req.body) );
 
-  // Checks if user is not a Mod
   if(req.user.mod) {
     return next({ statusCode:404, error: true, errormessage: "Unauthorized: Mods can't create new Insertions"});
   }
@@ -115,7 +109,6 @@ export function postInsertion ( req : express.Request,res : express.Response, ne
 
   if( isInsertion( recinsertion )) {
     insertion.getModel().create( recinsertion ).then( ( data ) => {
-      // Notify all socket.io clients
       req.ios.emit('broadcast', iosObject.createIosInsertion(data.id));
       return res.status(200).json({ error: false, errormessage: "", id: data._id });
     }).catch((reason) => {
@@ -168,12 +161,9 @@ export function getInsertionById  ( req : express.Request,res : express.Response
 
 export function deleteInsertionById  ( req : express.Request,res : express.Response, next : express.NextFunction ) {
 
-  // Check mod role
   if(!req.user.mod || !req.user.validated) {
     return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not a moderator"} );
   }
-  
-  // req.params.id contains the :id URL component
 
   insertion.getModel().findByIdAndDelete(req.params.id).then( ()=> {
       req.ios.emit('broadcast', iosObject.createIosInsertion(req.params.id));

@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
   templateUrl: './signupmod.component.html',
   styleUrls: ['./signupmod.component.css']
 })
+
 export class SignupmodComponent implements OnInit {
   public errmessage = undefined;
   public user = { password: '', username: ''};

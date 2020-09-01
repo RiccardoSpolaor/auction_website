@@ -24,11 +24,8 @@ export class PrivateChatHttpService {
 
   private handleError(error: HttpErrorResponse) {
     if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
       console.error('An error occurred:', error.error.message);
     } else {
-      // The backend returned an unsuccessful response code.
-      // The response body may contain clues as to what went wrong,
       console.error(
         `Backend returned code ${error.status}, ` +
         'body was: ' + JSON.stringify(error.error));
@@ -52,6 +49,7 @@ export class PrivateChatHttpService {
         );
   }
 
+
   get_chats(): Observable<PrivateChat[]> {
     const options = {
       headers: new HttpHeaders({
@@ -65,6 +63,7 @@ export class PrivateChatHttpService {
         catchError( this.handleError )
       );
   }
+
 
   post_chat(message : string, insertion_id: string) : Observable <any> {
     const options = {
@@ -87,6 +86,7 @@ export class PrivateChatHttpService {
     );
   }
 
+
   put_chat_read(id: string) : Observable <any> {
     const options = {
       headers: new HttpHeaders({
@@ -101,6 +101,7 @@ export class PrivateChatHttpService {
       })
     );
   }
+
 
   put_chat_content(message : string, id : string) : Observable <any> {
     const options = {
@@ -117,6 +118,7 @@ export class PrivateChatHttpService {
     );
   }
 
+  
   get_unread_chats_count(): Observable<number> {
     const options = {
       headers: new HttpHeaders({
@@ -136,35 +138,4 @@ export class PrivateChatHttpService {
   set_chats_state_after_login() {
     this.chatsStateSource.next()
   }
-
-/*
-  private notificationsStateSource = new Subject<any>();
-  public notificationsState = this.notificationsStateSource.asObservable();
-
-  constructor(private http: HttpClient, private uhs: UserHttpService ) {
-    console.log('Notification service instantiated');
-    console.log('User service token: ' + uhs.get_token() );
-  }
-
-  set_notifications_state_after_login() {
-    this.notificationsStateSource.next()
-  }
-
-  get_unread_notifications_count(): Observable<number> {
-    const options = {
-      headers: new HttpHeaders({
-        authorization: 'Bearer ' + this.uhs.get_token(),
-        'cache-control': 'no-cache',
-        'Content-Type':  'application/json',
-      })
-    };
-    
-    return this.http.get<number>( this.uhs.url + '/notifications/unreadcount', options ).pipe(
-      tap( (data) => {
-        console.log(data);
-      })
-    );
-  }
-*/
-
 }

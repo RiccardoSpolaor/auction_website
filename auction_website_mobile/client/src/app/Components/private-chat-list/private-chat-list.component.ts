@@ -1,13 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-
+import { Router } from '@angular/router';
 import { SocketioService } from '../../Services/socketio.service';
 import { UserHttpService } from '../../Services/user-http.service';
 import { PrivateChatHttpService } from '../../Services/private-chat-http.service';
 import { PrivateChat } from '../../Objects/PrivateChat';
-
 import { isIosPrivateChatList } from '../../Objects/IosObject' 
-
 import { Subscription } from 'rxjs'
 
 
@@ -22,7 +19,7 @@ export class PrivateChatListComponent implements OnInit, OnDestroy {
   public chats: PrivateChat[]
   private subscriptions : Subscription = new Subscription()
 
-  constructor( private sio: SocketioService , public pchs: PrivateChatHttpService, public uhs: UserHttpService, private router: Router , private route: ActivatedRoute) { }
+  constructor( private sio: SocketioService, public pchs: PrivateChatHttpService, public uhs: UserHttpService, private router: Router) { }
 
   ngOnInit() {
     if (!this.uhs.get_token())
@@ -88,12 +85,7 @@ export class PrivateChatListComponent implements OnInit, OnDestroy {
   }
 
   public goToChat(chat:PrivateChat){
-    this.router.navigate(['/private_chats/' + chat._id])/*.then(()=>{
-      this.pchs.put_chat_read(chat._id).subscribe(
-        (err) => {
-          console.log(err)
-        }
-      );
-    });*/
+    this.router.navigate(['/private_chats/' + chat._id])
   }
+  
 }

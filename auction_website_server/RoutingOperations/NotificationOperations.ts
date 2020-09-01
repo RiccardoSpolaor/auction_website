@@ -1,10 +1,7 @@
 import express = require('express');
 
-import mongoose = require('mongoose');
-
-import { Notification } from '../Notification';
-import * as notification from '../Notification';
-import * as iosObject from '../IosObject'
+import * as notification from '../Objects/Notification';
+import * as iosObject from '../Objects/IosObject'
 
 export function getNotifications ( req : express.Request,res : express.Response, next : express.NextFunction ) {
 

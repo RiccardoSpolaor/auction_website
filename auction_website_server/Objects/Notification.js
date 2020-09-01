@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getModel = exports.getSchema = void 0;
 const mongoose = require("mongoose");
+// Mongoose Schema
 var notificationSchema = new mongoose.Schema({
     content: {
         type: mongoose.SchemaTypes.String,
@@ -29,7 +30,7 @@ var notificationSchema = new mongoose.Schema({
 function getSchema() { return notificationSchema; }
 exports.getSchema = getSchema;
 // Mongoose Model
-var notificationModel; // This is not exposed outside the model
+var notificationModel;
 function getModel() {
     if (!notificationModel) {
         notificationModel = mongoose.model('Notification', getSchema());

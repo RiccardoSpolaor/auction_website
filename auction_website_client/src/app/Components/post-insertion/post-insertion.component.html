@@ -1,4 +1,4 @@
-<div class="container" style="width: 400px; margin-top: 20px;" >
+<div class="container" style="width: 350px; margin-top: 20px;" >
 
     <form class="form"  >
       
@@ -120,6 +120,8 @@
       [disabled]=" !title.valid || !insertion.authors.length || !edition.valid || !faculty.valid || !university.valid || !start_price.valid || 
       !reserve_price.valid || !expire_date.valid || (insertion.reserve_price <= insertion.start_price)" 
       (click)="post_insertion();">Post</button>
+      <br>
+      <br>
    
      
     </form>

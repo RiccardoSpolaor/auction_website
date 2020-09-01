@@ -15,10 +15,6 @@ export class SocketioService {
 
     return new Observable( (observer) => {
 
-      // The observer object must have two functions: next and error.
-      // the first is invoked by our observable when new data is available. The
-      // second is invoked if an error occurred
-
       this.socket.on('broadcast', (m) => {
         console.log('Socket.io message received: ' + JSON.stringify(m) );
         observer.next( m );
@@ -30,13 +26,7 @@ export class SocketioService {
         observer.error( err );
       });
 
-      // When the consumer unsubscribes, clean up data ready for next subscription.
-      /*return { unsubscribe() {
-        this.socket.disconnect();
-      } };*/
-
     });
-
   }
 
 }

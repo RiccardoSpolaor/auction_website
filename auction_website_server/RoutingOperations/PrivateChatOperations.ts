@@ -1,19 +1,15 @@
 import express = require('express');
 
-import mongoose = require('mongoose');
+import {Insertion} from '../Objects/Insertion';
+import * as insertion from '../Objects/Insertion';
 
-import {Insertion} from '../Insertion';
-import * as insertion from '../Insertion';
+import {Message} from '../Objects/Message';
+import * as message from '../Objects/Message';
 
-import {Message} from '../Message';
-import * as message from '../Message';
+import {PrivateChat} from '../Objects/PrivateChat';
+import * as private_chat from '../Objects/PrivateChat';
+import * as iosObject from '../Objects/IosObject'
 
-import {PrivateChat} from '../PrivateChat';
-import * as private_chat from '../PrivateChat';
-import * as iosObject from '../IosObject'
-
-import { User } from '../User';
-import * as user from '../User';
 
 function isPrivateChat(arg: any): arg is PrivateChat {
     return arg && arg.insertion_id && typeof(arg.insertion_id) == 'string'
@@ -27,7 +23,7 @@ export function postPrivateChat ( req : express.Request,res : express.Response, 
     console.log(req.user.id)
     private_chat.getModel().find({$and: [{insertion_id: body.insertion_id}, {sender: req.user.id}]}).then((data) =>{
         console.log(data)
-        if(data.length) { // UTILIZZARE app.put("/private_chat/:id")
+        if(data.length) { 
             req.params.id = data[0]._id;
             req.body = {content: req.body.message}
             putPrivateChatMessage(req, res, next);
@@ -71,8 +67,6 @@ export function getPrivateChat ( req : express.Request,res : express.Response, n
     })
 }
 
-
-
 export function putPrivateChatMessage ( req : express.Request,res : express.Response, next : express.NextFunction ) {
     var body = req.body;
     private_chat.getModel().findById(req.params.id).then((data)=>{
@@ -86,7 +80,6 @@ export function putPrivateChatMessage ( req : express.Request,res : express.Resp
           var m = message.newMessage(body);
           data.messages.push(m);
 
-          // Signals the interlocutor read flag as false
           if (data.insertionist == req.user.id)
             data.senderRead = false
           else
@@ -133,7 +126,6 @@ export function putPrivateChatRead ( req : express.Request,res : express.Respons
     return next({ statusCode:404, error: true, errormessage: "DB error: "+reason });
   })
 }
-
 
 export function getPrivateChatById ( req : express.Request,res : express.Response, next : express.NextFunction ) {
     private_chat.getModel().findById( req.params.id ).then( (document) => { 

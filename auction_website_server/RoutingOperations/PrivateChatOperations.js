@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUnreadChatsCount = exports.getPrivateChatById = exports.putPrivateChatRead = exports.putPrivateChatMessage = exports.getPrivateChat = exports.postPrivateChat = void 0;
-const insertion = require("../Insertion");
-const message = require("../Message");
-const private_chat = require("../PrivateChat");
-const iosObject = require("../IosObject");
+const insertion = require("../Objects/Insertion");
+const message = require("../Objects/Message");
+const private_chat = require("../Objects/PrivateChat");
+const iosObject = require("../Objects/IosObject");
 function isPrivateChat(arg) {
     return arg && arg.insertion_id && typeof (arg.insertion_id) == 'string'
         && arg.insertionist && typeof (arg.insertionist) == 'string'
@@ -16,7 +16,7 @@ function postPrivateChat(req, res, next) {
     console.log(req.user.id);
     private_chat.getModel().find({ $and: [{ insertion_id: body.insertion_id }, { sender: req.user.id }] }).then((data) => {
         console.log(data);
-        if (data.length) { // UTILIZZARE app.put("/private_chat/:id")
+        if (data.length) {
             req.params.id = data[0]._id;
             req.body = { content: req.body.message };
             putPrivateChatMessage(req, res, next);
@@ -72,7 +72,6 @@ function putPrivateChatMessage(req, res, next) {
             if (message.isMessage(body)) {
                 var m = message.newMessage(body);
                 data.messages.push(m);
-                // Signals the interlocutor read flag as false
                 if (data.insertionist == req.user.id)
                     data.senderRead = false;
                 else

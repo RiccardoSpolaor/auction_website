@@ -27,12 +27,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.getUnreadChatsCount()
     }
     
-    this.subscriptions.add(this.nhs.notificationsState.subscribe(() => this.getUnreadNotificationsCount())
-    )
+    this.subscriptions.add(this.nhs.notificationsState.subscribe(() => this.getUnreadNotificationsCount()))
     this.subscriptions.add(this.pchs.chatsState.subscribe(() => this.getUnreadChatsCount() ))
-
-    //this.nhs.notificationsState.subscribe(() => this.getUnreadNotificationsCount() )
-    //this.pchs.chatsState.subscribe(() => this.getUnreadChatsCount() )
 
     this.subscriptions.add(
       this.sio.connect().subscribe( (m) => {
@@ -94,18 +90,5 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.chatsCount = undefined
     this.router.navigate(['/insertions']);
   }
-
-  search(title: string, faculty: string, university: string, location: string, user: string, price: string) {
-   var params = {
-     title: title.length?title:undefined,
-     faculty: faculty.length?faculty:undefined,
-     university: university.length?university:undefined,
-     location: location.length?location:undefined,
-     user: user.length?user:undefined,
-     price: price.length?price:undefined
-   }
-   this.router.navigate(['/insertions'], { queryParams: params });
-
-  };
 
 }

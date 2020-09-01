@@ -4,14 +4,12 @@ import { Insertion } from '../Objects/Insertion';
 import { Observable } from 'rxjs';
 import { throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
-import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { UserHttpService } from './user-http.service';
 
 
 @Injectable()
 export class InsertionHttpService {
-
-  private messages = [];
 
   constructor( private http: HttpClient, private uhs: UserHttpService ) {
     console.log('Insertion service instantiated');
@@ -21,11 +19,8 @@ export class InsertionHttpService {
 
   private handleError(error: HttpErrorResponse) {
     if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
       console.error('An error occurred:', error.error.message);
     } else {
-      // The backend returned an unsuccessful response code.
-      // The response body may contain clues as to what went wrong,
       console.error(
         `Backend returned code ${error.status}, ` +
         'body was: ' + JSON.stringify(error.error));
@@ -55,6 +50,7 @@ export class InsertionHttpService {
       );
     }
   }
+  
 
   get_insertions(params?: any): Observable<Insertion[]> {
     return this.http.get<Insertion[]>( this.uhs.url + '/insertions', {params: params}).pipe(
@@ -62,6 +58,7 @@ export class InsertionHttpService {
         catchError( this.handleError )
       );
   }
+
 
   post_insertion(insertion : any) : Observable <any> {
     const options = {
@@ -78,6 +75,7 @@ export class InsertionHttpService {
       })
     );
   }
+
 
   put_price(params: any, price: number):Observable<any> {
     const options = {
@@ -117,6 +115,7 @@ export class InsertionHttpService {
     }
   }
 
+
   edit_insertion (params: any, insertion: any ): Observable<any> {
     const options = {
       headers: new HttpHeaders({
@@ -126,7 +125,6 @@ export class InsertionHttpService {
       })
     };
     console.log('Editing Insertion ' + params.id );
-
     
     return this.http.put( this.uhs.url + '/insertions/' + params.id + '/content', insertion,  options ).pipe(
       tap( (data) => {
@@ -135,6 +133,7 @@ export class InsertionHttpService {
     );
     
   }
+
 
   delete_insertion( params: any ): Observable<any> {
     const options = {

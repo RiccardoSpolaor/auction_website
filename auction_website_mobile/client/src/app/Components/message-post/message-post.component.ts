@@ -3,7 +3,6 @@ import { Message } from '../../Objects/Message';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
 import { PrivateChatHttpService } from '../../Services/private-chat-http.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 @Component({
   selector: 'app-message-post',
@@ -12,7 +11,6 @@ import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 })
 
 export class MessagePostComponent implements OnInit {
-
 
   constructor( private ihs: InsertionHttpService, private route : ActivatedRoute, private pchs: PrivateChatHttpService, private router : Router) { }
 
@@ -54,8 +52,6 @@ export class MessagePostComponent implements OnInit {
       });
     }
   }
-
   
-
 }
 

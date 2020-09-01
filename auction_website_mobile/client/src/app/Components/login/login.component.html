@@ -1,20 +1,22 @@
-<div class="container" style="width: 400px; margin-top: 20px;" >
-  <div class="form-signin text-center loginform ">
-    <i class="fa fa-envelope loginlogo" style="width: 50px; height: 50px;"></i>
+<div class="container" style="width: 350px; margin-top: 20px;" >
+    <div class="form-signin text-center loginform ">
+      <i class="fa fa-envelope loginlogo" style="width: 50px; height: 50px;"></i>
+  
+      <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+  
+      <label for="inputEmail" class="sr-only">Username or Email address</label>
+      <input type="text" #mailtxt id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+      
+      <label for="inputPassword" class="sr-only">Password</label>
+      <input type="password" #passwdtxt id="inputPassword" class="form-control" placeholder="Password" required>
+      
+      <div *ngIf="errmessage" class="alert alert-danger" role="alert">
+        Login error: {{errmessage}}
+      </div>
+      
+      <button class="btn btn-lg btn-primary btn-block" (click)="login( mailtxt.value, passwdtxt.value);" >Sign in</button>
+      <br>
+      <br>
 
-    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-
-    <label for="inputEmail" class="sr-only">Username or Email address</label>
-    <input type="text" #mailtxt id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
-    
-    <label for="inputPassword" class="sr-only">Password</label>
-    <input type="password" #passwdtxt id="inputPassword" class="form-control" placeholder="Password" required>
-    
-    <div *ngIf="errmessage" class="alert alert-danger" role="alert">
-      Login error: {{errmessage}}
     </div>
-    
-    <button class="btn btn-lg btn-primary btn-block" (click)="login( mailtxt.value, passwdtxt.value);" >Sign in</button>
-
-  </div>
 </div>

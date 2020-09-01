@@ -2,13 +2,9 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { SocketioService } from '../../Services/socketio.service';
-import { UserHttpService } from '../../Services/user-http.service';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
 import { Insertion } from '../../Objects/Insertion';
-import { isIosInsertion } from '../../Objects/IosObject' 
 import { Subscription } from 'rxjs';
-
-
 
 
 @Component({
@@ -89,23 +85,18 @@ export class InsertionListComponent implements OnInit, OnDestroy {
     return days + 'd ' + hours + 'h ' + minutes + 'm ' + seconds + 's'
   }
 
-  private setRemainingTime() {
-    setInterval ( () => {
-      this.insertions.forEach(elem => {
-        const date1 = new Date()
-        const date2 = new Date(elem.expire_date)
-        const diffTime = date2.getTime() - date1.getTime();
-        var seconds = Math.floor(diffTime / 1000);
-        var minutes = Math.floor(seconds / 60);
-        var hours = Math.floor(minutes / 60);
-        var days = Math.floor(hours / 24);
+  search(title: string, faculty: string, university: string, location: string, user: string, price: string) {
+    var params = {
+      title: title.length?title:undefined,
+      faculty: faculty.length?faculty:undefined,
+      university: university.length?university:undefined,
+      location: location.length?location:undefined,
+      user: user.length?user:undefined,
+      price: price.length?price:undefined
+    }
+    this.router.navigate(['/insertions'], { queryParams: params });
+ 
+   };
+ 
 
-        hours %= 24
-        minutes %= 60;
-        seconds %= 60;
-
-        elem.remaining_time = days + 'd ' + hours + 'h ' + minutes + 'm ' + seconds + 's'
-      })
-    }, 1000 )
-  }
 }

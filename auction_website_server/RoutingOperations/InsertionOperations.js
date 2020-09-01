@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.putInsertionPriceById = exports.putInsertionAnswerToPublicMessageById = exports.putInsertionPublicMessageById = exports.putInsertionContentById = exports.updateInsertionContent = exports.deleteInsertionById = exports.getInsertionById = exports.postInsertion = exports.getInsertions = void 0;
-const insertion = require("../Insertion");
-const message = require("../Message");
-const user = require("../User");
-const iosObject = require("../IosObject");
+const insertion = require("../Objects/Insertion");
+const message = require("../Objects/Message");
+const user = require("../Objects/User");
+const iosObject = require("../Objects/IosObject");
 function isInsertion(arg) {
     return arg && arg.title && typeof (arg.title) == 'string'
         && arg.authors && Array.isArray(arg.authors) && arg.authors.length
@@ -38,7 +38,6 @@ function findFilteredInsertions(req, res, next, data) {
     filter = expressions.length ? { $and: expressions } : {};
     console.log("Using filter: " + JSON.stringify(filter));
     console.log(" Using query: " + JSON.stringify(req.query));
-    //Slice ritorna con -1 ultimo elemento dell'array, populate aggrega gli oggetti degli schema.
     insertion.getModel().find(filter, { messages: 0, reserve_price: 0, history: { $slice: -1 } })
         .populate('history.user', ['_id', 'username', 'mail'])
         .populate('insertionist', ['_id', 'username', 'mail', 'location']).sort({ insertion_timestamp: -1 }).then((documents) => {
@@ -74,7 +73,6 @@ function getInsertions(req, res, next) {
 exports.getInsertions = getInsertions;
 function postInsertion(req, res, next) {
     console.log("Received: " + JSON.stringify(req.body));
-    // Checks if user is not a Mod
     if (req.user.mod) {
         return next({ statusCode: 404, error: true, errormessage: "Unauthorized: Mods can't create new Insertions" });
     }
@@ -84,7 +82,6 @@ function postInsertion(req, res, next) {
     recinsertion.insertionist = req.user.id;
     if (isInsertion(recinsertion)) {
         insertion.getModel().create(recinsertion).then((data) => {
-            // Notify all socket.io clients
             req.ios.emit('broadcast', iosObject.createIosInsertion(data.id));
             return res.status(200).json({ error: false, errormessage: "", id: data._id });
         }).catch((reason) => {
@@ -134,11 +131,9 @@ function getInsertionById(req, res, next) {
 }
 exports.getInsertionById = getInsertionById;
 function deleteInsertionById(req, res, next) {
-    // Check mod role
     if (!req.user.mod || !req.user.validated) {
         return next({ statusCode: 404, error: true, errormessage: "Unauthorized: user is not a moderator" });
     }
-    // req.params.id contains the :id URL component
     insertion.getModel().findByIdAndDelete(req.params.id).then(() => {
         req.ios.emit('broadcast', iosObject.createIosInsertion(req.params.id));
         return res.status(200).json({ error: false, errormessage: "" });

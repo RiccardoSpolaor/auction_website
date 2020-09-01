@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
 import { UserHttpService } from '../../Services/user-http.service';
 import { Router, ActivatedRoute } from '@angular/router';
-
 import {Insertion} from '../../Objects/Insertion'
 
 @Component({
@@ -18,7 +17,7 @@ export class EditInsertionComponent implements OnInit {
   public insertion = { title: undefined, authors: [], edition: undefined, faculty: undefined, university: undefined, reserve_price: undefined, start_price: undefined, expire_date: undefined};
   public authorInput
 
-  constructor(private ihs : InsertionHttpService, private router: Router, private route : ActivatedRoute, private uhs : UserHttpService) { }
+  constructor(private ihs : InsertionHttpService, private router: Router, private route : ActivatedRoute, private uhs : UserHttpService) {}
 
   ngOnInit() {
     this.get_insertion();
@@ -29,12 +28,12 @@ export class EditInsertionComponent implements OnInit {
   }
 
   public get_today_date() {
-    return new Date()
+    return new Date();
   }
 
   public get_insertion() {
     this.ihs.get_insertion(this.route.snapshot.params).subscribe(
-      ( insertion : Insertion ) => {
+      (insertion : Insertion) => {
         if (!insertion || insertion.closed || !this.uhs.get_token() || (this.uhs.get_id() != insertion.insertionist._id  && (!this.uhs.is_moderator() || !this.uhs.is_validated() )))
           this.router.navigate(['**'])
         else {
@@ -60,7 +59,6 @@ export class EditInsertionComponent implements OnInit {
 
   public edit_insertion () {
     
-
     this.insertion.edition = this.insertion.edition != undefined ? Number(this.insertion.edition) : undefined;
     this.insertion.start_price = this.insertion.start_price != undefined ? Number(this.insertion.start_price) : undefined;
     this.insertion.reserve_price = this.insertion.reserve_price != undefined ? Number(this.insertion.reserve_price) : undefined;

@@ -1,20 +1,11 @@
 import express = require('express');
 
-import mongoose = require('mongoose');
+import {Insertion} from '../Objects/Insertion';
+import * as insertion from '../Objects/Insertion';
 
-import {Insertion} from '../Insertion';
-import * as insertion from '../Insertion';
-
-import {Message} from '../Message';
-import * as message from '../Message';
-
-import {PrivateChat} from '../PrivateChat';
-import * as private_chat from '../PrivateChat';
-
-import { User } from '../User';
-import * as user from '../User';
-import * as iosObject from '../IosObject'
-
+import { User } from '../Objects/User';
+import * as user from '../Objects/User';
+import * as iosObject from '../Objects/IosObject'
 
 import jsonwebtoken = require('jsonwebtoken');
 
@@ -96,7 +87,6 @@ export function getUsers ( req : express.Request,res : express.Response, next : 
   if(!req.user.mod || !req.user.validated)
     return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not an moderator"});
   
-  // req.params.mail contains the :mail URL component
   user.getModel().find({},{digest: 0, salt:0 }).then( (user)=> {
     return res.status(200).json( user );
   }).catch( (reason) => {
@@ -181,11 +171,6 @@ function updateUser (req: any, res : any, next : any, body : any, data : User) {
         return next({ statusCode:404, error: true, errormessage: "Errors: " + errors});  
 }
 
-/*******************************
- * 
- * VIENE RIGENERATO IL TOKEN SE L'UPDATE VA A BUON FINE CONTENENTE I NUOVI DATI. RICORDARSI CHE DEVE ESSERE AGGIORNATO LATO CLIENT IL TOKEN PRENDENDO QUELLO NUOVO PASSATO VIA HEADER!
- * 
- * ******************************* */
 export function putUser ( req : express.Request,res : express.Response, next : express.NextFunction ) {
     var body = req.body;
     user.getModel().findById( req.user.id ).then( (user)=> {
@@ -197,8 +182,7 @@ export function putUser ( req : express.Request,res : express.Response, next : e
   
       else
         updateUser(req, res, next, body, data)
-        
-      /****REGENERATING TOKEN ****/  
+         
       data.save().then( (data) => {
         req.ios.emit('broadcast', iosObject.createIosUser());
         
@@ -208,7 +192,6 @@ export function putUser ( req : express.Request,res : express.Response, next : e
           mail: data.mail,
           id: data._id,
           validated: data.validated
-          //location: req.user.location
         };
       
         console.log("Regenerating Token" );
@@ -256,7 +239,6 @@ function changeCurrentWinnersAndCurrentPrice(data: User)  {
 
 export function deleteUserById ( req : express.Request,res : express.Response, next : express.NextFunction ) {
 
-    // Check mod role
     if(!req.user.mod || !req.user.validated) {
       return next({ statusCode:404, error: true, errormessage: "Unauthorized: user is not an moderator"} );
     }
@@ -285,7 +267,6 @@ export function deleteUserById ( req : express.Request,res : express.Response, n
     })
 }
 
-/*****************************************DA PROVARE***************************************/ 
 export function getUserStats ( req : express.Request,res : express.Response, next : express.NextFunction ) {
 
     if (req.user.mod) {

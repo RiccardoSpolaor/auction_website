@@ -1,14 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-
+import { Router} from '@angular/router';
 import { SocketioService } from '../../Services/socketio.service';
 import { UserHttpService } from '../../Services/user-http.service';
 import { NotificationHttpService } from '../../Services/notification-http.service';
 import { Notification } from '../../Objects/Notification';
-
-
 import { isIosNotification } from '../../Objects/IosObject' 
-
 import { Subscription } from 'rxjs'
 
 @Component({
@@ -21,7 +17,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   public notifications : Notification[]
   private subscriptions : Subscription = new Subscription()
 
-  constructor( private sio: SocketioService , public nhs: NotificationHttpService, public uhs: UserHttpService, private router: Router , private route: ActivatedRoute) { }
+  constructor( private sio: SocketioService, public nhs: NotificationHttpService, public uhs: UserHttpService, private router: Router) { }
 
 
   ngOnInit(): void {

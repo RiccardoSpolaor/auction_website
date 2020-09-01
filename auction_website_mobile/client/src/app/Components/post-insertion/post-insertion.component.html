@@ -1,126 +1,128 @@
-<div class="container" style="width: 400px; margin-top: 20px;" >
+<div class="container" style="width: 350px; margin-top: 20px;" >
 
-  <form class="form"  >
-    
-    <div class="text-center">  
-      <i class="fas fa-book" style="width: 50px; height: 50px;"></i>
-      <h1 class="h3 mb-3 my-1 font-weight-normal">Post a new Insertion</h1>
-    </div>
-  
-  
-    <div class="form-group">
-      <label for="inputTitle">Title</label>
-      <input type="text" #title="ngModel" required name="title" [(ngModel)]="insertion.title" class="form-control" id="inputTitle" placeholder="Enter title">
-    </div>
-  
-    <div [hidden]="title.valid || title.pristine"
-        class="alert alert-danger">
-      Title is required
-    </div>
-
-
-    <div class="form-group">
-      <label for= "inputAuthors">Authors</label>
-      <div class="input-group">
-          <input type="text" #authorname='ngModel' required name="authorname" [(ngModel)]="authorInput" class="form-control" id="inputAuthors" placeholder="Add Authors...">
-          &nbsp;
-          <button class="btn btn-outline-primary" [disabled] = "!authorname.valid" (click)="add_authors(authorname.value); authorInput = ''">Add Author</button>
+    <form class="form"  >
+      
+      <div class="text-center">  
+        <i class="fas fa-book" style="width: 50px; height: 50px;"></i>
+        <h1 class="h3 mb-3 my-1 font-weight-normal">Post a new Insertion</h1>
       </div>
-      <div class="col-md-auto">
-        <span *ngFor="let author of insertion.authors; let i = index" class="badge badge-secondary">{{author}} 
-          <span (click) = "insertion.authors.splice(i,1)">
-              <i class=" bt fas fa-times-circle"></i>
+    
+    
+      <div class="form-group">
+        <label for="inputTitle">Title</label>
+        <input type="text" #title="ngModel" required name="title" [(ngModel)]="insertion.title" class="form-control" id="inputTitle" placeholder="Enter title">
+      </div>
+    
+      <div [hidden]="title.valid || title.pristine"
+          class="alert alert-danger">
+        Title is required
+      </div>
+
+
+      <div class="form-group">
+        <label for= "inputAuthors">Authors</label>
+        <div class="input-group">
+            <input type="text" #authorname='ngModel' required name="authorname" [(ngModel)]="authorInput" class="form-control" id="inputAuthors" placeholder="Add Authors...">
+            &nbsp;
+            <button class="btn btn-outline-primary" [disabled] = "!authorname.valid" (click)="add_authors(authorname.value); authorInput = ''">Add Author</button>
+        </div>
+        <div class="col-md-auto">
+          <span *ngFor="let author of insertion.authors; let i = index" class="badge badge-secondary">{{author}} 
+            <span (click) = "insertion.authors.splice(i,1)">
+                <i class=" bt fas fa-times-circle"></i>
+            </span>
           </span>
-        </span>
+        </div>
       </div>
-    </div>
 
-    <div [hidden]="authorname.pristine || authorInput || insertion.authors.length"
-        class="alert alert-danger">
-      Authors are required
-    </div>
+      <div [hidden]="authorname.pristine || authorInput || insertion.authors.length"
+          class="alert alert-danger">
+        Authors are required
+      </div>
 
-    <div class="form-group">
-      <label for="inputEdition">Edition</label>
-      <input type="number" #edition="ngModel" pattern="\d+" required name="edition" [(ngModel)]="insertion.edition" class="form-control" id="inputEdition" 
-      placeholder="Enter Edition">
-    </div>
-  
-    <div [hidden]="edition.valid || edition.pristine"
-        class="alert alert-danger">
-      Edition is not valid
-    </div>
-
-    <div class="form-group">
-      <label for="inputFaculty">Faculty</label>
-      <input type="text" #faculty="ngModel" required name="faculty" [(ngModel)]="insertion.faculty" class="form-control" id="inputFaculty" 
-      placeholder="Enter Faculty">
-    </div>
-  
-    <div [hidden]="faculty.valid || faculty.pristine"
-        class="alert alert-danger">
-      Faculty is required
-    </div>
-
-    <div class="form-group">
-      <label for="inputUniversity">University</label>
-      <input type="text" #university="ngModel" required name="university" [(ngModel)]="insertion.university" class="form-control" id="inputUniversity" 
-      placeholder="Enter University">
-    </div>
-  
-    <div [hidden]="university.valid || university.pristine"
-        class="alert alert-danger">
-      University is required
-    </div>
-
-    <div class="form-group">
-      <label for="inputStartPrice">Start Price</label>
-      <input type="number" #start_price="ngModel" pattern="\d+(\.\d{1,2})?" required name="start_price" [(ngModel)]="insertion.start_price" class="form-control" id="inputStartPrice" 
-      placeholder="Enter Start Price">
-    </div>
-  
-    <div [hidden]="start_price.valid || start_price.pristine"
-        class="alert alert-danger">
-      Start Price is not valid
-    </div>
-
-    <div class="form-group">
-      <label for="inputReservePrice">Reserve Price</label>
-      <input type="number" #reserve_price="ngModel" pattern="\d+(\.\d{1,2})?" required name="reserve_price" [(ngModel)]="insertion.reserve_price" 
-      class="form-control" id="inputReservePrice" placeholder="Enter Reserve Price">
-    </div>
-  
-    <div [hidden]="!reserve_price.valid || !start_price.valid || (reserve_price.value > start_price.value)"
-        class="alert alert-danger">
-      Reserve Price must be greater than Start Price
-    </div>
-
-    <div [hidden]="reserve_price.valid || reserve_price.pristine"
-        class="alert alert-danger">
-      Reserve Price is not valid
-    </div>
-
-    <div class="form-group">
-      <label for="inputExpireDate">Expire Date</label>
-      <input type="datetime-local" #expire_date = "ngModel" required name="expire_date" [(ngModel)]="insertion.expire_date" class="form-control" id="inputExpireDate" 
-      placeholder="Enter Expire Date" min = "{{get_today_date() | date: 'yyyy-MM-ddTHH:mm'}}">
-    </div>
-  
-    <div [hidden]="expire_date.valid || expire_date.pristine"
-        class="alert alert-danger">
-      Expire Date is required
-    </div>
+      <div class="form-group">
+        <label for="inputEdition">Edition</label>
+        <input type="number" #edition="ngModel" pattern="\d+" required name="edition" [(ngModel)]="insertion.edition" class="form-control" id="inputEdition" 
+        placeholder="Enter Edition">
+      </div>
     
-    <div *ngIf="errmessage" class="alert alert-danger" role="alert">
-      Post Insertion Error: {{errmessage}}
-    </div>
+      <div [hidden]="edition.valid || edition.pristine"
+          class="alert alert-danger">
+        Edition is not valid
+      </div>
 
-     
-    <button class="btn btn-lg btn-primary btn-block" 
-    [disabled]=" !title.valid || !insertion.authors.length || !edition.valid || !faculty.valid || !university.valid || !start_price.valid || 
-    !reserve_price.valid || !expire_date.valid || (insertion.reserve_price <= insertion.start_price)" 
-    (click)="post_insertion();">Post</button>
- 
+      <div class="form-group">
+        <label for="inputFaculty">Faculty</label>
+        <input type="text" #faculty="ngModel" required name="faculty" [(ngModel)]="insertion.faculty" class="form-control" id="inputFaculty" 
+        placeholder="Enter Faculty">
+      </div>
+    
+      <div [hidden]="faculty.valid || faculty.pristine"
+          class="alert alert-danger">
+        Faculty is required
+      </div>
+
+      <div class="form-group">
+        <label for="inputUniversity">University</label>
+        <input type="text" #university="ngModel" required name="university" [(ngModel)]="insertion.university" class="form-control" id="inputUniversity" 
+        placeholder="Enter University">
+      </div>
+    
+      <div [hidden]="university.valid || university.pristine"
+          class="alert alert-danger">
+        University is required
+      </div>
+
+      <div class="form-group">
+        <label for="inputStartPrice">Start Price</label>
+        <input type="number" #start_price="ngModel" pattern="\d+(\.\d{1,2})?" required name="start_price" [(ngModel)]="insertion.start_price" class="form-control" id="inputStartPrice" 
+        placeholder="Enter Start Price">
+      </div>
+    
+      <div [hidden]="start_price.valid || start_price.pristine"
+          class="alert alert-danger">
+        Start Price is not valid
+      </div>
+
+      <div class="form-group">
+        <label for="inputReservePrice">Reserve Price</label>
+        <input type="number" #reserve_price="ngModel" pattern="\d+(\.\d{1,2})?" required name="reserve_price" [(ngModel)]="insertion.reserve_price" 
+        class="form-control" id="inputReservePrice" placeholder="Enter Reserve Price">
+      </div>
+    
+      <div [hidden]="!reserve_price.valid || !start_price.valid || (reserve_price.value > start_price.value)"
+          class="alert alert-danger">
+        Reserve Price must be greater than Start Price
+      </div>
+
+      <div [hidden]="reserve_price.valid || reserve_price.pristine"
+          class="alert alert-danger">
+        Reserve Price is not valid
+      </div>
+
+      <div class="form-group">
+        <label for="inputExpireDate">Expire Date</label>
+        <input type="datetime-local" #expire_date = "ngModel" required name="expire_date" [(ngModel)]="insertion.expire_date" class="form-control" id="inputExpireDate" 
+        placeholder="Enter Expire Date" min = "{{get_today_date() | date: 'yyyy-MM-ddTHH:mm'}}">
+      </div>
+    
+      <div [hidden]="expire_date.valid || expire_date.pristine"
+          class="alert alert-danger">
+        Expire Date is required
+      </div>
+      
+      <div *ngIf="errmessage" class="alert alert-danger" role="alert">
+        Post Insertion Error: {{errmessage}}
+      </div>
+
+       
+      <button class="btn btn-lg btn-primary btn-block" 
+      [disabled]=" !title.valid || !insertion.authors.length || !edition.valid || !faculty.valid || !university.valid || !start_price.valid || 
+      !reserve_price.valid || !expire_date.valid || (insertion.reserve_price <= insertion.start_price)" 
+      (click)="post_insertion();">Post</button>
+      <br>
+      <br>
    
-  </form>
-  </div>
+     
+    </form>
+    </div>

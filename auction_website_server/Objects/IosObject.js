@@ -39,32 +39,4 @@ function createIosUserDeleted(id) {
     return { type: Kind.user_deleted, id: id };
 }
 exports.createIosUserDeleted = createIosUserDeleted;
-/*
-enum Kinds{
-    auctionEnded = "auctionEnded"
-}
-
-export class IosObject {
-
-    constructor(private kind: Kinds, ) {
-        
-    }
-}
-
-
-export class AuctionEnded{
-    private insertion;
-    private insertionist;
-    private winner;
-
-
-    constructor(document: Insertion){
-        
-        this.insertion = document.id;
-        this.insertionist = document.insertionist;
-        this.winner = document.current_winner;
-    }
-
-}
-*/ 
 //# sourceMappingURL=IosObject.js.map

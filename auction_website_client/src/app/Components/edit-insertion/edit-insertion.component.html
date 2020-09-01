@@ -1,4 +1,4 @@
-<div class="container" style="width: 400px; margin-top: 20px;" >
+<div class="container" style="width: 350px; margin-top: 20px;" >
     <form class="form"  >
       
       <div class="text-center">  
@@ -6,22 +6,24 @@
         <h1 class="h3 mb-3 my-1 font-weight-normal">Edit Insertion</h1>
       </div>
     
-    
       <div class="form-group">
         <label for="inputTitle">Title</label>
-        <input type="text" #title="ngModel" name="title" [(ngModel)]="insertion.title" class="form-control" id="inputTitle" placeholder="Enter title">
+        <input type="text" #title="ngModel" name="title" [(ngModel)]="insertion.title" class="form-control" id="inputTitle" 
+          placeholder="Enter title">
         <small>
             * Current = {{oldInsertion.title}}
         </small>
       </div>
 
-
       <div class="form-group">
         <label for= "inputAuthors">Authors</label>
         <div class="input-group">
-            <input type="text" #authorname='ngModel' required name="authorname" [(ngModel)]="authorInput" class="form-control" id="inputAuthors" placeholder="Add Authors...">
+            <input type="text" #authorname='ngModel' required name="authorname" [(ngModel)]="authorInput" class="form-control" id="inputAuthors" 
+              placeholder="Add Authors...">
             &nbsp;
-            <button class="btn btn-outline-primary" [disabled] = "!authorname.valid" (click)="add_authors(authorname.value); authorInput = ''">Add Author</button>
+            <button class="btn btn-outline-primary" [disabled] = "!authorname.valid" 
+              (click)="add_authors(authorname.value); authorInput = ''">Add Author
+            </button>
         </div>
         <div class="col-md-auto">
           <span *ngFor="let author of insertion.authors; let i = index" class="badge badge-secondary">{{author}} 
@@ -40,7 +42,7 @@
       <div class="form-group">
         <label for="inputEdition">Edition</label>
         <input type="number" #edition="ngModel" pattern="\d+" name="edition" [(ngModel)]="insertion.edition" class="form-control" id="inputEdition" 
-        placeholder="Enter Edition" [value] ='insertion.edition'>
+          placeholder="Enter Edition" [value] ='insertion.edition'>
         <small>
             * Current = {{oldInsertion.edition}}
         </small>
@@ -54,27 +56,25 @@
       <div class="form-group">
         <label for="inputFaculty">Faculty</label>
         <input type="text" #faculty="ngModel" name="faculty" [(ngModel)]="insertion.faculty" class="form-control" id="inputFaculty" 
-        placeholder="Enter Faculty">
+          placeholder="Enter Faculty">
         <small>
             * Current = {{oldInsertion.faculty}}
         </small>
       </div>
     
-
       <div class="form-group">
         <label for="inputUniversity">University</label>
         <input type="text" #university="ngModel" name="university" [(ngModel)]="insertion.university" class="form-control" id="inputUniversity" 
-        placeholder="Enter University">
+          placeholder="Enter University">
         <small>
             * Current = {{oldInsertion.university}}
         </small>
       </div>
-    
 
       <div class="form-group">
         <label for="inputStartPrice">Start Price</label>
-        <input [hidden] = "oldInsertion.current_price != undefined"  type="number" #start_price="ngModel" pattern="\d+(\.\d{1,2})?" name="start_price" [(ngModel)]="insertion.start_price" class="form-control" id="inputStartPrice" 
-        placeholder="Enter Start Price" >
+        <input [hidden] = "oldInsertion.current_price != undefined"  type="number" #start_price="ngModel" pattern="\d+(\.\d{1,2})?" name="start_price" 
+          [(ngModel)]="insertion.start_price" class="form-control" id="inputStartPrice" placeholder="Enter Start Price" >
         <small>
             * Current = {{oldInsertion.start_price | currency}}
         </small>
@@ -88,7 +88,7 @@
       <div class="form-group">
         <label for="inputReservePrice">Reserve Price</label>
         <input type="number" #reserve_price="ngModel" pattern="\d+(\.\d{1,2})?"  name="reserve_price" [(ngModel)]="insertion.reserve_price" 
-        class="form-control" id="inputReservePrice" placeholder="Enter Reserve Price">
+          class="form-control" id="inputReservePrice" placeholder="Enter Reserve Price">
         <small>
             * Current = {{oldInsertion.reserve_price | currency}}
         </small>
@@ -105,8 +105,8 @@
 
       <div class="form-group">
         <label for="inputExpireDate">Expire Date</label>
-        <input type="datetime-local" #expire_date = "ngModel" name="expire_date" [(ngModel)]="insertion.expire_date" class="form-control" id="inputExpireDate" 
-        placeholder="Enter Expire Date" min = "{{get_today_date() | date: 'yyyy-MM-ddTHH:mm'}}">
+        <input type="datetime-local" #expire_date = "ngModel" name="expire_date" [(ngModel)]="insertion.expire_date" class="form-control" 
+          id="inputExpireDate" placeholder="Enter Expire Date" min = "{{get_today_date() | date: 'yyyy-MM-ddTHH:mm'}}">
         <small>
             * Current = {{oldInsertion.expire_date  | date}} / {{oldInsertion.expire_date | date :'shortTime'}}
         </small>
@@ -123,10 +123,11 @@
 
        
       <button class="btn btn-lg btn-primary btn-block" 
-      [disabled]="!are_start_and_reserve_price_compatible(start_price.value, reserve_price.value) || !reserve_price.valid || !start_price.valid || !expire_date.valid || !insertion.authors.length"
-      (click)="edit_insertion();">Edit</button>
+        [disabled]="!are_start_and_reserve_price_compatible(start_price.value, reserve_price.value) || !reserve_price.valid || !start_price.valid || !expire_date.valid || !insertion.authors.length"
+        (click)="edit_insertion();">Edit</button>
+      <br>
+      <br>
    
-     
     </form>
-    </div>
+</div>
 

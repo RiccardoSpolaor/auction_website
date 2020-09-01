@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Notification } from '../Objects/Notification';
-
 import { Observable } from 'rxjs';
 import { throwError } from 'rxjs';
 import { Subject } from 'rxjs';
-
 import { tap, catchError } from 'rxjs/operators';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { UserHttpService } from './user-http.service';
@@ -14,7 +12,6 @@ import { UserHttpService } from './user-http.service';
 })
 export class NotificationHttpService {
 
-  // Subject object and its observable that lets the login-component communicate with the navbar and reload the notifications count when a user logs in.
   private notificationsStateSource = new Subject<any>();
   public notificationsState = this.notificationsStateSource.asObservable();
 
@@ -25,11 +22,8 @@ export class NotificationHttpService {
 
   private handleError(error: HttpErrorResponse) {
     if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
       console.error('An error occurred:', error.error.message);
     } else {
-      // The backend returned an unsuccessful response code.
-      // The response body may contain clues as to what went wrong,
       console.error(
         `Backend returned code ${error.status}, ` +
         'body was: ' + JSON.stringify(error.error));

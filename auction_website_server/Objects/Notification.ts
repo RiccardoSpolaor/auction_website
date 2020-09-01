@@ -1,8 +1,6 @@
 import mongoose = require('mongoose');
 
-
 export interface Notification extends mongoose.Document {
-    //readonly _id: mongoose.Schema.Types.ObjectId,
     content: string,
     to: string,
     timestamp: Date,
@@ -10,6 +8,7 @@ export interface Notification extends mongoose.Document {
     read: boolean
 }
 
+// Mongoose Schema
 var notificationSchema = new mongoose.Schema( {
     content: {
         type: mongoose.SchemaTypes.String,
@@ -35,12 +34,11 @@ var notificationSchema = new mongoose.Schema( {
     } 
 })
 
-
 export function getSchema() { return notificationSchema; }
 
 // Mongoose Model
-var notificationModel;  // This is not exposed outside the model
-export function getModel() : mongoose.Model< Notification > { // Return Model as singleton
+var notificationModel;  
+export function getModel() : mongoose.Model< Notification > { 
     if( !notificationModel ) {
         notificationModel = mongoose.model('Notification', getSchema() )
     }

@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { tap, catchError } from 'rxjs/operators';
-import { Observable, throwError } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import * as jwtdecode from 'jwt-decode';
-
 import {User} from '../Objects/User'
 import {ModStats, StudentStats} from '../Objects/UserStats'
 
@@ -23,7 +22,6 @@ export class UserHttpService {
 
   }
 
-  //public token = '';
   public token = undefined;
   public url = 'http://localhost:8080';
 
@@ -45,13 +43,13 @@ export class UserHttpService {
       }));
   }
 
+
   logout() {
     console.log('Logging out');
     this.token = undefined;
     localStorage.setItem('session_id', '');
-    
-
   }
+
 
   register( user ): Observable<any> {
     const options = {
@@ -69,6 +67,7 @@ export class UserHttpService {
 
   }
 
+
   registerMod( user ): Observable<any> {
     const options = {
       headers: new HttpHeaders({
@@ -84,6 +83,7 @@ export class UserHttpService {
       })
     );
   }
+
 
   edit( user ): Observable<any> {
     const options = {
@@ -103,6 +103,7 @@ export class UserHttpService {
     );
   }
 
+
   delete_user(id : string): Observable<any> {
     const options = {
       headers: new HttpHeaders({
@@ -118,6 +119,7 @@ export class UserHttpService {
       })
     );
   }
+
 
   get_users() : Observable <User[]> {
     const options = {
@@ -135,6 +137,7 @@ export class UserHttpService {
     );
   }
   
+
   get_mod_stats(): Observable <ModStats> {
     const options = {
       headers: new HttpHeaders({
@@ -151,6 +154,7 @@ export class UserHttpService {
     );
   }
 
+
   get_student_stats(): Observable <StudentStats> {
     const options = {
       headers: new HttpHeaders({
@@ -166,6 +170,7 @@ export class UserHttpService {
       })
     );
   }
+  
 
   set_token_from_storage(){
     this.token=localStorage.getItem('session_id')===''?undefined:localStorage.getItem('session_id')

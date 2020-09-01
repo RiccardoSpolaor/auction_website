@@ -1,19 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addTokenUserInfoIfExists = exports.auth = void 0;
-const jsonwebtoken = require("jsonwebtoken"); // JWT generation
-const jwt = require("express-jwt"); // JWT parsing middleware for express
-//import { AuctionEnded, IosObject } from '../IosObject';
-// We create the JWT authentication middleware
-// provided by the express-jwt library.  
-// 
-// How it works (from the official documentation):
-// If the token is valid, req.user will be set with the JSON object 
-// decoded to be used by later middleware for authorization and access control.
-//
+const jsonwebtoken = require("jsonwebtoken");
+const jwt = require("express-jwt");
 exports.auth = jwt({ secret: process.env.JWT_SECRET });
 function addTokenUserInfoIfExists(req, res, next) {
-    // Gather the jwt access token from the request header
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     if (token == null) {

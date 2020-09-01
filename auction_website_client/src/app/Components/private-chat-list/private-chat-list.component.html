@@ -8,7 +8,8 @@
         <h3>No chats to show</h3>
     </div>
 
-    <div *ngFor="let chat of chats" (click)="goToChat(chat)" class="card" style="margin: 5px; cursor:pointer;" [ngStyle]="{'background-color': !isRead(chat) ? 'rgb(241, 234, 148)' : ''}"> 
+    <div *ngFor="let chat of chats" (click)="goToChat(chat)" class="card" style="margin: 5px; cursor:pointer;" 
+        [ngStyle]="{'background-color': !isRead(chat) ? 'rgb(241, 234, 148)' : ''}"> 
         <div class="card-body">
             <h4 class="card-subtitle mb-2">
                 <i class = 'fa fa-user-circle'></i> 

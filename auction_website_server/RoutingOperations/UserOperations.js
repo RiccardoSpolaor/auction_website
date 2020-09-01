@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUserStats = exports.deleteUserById = exports.putUser = exports.getUsers = exports.postStudent = exports.postMod = void 0;
-const insertion = require("../Insertion");
-const user = require("../User");
-const iosObject = require("../IosObject");
+const insertion = require("../Objects/Insertion");
+const user = require("../Objects/User");
+const iosObject = require("../Objects/IosObject");
 const jsonwebtoken = require("jsonwebtoken");
 function validateEmail(email) {
     const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
@@ -69,7 +69,6 @@ exports.postStudent = postStudent;
 function getUsers(req, res, next) {
     if (!req.user.mod || !req.user.validated)
         return next({ statusCode: 404, error: true, errormessage: "Unauthorized: user is not an moderator" });
-    // req.params.mail contains the :mail URL component
     user.getModel().find({}, { digest: 0, salt: 0 }).then((user) => {
         return res.status(200).json(user);
     }).catch((reason) => {
@@ -135,11 +134,6 @@ function updateUser(req, res, next, body, data) {
     if (errors.length)
         return next({ statusCode: 404, error: true, errormessage: "Errors: " + errors });
 }
-/*******************************
- *
- * VIENE RIGENERATO IL TOKEN SE L'UPDATE VA A BUON FINE CONTENENTE I NUOVI DATI. RICORDARSI CHE DEVE ESSERE AGGIORNATO LATO CLIENT IL TOKEN PRENDENDO QUELLO NUOVO PASSATO VIA HEADER!
- *
- * ******************************* */
 function putUser(req, res, next) {
     var body = req.body;
     user.getModel().findById(req.user.id).then((user) => {
@@ -149,7 +143,6 @@ function putUser(req, res, next) {
             validateMod(req, res, next, body, data);
         else
             updateUser(req, res, next, body, data);
-        /****REGENERATING TOKEN ****/
         data.save().then((data) => {
             req.ios.emit('broadcast', iosObject.createIosUser());
             var tokendata = {
@@ -158,7 +151,6 @@ function putUser(req, res, next) {
                 mail: data.mail,
                 id: data._id,
                 validated: data.validated
-                //location: req.user.location
             };
             console.log("Regenerating Token");
             var token_signed = jsonwebtoken.sign(tokendata, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -198,7 +190,6 @@ function changeCurrentWinnersAndCurrentPrice(data) {
     });
 }
 function deleteUserById(req, res, next) {
-    // Check mod role
     if (!req.user.mod || !req.user.validated) {
         return next({ statusCode: 404, error: true, errormessage: "Unauthorized: user is not an moderator" });
     }
@@ -226,7 +217,6 @@ function deleteUserById(req, res, next) {
     });
 }
 exports.deleteUserById = deleteUserById;
-/*****************************************DA PROVARE***************************************/
 function getUserStats(req, res, next) {
     if (req.user.mod) {
         if (!req.user.validated)

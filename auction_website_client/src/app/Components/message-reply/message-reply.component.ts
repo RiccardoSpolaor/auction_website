@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-
-import { SocketioService } from '../../Services/socketio.service';
 import { UserHttpService } from '../../Services/user-http.service';
 import { InsertionHttpService } from '../../Services/insertion-http.service';
 import { Insertion } from '../../Objects/Insertion';
@@ -53,6 +51,5 @@ export class MessageReplyComponent implements OnInit {
   public returnToInsertion(){
     this.router.navigate(['/insertions/'+this.route.snapshot.params.id])
   }
-
 
 }

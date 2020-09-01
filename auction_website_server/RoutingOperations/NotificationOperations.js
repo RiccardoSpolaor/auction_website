@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.putNotificationAsRead = exports.getUnreadNotificationsCount = exports.getNotifications = void 0;
-const notification = require("../Notification");
-const iosObject = require("../IosObject");
+const notification = require("../Objects/Notification");
+const iosObject = require("../Objects/IosObject");
 function getNotifications(req, res, next) {
     notification.getModel().find({ to: req.user.id }).populate('insertion', ['_id', 'title']).sort({ "timestamp": -1 }).then((documents) => {
         return res.status(200).json(documents);

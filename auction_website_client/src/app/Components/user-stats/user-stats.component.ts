@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UserHttpService } from '../../Services/user-http.service';
 import { Router } from '@angular/router';
-import {ModStats, StudentStats} from '../../Objects/UserStats'
 
 @Component({
   selector: 'app-user-stats',
