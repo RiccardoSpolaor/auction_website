@@ -1,5 +1,7 @@
 import express = require('express');
 
+import mongoose = require('mongoose');
+
 import {Insertion} from '../Objects/Insertion';
 import * as insertion from '../Objects/Insertion';
 
@@ -9,6 +11,9 @@ import * as message from '../Objects/Message';
 import {PrivateChat} from '../Objects/PrivateChat';
 import * as private_chat from '../Objects/PrivateChat';
 import * as iosObject from '../Objects/IosObject'
+
+import { User } from '../Objects/User';
+import * as user from '../Objects/User';
 
 
 function isPrivateChat(arg: any): arg is PrivateChat {

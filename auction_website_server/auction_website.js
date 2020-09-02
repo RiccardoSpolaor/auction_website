@@ -103,10 +103,10 @@ app.put("/insertions/:id/public_messages/:m_id", generalOperations.auth, inserti
 app.put("/insertions/:id/price", generalOperations.auth, insertionOperations.putInsertionPriceById);
 app.get("/private_chats", generalOperations.auth, privateChatOperations.getPrivateChat);
 app.post("/private_chats", generalOperations.auth, privateChatOperations.postPrivateChat);
+app.get("/private_chats/unreadcount", generalOperations.auth, privateChatOperations.getUnreadChatsCount);
 app.get("/private_chats/:id", generalOperations.auth, privateChatOperations.getPrivateChatById);
 app.put("/private_chats/:id/message", generalOperations.auth, privateChatOperations.putPrivateChatMessage);
 app.put("/private_chats/:id/read", generalOperations.auth, privateChatOperations.putPrivateChatRead);
-app.get("/private_chats/unreadcount", generalOperations.auth, privateChatOperations.getUnreadChatsCount);
 app.get("/notifications", generalOperations.auth, notificationOperations.getNotifications);
 app.put("/notifications/:id", generalOperations.auth, notificationOperations.putNotificationAsRead);
 app.get("/notifications/unreadcount", generalOperations.auth, notificationOperations.getUnreadNotificationsCount);

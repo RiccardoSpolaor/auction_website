@@ -157,13 +157,14 @@ app.get("/private_chats", generalOperations.auth, privateChatOperations.getPriva
 
 app.post("/private_chats", generalOperations.auth, privateChatOperations.postPrivateChat); 
 
+app.get("/private_chats/unreadcount", generalOperations.auth, privateChatOperations.getUnreadChatsCount)
+
 app.get("/private_chats/:id", generalOperations.auth, privateChatOperations.getPrivateChatById) 
 
 app.put("/private_chats/:id/message", generalOperations.auth, privateChatOperations.putPrivateChatMessage)
 
 app.put("/private_chats/:id/read", generalOperations.auth, privateChatOperations.putPrivateChatRead)
 
-app.get("/private_chats/unreadcount", generalOperations.auth, privateChatOperations.getUnreadChatsCount)
 
 
 

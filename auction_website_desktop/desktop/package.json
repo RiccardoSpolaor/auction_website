@@ -1,5 +1,5 @@
 {
-  "name": "desktop",
+  "name": "app",
   "version": "1.0.0",
   "main": "start",
   "description": "App desktop for auction_website",
@@ -9,8 +9,7 @@
   "private": true,
   "scripts": {
     "start": "electron --no-sandbox .",
-    "build": "electron-packager ./ Desktop --platform=linux --arch x64",
-    "deb64": "electron-installer-debian --src Desktop-linux-x64 --dest ./installer/ --arch amd64"
+    "deb64": "electron-installer-debian --src ./app-linux-x64 --dest ./installer/ --arch amd64"
   },
   "author": "Riccardo Spolaor e Silvia Zilio",
   "devDependencies": {

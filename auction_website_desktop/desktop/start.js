@@ -1,4 +1,9 @@
+const {app, BrowserWindow,ipcMain,dialog} = require('electron') 
+const url = require('url') 
+const fs = require('fs')
 const path = require('path')
+
+let win
 
 function createWindow(){
     mainWindow = new BrowserWindow({
@@ -14,5 +19,3 @@ function createWindow(){
 app.whenReady().then(createWindow).catch((err)=>{
     console.log(err);
 })
-
-
