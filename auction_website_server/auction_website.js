@@ -125,7 +125,7 @@ app.get("/login", passport.authenticate('basic', { session: false }), (req, res,
         validated: req.user.validated
     };
     console.log("Login granted. Generating token");
-    var token_signed = jsonwebtoken.sign(tokendata, process.env.JWT_SECRET, { expiresIn: '7d' });
+    var token_signed = jsonwebtoken.sign(tokendata, process.env.JWT_SECRET, { expiresIn: '1m' });
     return res.status(200).json({ error: false, errormessage: "", token: token_signed });
 });
 passport.use(new passportHTTP.BasicStrategy(function (username, password, done) {
@@ -194,7 +194,7 @@ mongoose.connect('mongodb://localhost:27017/auction_website').then(function onco
                             university: "Ca Foscari Venezia",
                             messages: [],
                             history: [],
-                            insertion_timestamp: todayDate,
+                            insertion_timestamp: new Date(),
                             insertionist: s1.id,
                             reserve_price: 50,
                             start_price: 0,
@@ -251,6 +251,7 @@ mongoose.connect('mongodb://localhost:27017/auction_website').then(function onco
                     var notifications = [];
                     var iosMessages = [];
                     documents.forEach(doc => {
+                        iosMessages.push(iosObject.createIosInsertion(doc._id));
                         doc.closed = true;
                         doc.save();
                         if (doc.current_winner) {

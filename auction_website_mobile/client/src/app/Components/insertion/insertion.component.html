@@ -33,7 +33,7 @@
         <p class="card-subtitle"><span style="font-weight: bold;">Current winner:</span> {{ get_current_winner() }}</p><br><br>
         <p class="card-subtitle text-center text-muted mb-2"><span style="font-weight: bold;">Start price:</span> {{ insertion.start_price | currency }}</p>
         <p class="card-subtitle text-center"><span style="font-weight: bold;">Current price:</span> {{ get_current_price() | currency }}</p>
-        <p *ngIf="hasToken() && ((getToken().mod && getToken().validated) || getToken().id == insertion.insertionist._id)" class="card-subtitle text-center my-1"><span style="font-weight: bold;">Reserve price:</span> {{ insertion.reserve_price | currency }}</p>
+        <p *ngIf="insertion.reserve_price!=undefined" class="card-subtitle text-center my-1"><span style="font-weight: bold;">Reserve price:</span> {{ insertion.reserve_price | currency }}</p>
 
         <div *ngIf="!insertion.closed && hasToken() && !getToken().mod && getToken().id != insertion.insertionist._id" class="form-group text-center">
             <input type="number" #price required name="price" class="form-control text-center my-1" style="width: 200px; margin:auto;" placeholder="Enter price">

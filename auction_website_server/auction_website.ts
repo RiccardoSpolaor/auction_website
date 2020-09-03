@@ -200,7 +200,7 @@ app.get("/login", passport.authenticate('basic', { session: false }), (req,res,n
   };
 
   console.log("Login granted. Generating token" );
-  var token_signed = jsonwebtoken.sign(tokendata, process.env.JWT_SECRET, { expiresIn: '7d' } );
+  var token_signed = jsonwebtoken.sign(tokendata, process.env.JWT_SECRET, { expiresIn: '1h' } );
 
   return res.status(200).json({ error: false, errormessage: "", token: token_signed });
 
@@ -290,7 +290,7 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
                             university: "Ca Foscari Venezia",
                             messages: [],
                             history: [],
-                            insertion_timestamp: todayDate,
+                            insertion_timestamp: new Date(),
                             insertionist: s1.id,
                             reserve_price: 50,
                             start_price: 0,
@@ -355,6 +355,7 @@ mongoose.connect( 'mongodb://localhost:27017/auction_website' ).then(
                 var iosMessages : Array<any> = []
 
                 documents.forEach(doc => {
+                  iosMessages.push(iosObject.createIosInsertion(doc._id))
                   doc.closed=true;
                   doc.save();
                   if (doc.current_winner) {

@@ -26,6 +26,14 @@ export class UserHttpService {
   public token = undefined;
   public url = 'http://10.0.2.2:8080';
 
+  public tokenExpired() {
+    if(this.token){
+      const expiry = (JSON.parse(atob(this.token.split('.')[1]))).exp;
+      return (Math.floor((new Date).getTime() / 1000)) >= expiry;
+    }
+    return false
+  }
+
   login( mail: string, password: string): Observable<any> {
     console.log('Login: ' + mail + ' ' + password );
     const options = {

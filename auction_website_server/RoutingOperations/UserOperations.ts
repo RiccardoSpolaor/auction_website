@@ -195,7 +195,7 @@ export function putUser ( req : express.Request,res : express.Response, next : e
         };
       
         console.log("Regenerating Token" );
-        var token_signed = jsonwebtoken.sign(tokendata, process.env.JWT_SECRET, { expiresIn:  '7d' } );
+        var token_signed = jsonwebtoken.sign(tokendata, process.env.JWT_SECRET, { expiresIn:  '1h' } );
         return res.status(200).json({ error: false, errormessage: "", id: data._id, token: token_signed });
 
       }).catch( (reason) => {
